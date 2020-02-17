@@ -1,0 +1,104 @@
+fth ELT is
+ pr BOOL .
+ sort Elt .
+ op _~_ :  Elt Elt -> Bool .
+ vars E E' : Elt .
+ eq E ~ E = true .
+ceq E = E' if E ~ E' [nonexec].  
+endfth
+
+fmod LIST {X :: ELT} is
+ sorts List .
+ op empty : -> List [ctor] .
+ op _;_ : X$Elt List -> List [ctor] .
+ op _in_ : X$Elt List -> Bool .
+ var L : List .
+ vars E E' : X$Elt .
+ eq E in empty = false .
+ceq E in E' ; L = true   if E ~ E' = true [metadata "CA-1"].
+ceq E in E' ; L = E in L if E ~ E' = false[metadata "CA-2"]. 
+endfm
+
+fmod NOMINAL is
+ sort Nominal .
+ op init : -> Nominal [ctor metadata "nominal"].
+ op next_ :  Nominal -> Nominal [ctor metadata "nominal"]. 
+endfm
+
+fmod BUFFER {X :: ELT} is
+ pr NOMINAL .
+ pr LIST{X} .
+ op read : Nominal List ~> X$Elt [metadata "non-rigid"] .
+ op del :  Nominal List ~> List  [metadata "non-rigid"].
+ 
+ var Z : Nominal .
+ var L : List .
+ vars E E1 E2 : X$Elt .
+
+ eq read(init, E ; L) = E .
+ eq del(init, E ; L) = L . 
+---
+ eq read(next Z, E ; L)= read(Z, L) .
+ eq del(next Z, E ; L) = E ; del(Z,L) .
+endfm
+
+---> BUFFER |- forall L:List, E:X$Elt . exists Z:Nominal . read(Z,L) = E if (E in L) = true ;
+---> (ind on L:List)
+
+---> induction basis: empty <---
+---> BUFFER |- forall E:X$Elt . exists Z:Nominal . read(Z,empty) = E if (E in empty) = true ;
+---> (red)
+
+---> BUFFER |- forall E:X$Elt . exists Z:Nominal . read(Z,empty) = E if false = true ;
+---> Discharged
+
+---> induction step: l implies e ; l <---
+fmod BUFFER-ind {X :: ELT} is
+ pr BUFFER{X} .
+ op e : -> X$Elt[metadata "induction-constant"].
+ op l : -> List [metadata "induction-constant"].
+ op z : X$Elt -> Nominal [metadata "exists"].
+ var E : X$Elt .
+ ceq read(z(E),l) = E if E in l [metadata "induction-hypothesis"].
+endfm
+---> BUFFER-ind |- forall E:X$Elt . exists Z:Nominal . read(Z,e ; l)= E:X$Elt if (E:X$Elt in e ; l) = true ;
+---> (tc)
+
+fmod BUFFER-ind-tc {X :: ELT} is
+ pr BUFFER-ind{X} .
+ op e' : -> X$Elt [metadata "tc"].
+endfm 
+---> BUFFER-ind-tc |- exists Z:Nominal . read(Z,e ; l)= e' if (e' in e ; l) = true ;
+---> (ca)
+
+---> ca1: e' = e <---
+fmod BUFFER-ind-tc-ca1 {X :: ELT} is
+ pr BUFFER-ind-tc{X}.
+ eq e' = e .
+endfm
+
+---> BUFFER-ind-tc-ca1 |-  exists Z:Nominal . read(Z,e ; l)= e ;
+---> (subst Z:Nominal <- init)
+
+---> BUFFER-ind-tc-ca1 |- read(init,e ; l) = e .
+red in BUFFER-ind-tc-ca1 : read(init,e ; l) == e .
+
+---> ca2: e' ~ e = false <---
+fmod BUFFER-ind-tc-ca2 {X :: ELT} is
+ pr BUFFER-ind-tc{X}.
+ eq e' ~ e = false .
+endfm
+
+---> BUFFER-ind-tc-ca2 |-  exists Z:Nominal . read(Z,e ; l)= e' if (e' in l) = true ;
+---> (subst Z:Nominal <- next z(e'))
+
+---> BUFFER-ind-tc-ca2 |-  read(next z(e'),e ; l)= e' if (e' in l) = true ;
+---> (imp)
+
+fmod BUFFER-ind-tc-ca2-imp {X :: ELT} is
+ pr BUFFER-ind-tc-ca2{X}.
+ eq e' in l = true .
+endfm
+---> BUFFER-ind-tc-ca2-imp |-  read(next z(e'),e ; l)= e'
+
+red in BUFFER-ind-tc-ca2-imp : read(next z(e'),e ; l)== e' .

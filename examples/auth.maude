@@ -1,0 +1,130 @@
+mod NOMINAL is
+  sort Nominal .
+  op  init : -> Nominal .
+  ops submit-uid submit-pswd cancel hint : Nominal -> Nominal .
+  var K : Nominal .
+  rl [submit-uid]: K => submit-uid(K) .
+  rl [submit-pswd]: K => submit-pswd(K) .
+  rl [cancel]: K => cancel(K) .
+  rl [hint]: K => hint(K) .
+endm
+
+fmod PNAT is
+  sort PNat .
+  op 0 : -> PNat .
+  op s_ : PNat -> PNat .
+  op _<_ : PNat PNat -> Bool .
+  vars M N : PNat .
+  eq 0    < s N   = true .
+  eq N    < N     = false .
+  eq s M < s N    = M < N .
+
+  op _<=_ : PNat PNat -> Bool .
+  ceq M <= N = true  if M = N .
+  ceq M <= N = true  if M < N .
+  ceq M <= N = false if N < M .
+ endfm
+
+fth PNAT-MAX is
+  pr PNAT .
+  op max : -> PNat .
+endfth
+
+fmod STATUS is
+ sort Status .
+ ops anonymous check-credentials authorized : -> Status .
+endfm
+
+fth UID-PASWD is
+  pr BOOL .
+  sorts UId Pswd .
+--- chk-pswd  matches User-ID to Password ---
+  op chk-pswd : UId -> Pswd .
+  op _~_ : UId UId   -> Bool .
+  var U : UId .
+  eq U ~ U = true . 
+  op _~_ : Pswd Pswd -> Bool .
+  vars P : Pswd .
+  eq P ~ P = true .
+endfth
+
+th AUTH is
+ pr NOMINAL .
+--- rigid data imported in protecting mode --- 
+ pr STATUS .
+ inc PNAT-MAX .
+ inc UID-PASWD .
+--- observations ---
+  op status : Nominal -> Status .
+  op uid    : Nominal -> UId .
+  op attpts : Nominal -> PNat .  
+--- random functions ---
+  op type-id   : Nominal -> UId .
+  op type-pswd : Nominal -> Pswd . 
+--- variables ---
+ var K : Nominal .
+--- init ---
+ eq uid(init)   = type-id(init) . 
+ eq status(init)= anonymous .
+ eq attpts(init)= 0 .
+--- -------------- 
+--- submit-uid ---
+--- --------------
+  ceq uid(submit-uid(K)) = type-id(K) if status(K) = anonymous .
+--- submit-uid1: type-id != uid ---  
+ ceq status(submit-uid(K)) = check-credentials
+     if uid(K) ~ type-id(K) = false /\ status(K)= anonymous .
+ ceq attpts(submit-uid(K)) = 0
+     if uid(K) ~ type-id(K) = false /\ status(K)= anonymous .
+
+--- submit-uid2: type-id = uid /\ attpts < max ---
+ ceq status(submit-uid(K)) = check-credentials
+     if uid(K) = type-id(K) /\ attpts(K) < max /\ status(K)= anonymous .
+ ceq attpts(submit-uid(K)) = attpts(K)
+     if uid(K) = type-id(K) /\ attpts(K) < max /\ status(K)= anonymous .
+
+--- submit-uid3: type-id = uid /\ attpts = max ---
+ ceq status(submit-uid(K)) = status(K)
+     if uid(K) = type-id(K) /\ attpts(K) < max /\ status(K)= anonymous .
+ ceq attpts(submit-uid(K)) = attpts(K)
+     if uid(K) = type-id(K) /\ attpts(K) < max /\ status(K)= anonymous .
+--- ---------------
+--- submit-pswd ---
+--- ---------------
+ ceq uid(submit-pswd(K))    = uid(K)      if status(K) = check-credentials .
+ ceq attpts(submit-pswd(K)) = s attpts(K) if status(K) = check-credentials . 
+--- submit-pswd1: chk-pswd(uid) != type-pswd /\ attpts < max ---
+ ceq status(submit-pswd(K)) = check-credentials 
+     if chk-pswd(uid(K)) ~ type-pswd(K) = false /\ attpts(K) < max /\
+        status(K) = check-credentials .
+--- submit-pswd2: chk-pswd(uid) != type-pswd /\ attpts = max ---
+ceq status(submit-pswd(K)) = anonymous 
+     if chk-pswd(uid(K)) ~ type-pswd(K) = false /\ attpts(K) = max /\
+        status(K) = check-credentials .
+--- submit-pswd3: chk-pswd(uid) = type-pswd ---	
+ ceq status(submit-pswd(K))= authorized 
+     if chk-pswd(uid(K)) = type-pswd(K) /\ status(K) = check-credentials .
+---    
+ ceq submit-pswd(K)= K if status(K) = authorized .
+ ceq submit-pswd(K)= K if status(K) = anonymous .
+--- cancel ---
+  eq uid(cancel(K)) = uid(K) .
+  eq status(cancel(K)) = anonymous .
+--- cancel1 : status = anonymous \/ status = check-credentials ---   
+  ceq attpts(cancel(K)) = attpts(K) if status(K) = anonymous .
+  ceq attpts(cancel(K)) = attpts(K) if status(K) = check-credentials .
+--- cancel2 : status = authorized ---  
+  ceq attpts(cancel(K)) = 0         if status(K) = authorized .
+--- hint ---
+ eq uid(hint(K)) = uid(K) .
+ eq status(hint(K)) = status(K) .
+ eq attpts(hint(K)) = attpts(K) .
+ eq chk-pswd(uid(K)) = type-pswd(hint(K)) .  
+endth
+
+---> AUTH |- forall K:Nominal .
+--->          attpts(K) < max =>
+--->           exists K':Nominal .
+--->	        K => K' /\
+--->	        uid(K) = uid(K') /\
+--->	        status(K') = authorized .
