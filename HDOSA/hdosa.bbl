@@ -1,0 +1,23 @@
+\begin{thebibliography}{1}
+
+\bibitem{dia-qvh}
+R.~Diaconescu.
+\newblock {Quasi-varieties and initial semantics for hybridized institutions}.
+\newblock {\em Journal of Logic and Computation}, 26(3):855--891, 2016.
+
+\bibitem{GoguenM92}
+J.~A. Goguen and J.~Meseguer.
+\newblock Order-sorted algebra {I:} equational deduction for multiple
+  inheritance, overloading, exceptions and partial operations.
+\newblock {\em Theor. Comput. Sci.}, 105(2):217--273, 1992.
+
+\bibitem{Meseguer97}
+J.~Meseguer.
+\newblock Membership algebra as a logical framework for equational
+  specification.
+\newblock In F.~Parisi{-}Presicce, editor, {\em Recent Trends in Algebraic
+  Development Techniques, 12th International Workshop, WADT'97, Tarquinia,
+  Italy, June 1997, Selected Papers}, volume 1376 of {\em Lecture Notes in
+  Computer Science}, pages 18--61. Springer, 1997.
+
+\end{thebibliography}
