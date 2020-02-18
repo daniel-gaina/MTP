@@ -15,7 +15,7 @@
 \xyoption{all}
 \usepackage{tikz}
 \usepackage{mathabx}
-
+\usepackage{mathtools}
 
 %************** line enumeration ********************************* 
 \usepackage{xcolor}
@@ -54,7 +54,7 @@
 \newcommand{\HHCLS}{{\mathbf{HHCLS}}}
 
 \newcommand{\OSA}{{\mathbf{OSA}}}
-\newcommand{\HOSA}{{\mathbf{HOSA}}}
+\newcommand{\HDOSA}{{\mathbf{HDOSA}}}
 
 
 \newcommand{\Nom}{\mathtt{Nom}}
@@ -96,19 +96,27 @@
 \newcommand{\va}{\mathtt{va}}
 \newcommand{\s}{\mathtt{s}}
 
+\newcommand{\rigid}{\mathtt{r}}
+\newcommand{\flexible}{\mathtt{f}}
+\newcommand{\nom}{\mathtt{n}}
+\newcommand{\act}{\mathfrak{a}}
+
 \newcommand{\oS}{{\overline S}}
 \newcommand{\oF}{{\overline F}}
 \newcommand{\oP}{{\overline P}}
 \newcommand{\oSigma}{{\overline\Sigma}}
 \newcommand{\oDelta}{{\overline\Delta}}
 \newcommand{\oX}{{\overline X}}
+\newcommand{\ok}{{\overline k}}
 % ***************************************************************
 \newcommand{\bigand}{\bigwedge}
 \renewcommand{\implies}{\Rightarrow}
 \newcommand{\at}[1]{@_{#1}\,}
 \newcommand{\nec}[1]{[#1]}
+\newcommand{\pos}[1]{\langle #1 \rangle}
 \newcommand{\store}[1]{{\downarrow}#1\,{\cdot}\,}
 \newcommand{\Forall}[1]{\forall #1\,{\cdot}\,}
+\newcommand{\Exists}[1]{\exists #1\,{\cdot}\,}
 \newcommand{\Q}[1]{\mathcal{Q}#1\,{\cdot}\,}
 % ***************************************************************
 \usepackage{mathpartir} %% for proof rules
@@ -286,8 +294,95 @@ The satisfaction of sentences obtained by applying Boolean connectives and quant
   
   \end{itemize}
 \end{proposition}
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Hybrid-Dynamic Order-Sorted Algebra}
+
+Hybrid-Dynamic Order-Sorted Algebra with rigid symbols ($\HDOSA$) is defined based on the ideas used to define rigid first-order hybrid logic~\cite{DBLP:conf/wollic/BlackburnMMH19} and first-order hybrid logic with user-defined sharing \cite{dia-msc,dia-qvh}. 
+The signatures contain a distinguished subset of ``rigid'' symbols such as sorts, operation and relation symbols which have the same interpretation in each world. 
+This makes it possible to use a ``rigid'' semantics for the quantification, where the variables are interpreted uniformly across the worlds.
+
+\paragraph{Signatures} 
+\emph{The signatures} are of the form $\Delta=(\Sigma^n,\Sigma^r\subseteq \Sigma)$ where:
+\begin{enumerate}
+\item $\Sigma^\nom=(S^\nom,\leq^\nom,F^\nom,P^\nom)$ is an $\OSA$ signature of nominals with a single connected component,
+
+\item $\Sigma^\rigid=(S^\rigid,\leq, F^\rigid,P^\rigid)$ is an $\OSA$ signature of rigid symbols, and
+
+\item $\Sigma=(S,\leq,F,P)$ is an $\OSA$ signature. 
+\end{enumerate}
+We let $S^\flexible = S\setminus S^\rigid$ be set of flexible sorts, and $F^\flexible=F\setminus F^\rigid$ and $P^\flexible=P\setminus P^\rigid$ be the subsets of $F$ and $P$ that consist of flexible symbols (obtained by removing rigid symbols).
+Throughout this paper we let $\Delta$, $\Delta'$ and $\Delta_i$ range over signatures of the form $(\Sigma^\nom,\Sigma^\rigid\subseteq\Sigma)$, $(\Sigma'^\nom,\Sigma'^\rigid\subseteq \Sigma')$ and $(\Sigma^\nom_i,\Sigma^\rigid_i\subseteq \Sigma_i)$, respectively.
+
+\paragraph{Signature morphisms.}
+The signature morphisms $\varphi:\Delta\to \Delta'$ are pairs $\varphi=(\varphi^n,\varphi)$, where:
+\begin{enumerate}[leftmargin=1.5em,nosep,label=\alph*)]
+ \item $\varphi^\nom:\Sigma^\nom\to\Sigma'^\nom$ is an $\OSA$-signature morphism mapping the top sorts of $\Sigma^n$ to the top sorts of $\Sigma'^\nom$, and
+
+ \item $\varphi:\Sigma\to\Sigma'$ is an $\OSA$-signature morphism such that $\varphi(\Sigma^\rigid)\subseteq \Sigma'^\rigid$.
+\end{enumerate}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\paragraph{Kripke structures}
+The $\Delta$-models are pairs $(W,M)$, where
+\begin{enumerate}
+\item $W\in|\Mod^\OSA(\Sigma^\nom)|$, and 
+\item $M\colon W_{[s_1]}\times W_{[s_n]}\to|\Mod^\OSA(\Sigma)|$ is a mapping such that 
+\begin{enumerate}
+ \item $[s_1],\dots,[s_n]$ are all the top sorts of $\Sigma^\nom$,
+ \item the rigid symbols have the same interpretations across the worlds, i.e. ${M_{w_1}\red_{\Sigma^\rigid}}$ and ${M_{w_2}\red_{\Sigma^\rigid}}$ are equal as order-sorted models, for all worlds $w_1,w_2\in|W|$; 
+ this means that \(M_{w_{1}}\) and \(M_{w_{2}}\) have the same carrier sets for the rigid sorts, and the same interpretations of the rigid operation or predicate symbols.
+ \end{enumerate}
+\end{enumerate}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\paragraph{Rigid terms} 
+ Let $\Delta$ be a $\HDOSA$ signature such that $[s_1],\dots,[s_n]$ are all the top nominal sorts.
+ The \emph{rigidification} of $\Sigma$ with respect to $\Sigma^\nom$ is the signature $\Sigma_@=(S_@,\leq_@,F_@,P_@)$, where 
+ \begin{enumerate}
+ \item $S_@=\{@_{\overline{k}} s \mid \overline{k}\in T_{\Sigma^\nom,[s_1]}\times\dots\times T_{\Sigma^\nom,[s_n]} \mbox{ and } s\in S\}$,
+ 
+ \item $\leq_@=\{ (\at{\overline{k}}s_1,\at{\overline{k}}s_2 ) \mid \overline{k}\in T_{\Sigma^\nom,[s_1]}\times\dots\times T_{\Sigma^\nom,[s_n]} \mbox{ and } s_1\leq s_2  \}$,
+ 
+ \item $F_@=\{@_{\overline{k}}\sigma\colon @_{\overline{k}}\ari \to @_{\overline{k}} s \mid \ok\in T_{\Sigma^\nom,[s_1]}\times\dots\times T_{\Sigma^\nom,[s_n]} \mbox{ and } \sigma\colon \ari\to s \in F \}$,~\footnote{$@_k (s_1\ldots s_n)=@_k s_1\ldots@_k s_n$ for all arities $s_1\ldots s_n$.}
+ 
+ \item $P_@=\{@_\ok \pi\colon @_\ok \ari \mid \ok\in T_{\Sigma^\nom,[s_1]}\times\dots\times T_{\Sigma^\nom,[s_n]} \mbox{ and } \pi\colon\ari\in P\}$.
+ \end{enumerate}
+ Since the rigid symbols have the same interpretation across the worlds, we further define $@_\ok x=x$ for all tuples of nominals $\ok\in T_{\Sigma^\nom,[s_1]}\times\dots\times T_{\Sigma^\nom,[s_n]}$ and all symbols $x$ in $\Sigma^\rigid$.
+ The set of \emph{rigid $\Delta$-terms} is $T_{\Sigma_@}$
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\paragraph{Sentences} 
+Given a signature $\Delta$, the proper atomic $\Delta$-sentences consist of
+ 
+\begin{enumerate}
+\item rigid equations $t=_s t'$, where $t,t'\in T_{\Sigma_@,[s]}$, and $[s]\in [S_@]$, and
+
+\item rigid relations $\pi(t)$, where $\pi\colon\ari \in P_@$ and $t\in T_{\Sigma_@,\ari}$.
+
+\end{enumerate}
+ The set of $\Delta$-sentences is given by the following grammar:
+$$e\Coloneqq t_1=t_2 \mid \pi(t) \mid k_1=k_2 \mid\act(k_1,k_2)\mid \neg e\mid \vee E\mid \at{k} e\mid \pos{\act}e \mid \store{z}e'\mid \Exists{X,Y}e''$$
+where 
+\begin{enumerate*}[label=(\alph*)]
+ \item $t_1=t_2$ is a rigid equation,
+ \item $\pi(t)$ is a rigid relation,
+ \item $k_1=k_2$ is a nominal equation,
+ \item $\act(k_1,k_2)$ is a action relation,
+ \item $E$ is a finite set of $\Delta$-sentences,
+ \item $z$ is a nominal variable and $e'$ is a $\Delta[z]$-sentence,
+ \item $X$ is a finite set of nominal variables,
+       $Y$ is a finite set of variables of rigid sorts, and
+       $e''$ is a $\Delta[X,Y]$-sentence.
+\end{enumerate*}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \bibliographystyle{abbrv}
 \bibliography{hdosa}

@@ -3,44 +3,44 @@ Capacity: max_strings=100000, hash_size=100000, hash_prime=85009
 The top-level auxiliary file: hdosa.aux
 The style file: abbrv.bst
 Database file #1: hdosa.bib
-You've used 3 entries,
+You've used 5 entries,
             2118 wiz_defined-function locations,
-            524 strings with 4413 characters,
-and the built_in function-call counts, 1083 in all, are:
-= -- 112
-> -- 31
-< -- 2
-+ -- 12
-- -- 9
-* -- 79
-:= -- 176
-add.period$ -- 10
-call.type$ -- 3
-change.case$ -- 13
+            541 strings with 5012 characters,
+and the built_in function-call counts, 1978 in all, are:
+= -- 200
+> -- 78
+< -- 4
++ -- 29
+- -- 24
+* -- 152
+:= -- 318
+add.period$ -- 17
+call.type$ -- 5
+change.case$ -- 25
 chr.to.int$ -- 0
-cite$ -- 3
-duplicate$ -- 44
-empty$ -- 95
-format.name$ -- 9
-if$ -- 230
+cite$ -- 5
+duplicate$ -- 77
+empty$ -- 162
+format.name$ -- 24
+if$ -- 421
 int.to.chr$ -- 0
-int.to.str$ -- 3
-missing$ -- 3
-newline$ -- 18
-num.names$ -- 8
-pop$ -- 10
+int.to.str$ -- 5
+missing$ -- 5
+newline$ -- 28
+num.names$ -- 14
+pop$ -- 21
 preamble$ -- 1
-purify$ -- 10
+purify$ -- 20
 quote$ -- 0
-skip$ -- 31
+skip$ -- 55
 stack$ -- 0
-substring$ -- 89
-swap$ -- 13
-text.length$ -- 2
+substring$ -- 148
+swap$ -- 25
+text.length$ -- 4
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 12
+type$ -- 20
 warning$ -- 0
-while$ -- 14
-width$ -- 4
-write$ -- 37
+while$ -- 24
+width$ -- 6
+write$ -- 61
