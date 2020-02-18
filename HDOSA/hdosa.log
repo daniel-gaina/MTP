@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2019.4.1)  18 FEB 2020 19:51
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2019.4.1)  18 FEB 2020 20:19
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -1045,22 +1045,22 @@ Package: xspace 2014/10/28 v1.13 Space after command names (DPC,MH)
 ) (./hdosa.aux)
 \openout1 = `hdosa.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 143.
-LaTeX Font Info:    ... okay on input line 143.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 143.
-LaTeX Font Info:    ... okay on input line 143.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 143.
-LaTeX Font Info:    ... okay on input line 143.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 143.
-LaTeX Font Info:    ... okay on input line 143.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 143.
-LaTeX Font Info:    ... okay on input line 143.
-LaTeX Font Info:    Checking defaults for U/mathx/m/n on input line 143.
-LaTeX Font Info:    ... okay on input line 143.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 143.
-LaTeX Font Info:    ... okay on input line 143.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 144.
+LaTeX Font Info:    ... okay on input line 144.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 144.
+LaTeX Font Info:    ... okay on input line 144.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 144.
+LaTeX Font Info:    ... okay on input line 144.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 144.
+LaTeX Font Info:    ... okay on input line 144.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 144.
+LaTeX Font Info:    ... okay on input line 144.
+LaTeX Font Info:    Checking defaults for U/mathx/m/n on input line 144.
+LaTeX Font Info:    ... okay on input line 144.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 144.
+LaTeX Font Info:    ... okay on input line 144.
 \AtBeginShipoutBox=\box47
-Package hyperref Info: Link coloring ON on input line 143.
+Package hyperref Info: Link coloring ON on input line 144.
 
 (/usr/local/texlive/2018/texmf-dist/tex/latex/hyperref/nameref.sty
 Package: nameref 2016/05/21 v2.44 Cross-referencing by name of section
@@ -1070,25 +1070,25 @@ Package: gettitlestring 2016/05/16 v1.5 Cleanup title references (HO)
 )
 \c@section@level=\count158
 )
-LaTeX Info: Redefining \ref on input line 143.
-LaTeX Info: Redefining \pageref on input line 143.
-LaTeX Info: Redefining \nameref on input line 143.
+LaTeX Info: Redefining \ref on input line 144.
+LaTeX Info: Redefining \pageref on input line 144.
+LaTeX Info: Redefining \nameref on input line 144.
 
 (./hdosa.out) (./hdosa.out)
 \@outlinefile=\write5
 \openout5 = `hdosa.out'.
 
-LaTeX Font Info:    Try loading font information for U+msa on input line 143.
+LaTeX Font Info:    Try loading font information for U+msa on input line 144.
 
 (/usr/local/texlive/2018/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Try loading font information for U+msb on input line 143.
+LaTeX Font Info:    Try loading font information for U+msb on input line 144.
 
 (/usr/local/texlive/2018/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
-Package xypdf Info: Line width: 0.39998pt on input line 143.
+Package xypdf Info: Line width: 0.39998pt on input line 144.
 
 ABD: EveryShipout initializing macros
 (/usr/local/texlive/2018/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
@@ -1121,45 +1121,45 @@ G,.JBIG2,.JB2,.eps]
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
 e
 ))
-LaTeX Font Info:    Try loading font information for OMS+cmr on input line 162.
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 163.
 
 
 (/usr/local/texlive/2018/texmf-dist/tex/latex/base/omscmr.fd
 File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 162.
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 163.
  [1
 
 {/usr/local/texlive/2018/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
-LaTeX Font Info:    Try loading font information for U+euf on input line 196.
+LaTeX Font Info:    Try loading font information for U+euf on input line 197.
 
 (/usr/local/texlive/2018/texmf-dist/tex/latex/amsfonts/ueuf.fd
 File: ueuf.fd 2013/01/14 v3.01 Euler Fraktur
 ) [2]
 LaTeX Font Info:    Font shape `OMS/cmr/m/it' in size <10> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 278.
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 279.
  [3]
-Overfull \hbox (0.51735pt too wide) in paragraph at lines 300--303
+Overfull \hbox (0.51735pt too wide) in paragraph at lines 301--304
 \OT1/cmr/m/n/10 Hybrid-Dynamic Order-Sorted Al-ge-bra with rigid sym-bols ($[]$
 ) is de-fined based
  []
 
 [4] (./hdosa.bbl [5]) [6]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 390.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 390.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 404.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 404.
  (./hdosa.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 390.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 390.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 404.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 404.
 Package rerunfilecheck Info: File `hdosa.out' has not changed.
 (rerunfilecheck)             Checksum: CE9DD334CC06014B381065D986091178;199.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 390.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 404.
  ) 
 Here is how much of TeX's memory you used:
- 20166 strings out of 492649
- 354406 string characters out of 6129623
- 470286 words of memory out of 5000000
- 23578 multiletter control sequences out of 15000+600000
+ 20173 strings out of 492649
+ 354458 string characters out of 6129623
+ 472292 words of memory out of 5000000
+ 23579 multiletter control sequences out of 15000+600000
  20543 words of font info for 79 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  55i,8n,54p,3206b,512s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -1184,13 +1184,14 @@ f-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/local/texlive/2018/texmf
 ist/fonts/type1/public/amsfonts/euler/eufm10.pfb></usr/local/texlive/2018/texmf
 -dist/fonts/type1/public/mathabx-type1/matha10.pfb></usr/local/texlive/2018/tex
 mf-dist/fonts/type1/public/mathabx-type1/matha5.pfb></usr/local/texlive/2018/te
-xmf-dist/fonts/type1/public/mathabx-type1/matha7.pfb></usr/local/texlive/2018/t
-exmf-dist/fonts/type1/public/mathabx-type1/matha8.pfb></usr/local/texlive/2018/
-texmf-dist/fonts/type1/public/mathabx-type1/mathx10.pfb>
-Output written on hdosa.pdf (6 pages, 229259 bytes).
+xmf-dist/fonts/type1/public/mathabx-type1/matha6.pfb></usr/local/texlive/2018/t
+exmf-dist/fonts/type1/public/mathabx-type1/matha7.pfb></usr/local/texlive/2018/
+texmf-dist/fonts/type1/public/mathabx-type1/matha8.pfb></usr/local/texlive/2018
+/texmf-dist/fonts/type1/public/mathabx-type1/mathx10.pfb>
+Output written on hdosa.pdf (6 pages, 236783 bytes).
 PDF statistics:
- 230 PDF objects out of 1000 (max. 8388607)
- 196 compressed objects within 2 object streams
- 72 named destinations out of 1000 (max. 500000)
+ 245 PDF objects out of 1000 (max. 8388607)
+ 209 compressed objects within 3 object streams
+ 78 named destinations out of 1000 (max. 500000)
  37 words of extra memory for PDF output out of 10000 (max. 10000000)
 

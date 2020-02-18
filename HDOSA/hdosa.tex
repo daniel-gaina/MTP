@@ -108,6 +108,7 @@
 \newcommand{\oDelta}{{\overline\Delta}}
 \newcommand{\oX}{{\overline X}}
 \newcommand{\ok}{{\overline k}}
+\newcommand{\ow}{{\overline w}}
 % ***************************************************************
 \newcommand{\bigand}{\bigwedge}
 \renewcommand{\implies}{\Rightarrow}
@@ -342,31 +343,44 @@ The $\Delta$-models are pairs $(W,M)$, where
  
  \item $\leq_@=\{ (\at{\overline{k}}s_1,\at{\overline{k}}s_2 ) \mid \overline{k}\in T_{\Sigma^\nom,[s_1]}\times\dots\times T_{\Sigma^\nom,[s_n]} \mbox{ and } s_1\leq s_2  \}$,
  
- \item $F_@=\{@_{\overline{k}}\sigma\colon @_{\overline{k}}\ari \to @_{\overline{k}} s \mid \ok\in T_{\Sigma^\nom,[s_1]}\times\dots\times T_{\Sigma^\nom,[s_n]} \mbox{ and } \sigma\colon \ari\to s \in F \}$,~\footnote{$@_k (s_1\ldots s_n)=@_k s_1\ldots@_k s_n$ for all arities $s_1\ldots s_n$.}
+ \item $F_@=\{@_{\overline{k}}\sigma\colon @_{\overline{k}}\ari \to @_{\overline{k}} s \mid \ok\in T_{\Sigma^\nom,[s_1]}\times\dots\times T_{\Sigma^\nom,[s_n]} \mbox{ and } \sigma\colon \ari\to s \in F \}$,~\footnote{$@_\ok (s_1\ldots s_n)=@_\ok s_1\ldots @_\ok s_n$ for all arities $s_1\ldots s_n$.}
  
  \item $P_@=\{@_\ok \pi\colon @_\ok \ari \mid \ok\in T_{\Sigma^\nom,[s_1]}\times\dots\times T_{\Sigma^\nom,[s_n]} \mbox{ and } \pi\colon\ari\in P\}$.
  \end{enumerate}
  Since the rigid symbols have the same interpretation across the worlds, we further define $@_\ok x=x$ for all tuples of nominals $\ok\in T_{\Sigma^\nom,[s_1]}\times\dots\times T_{\Sigma^\nom,[s_n]}$ and all symbols $x$ in $\Sigma^\rigid$.
  The set of \emph{rigid $\Delta$-terms} is $T_{\Sigma_@}$
+ 
+
+ We define the interpretation of the rigid terms into Kripke structures:
+ for any $\Delta$-model $(W,M)$, any possible world $\ow\in W_{s_1}\times\dots\times W_{s_n}$, and any rigid $\Delta$-term $t$, 
+ \begin{enumerate}
+  \item $M_{\ow,\sigma(t)} = (M_{\ow,\sigma})(M_{\ow,t})$, where $\sigma\colon\ari\to s\in F^\rigid$;
+  \footnote{$M_{\ow,(t_1,\ldots,t_2)}=M_{\ow,t_1},\ldots,M_{\ow,{t_n}}$ for all lists of rigid terms $t_1,\ldots,t_n$.}
+  
+   \item $M_{\ow,(@_\ok \sigma)(t)} = (M_{\ow',\sigma}) (M_{\ow,t})$, where $(@_\ok \sigma\colon @_\ok \ari\to @_\ok s)\in F_@^\flexible$ and $\ow'=W_{\ok}$.~\footnote{$W_{(k_1,\dots,k_n)}=(W_{k_1},\dots,W_{k_n})$.}
+ \end{enumerate}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \paragraph{Sentences} 
 Given a signature $\Delta$, the proper atomic $\Delta$-sentences consist of
  
 \begin{enumerate}
-\item rigid equations $t=_s t'$, where $t,t'\in T_{\Sigma_@,[s]}$, and $[s]\in [S_@]$, and
+ \item nominal equations $k_1=_s k_2$, where $k_1,k_2\in T_{\Sigma^\nom_@,[s]}$ and $[s]\in [S^\nom_@]$,
 
-\item rigid relations $\pi(t)$, where $\pi\colon\ari \in P_@$ and $t\in T_{\Sigma_@,\ari}$.
+ \item nominal relations $\lambda(k_1,k_2)$, where $\lambda \colon s_1 s_2\in P^\nom$,  $k_1\in T_{\Sigma^\nom_@,s_1}$ and $k_1\in T_{\Sigma^\nom_@,s_2}$,
 
+ \item rigid equations $t_1=_s t_2$, where $t_1,t_2\in T_{\Sigma_@,[s]}$ and $[s]\in [S_@]$, and
+
+ \item rigid relations $\pi(t)$, where $\pi\colon\ari \in P_@$ and $t\in T_{\Sigma_@,\ari}$.
 \end{enumerate}
  The set of $\Delta$-sentences is given by the following grammar:
-$$e\Coloneqq t_1=t_2 \mid \pi(t) \mid k_1=k_2 \mid\act(k_1,k_2)\mid \neg e\mid \vee E\mid \at{k} e\mid \pos{\act}e \mid \store{z}e'\mid \Exists{X,Y}e''$$
+$$e\Coloneqq k_1=k_2 \mid\lambda(k_1,k_2)\mid t_1=t_2 \mid \pi(t) \mid  \neg e\mid \vee E\mid \at{k} e\mid \pos{\lambda}e \mid \store{z}e'\mid \Exists{X,Y}e''$$
 where 
 \begin{enumerate*}[label=(\alph*)]
+ \item $k_1=k_2$ is a nominal equation,
+ \item $\lambda$ is a binary modality and $\lambda(k_1,k_2)$ is a nominal relation,
  \item $t_1=t_2$ is a rigid equation,
  \item $\pi(t)$ is a rigid relation,
- \item $k_1=k_2$ is a nominal equation,
- \item $\act(k_1,k_2)$ is a action relation,
  \item $E$ is a finite set of $\Delta$-sentences,
  \item $z$ is a nominal variable and $e'$ is a $\Delta[z]$-sentence,
  \item $X$ is a finite set of nominal variables,
