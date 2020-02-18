@@ -1,0 +1,117 @@
+--- ----------------------------------------------------------------------------
+--- The rigid part
+--- ----------------------------------------------------------------------------
+
+fth KEY is
+  inc BOOL .
+  sort Key .
+  op _~_ : Key Key -> Bool [ comm ] .
+  vars K K' : Key .
+  eq K ~ K = true .
+  ceq K = K' if K ~ K' [ nonexec ] .
+
+  sorts FinDuration Duration .
+  subsort FinDuration < Duration .  
+  op 0 : -> FinDuration .
+  op infty : -> Duration .  
+  op _>_ : Duration Duration -> Bool .
+  var F : FinDuration .  
+  vars D D' D'' : Duration .
+  eq infty > F = true .  
+  eq D > D = false .
+  ceq D > D'' = true if D > D' /\ D' > D'' [ nonexec ] .
+
+  op _-1 : Duration -> Duration .
+  eq F > F -1 = true .
+  eq infty -1 = infty .
+endfth
+
+fmod KEY-SET{X :: KEY} is
+  sort Set{X} .
+  subsort X$Key < Set{X} .
+  op empty : -> Set{X} .
+  op _,_ : Set{X} Set{X} -> Set{X} [ assoc comm idem id: empty ] .
+endfm
+
+fmod RIGID{X :: KEY} is
+  pr KEY-SET{X} .
+
+  vars K K' : X$Key .
+  var S : Set{X} .
+
+  op _in_ : X$Key Set{X} -> Bool .
+  eq K in empty = false .
+  eq K in (K, S) = true .
+  ceq K in (K', S) = K in S if K ~ K' = false .
+
+  op _notin_ : X$Key Set{X} -> Bool .
+  eq K notin S = not (K in S) .
+endfm
+
+--- ----------------------------------------------------------------------------
+--- The nominal (Kripke frame) part
+--- ----------------------------------------------------------------------------
+
+fth NOMINAL is
+  sorts Config KeyGen .
+  op init : -> Config .
+  op newKey : Config KeyGen -> Config .
+  op idle : Config -> Config .
+endfth
+
+--- ----------------------------------------------------------------------------
+--- The flexible part
+--- ----------------------------------------------------------------------------
+
+mod FLEXIBLE{X :: KEY, W :: NOMINAL} is
+  pr RIGID{X} .
+
+  var C : W$Config .
+  var K : X$Key .
+  var S : Set{X} .
+
+  --- core observations ---
+  op key : W$KeyGen -> X$Key .
+  op validity : W$Config X$Key -> X$Duration .
+  op keys : W$Config -> Set{X} .
+
+  --- derived observations ---
+  op valid : W$Config X$Key -> Bool .
+  eq valid(C, K) = validity(C, K) > 0 .
+    
+  op filter : W$Config Set{X} -> Set{X} .
+  eq filter(C, empty) = empty .
+  ceq filter(C, (K, S)) = K, filter(C, S) if valid(C, K) = true .
+  ceq filter(C, (K, S)) = filter(C, S) if valid(C, K) = false .
+endm
+
+--- ----------------------------------------------------------------------------
+--- The specification/axiomatization of the KeyGen
+--- ----------------------------------------------------------------------------
+
+mod KEYGEN{X :: KEY, W :: NOMINAL} is
+  inc FLEXIBLE{X, W} .
+    
+  vars G G1 G2 : W$KeyGen .
+  vars C : W$Config .
+  var K : X$Key .
+
+  ceq G1 = G2 if key(G1) = key(G2) [ nonexec ] .
+      
+  --- init ---
+  eq validity(init, K) = 0 .
+  eq keys(init) = empty .
+    
+  --- newKey ---
+  ceq newKey(C, G) = C if key(G) in keys(C) .
+  ceq validity(newKey(C, G), K) = validity(C, K) -1
+      if K in keys(C) /\ key(G) notin keys(C) .
+  ceq valid(newKey(C, G), key(G)) = true
+      if key(G) notin keys(C) .
+  ceq keys(newKey(C, G)) = key(G), filter(C, keys(C))
+      if key(G) notin keys(C) .
+
+  --- idle ---
+  eq validity(idle(C), K) = validity(C, K) -1 .
+  eq keys(idle(C)) = filter(C, keys(C)) .
+endm

@@ -1,0 +1,31 @@
+Consider the following informal description of a transition system
+that models a generator of cryptographic keys (KeyGen):
+
+– Every state consists of a set of keys in use at that time – it would
+  be all right to assume those keys to have been previously produced
+  by the KeyGen. Moreover, every key has some kind of validity period
+  or expiry time, which may be infinite.
+
+– There are two kinds of transitions:
+  1. transitions that generate a new valid key while updating the
+     internal clocks (or validities) of all other keys, and
+  2. idle transitions that only update the validity of the keys
+     according to the passage of time.
+  The keys that are no longer valid are eliminated as soon as possible.
+
+– Initially, there are no keys available.
+
+As an example, if we were to represent validity periods as natural
+numbers (plus infinity), we could have the following transitions:
+
+{} --[newKey]--> {a(3)} --[idle]--> {a(2)} --[newKey]--> {a(1), b(2)}
+--[newKey]--> {a(0), b(1), c(4)} --[idle]--> {b(0), c(3)} ...
+
+In the listing above, `k(i)' is meant to denote the fact that `k'
+is a key with validity `i', but this is only a choice made for this
+particular example in hope that it will make it easier to read. It
+does not mean that we ought to represent validity periods explicitly,
+or that they should be natural numbers (the path I followed in the
+two specifications included in this folder is quite different).
+
+How would you specify such a KeyGen?

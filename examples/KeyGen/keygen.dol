@@ -1,0 +1,98 @@
+logic RigidCASL
+
+spec KeyGen_Data =
+  %% Rigid sorts, operations, and predicates (plus axioms)  %%%%%%%%%%%%%%%%%%%%
+  %% 
+  rigid sorts Key, KeySet
+  rigid op empty : KeySet
+  rigid op add : Key * KeySet -> KeySet
+
+  rigid pred elem : Key * KeySet
+  forall k : Key
+  . not elem(k, empty)
+  %(elem_empty)%
+  forall k, k' : Key; S : KeySet
+  . elem(k, add(k', S)) <=> k = k' \/ elem(k, S)
+  %(elem_non_empty)%
+  forall S, T : KeySet
+  . S = T <=> (forall k : Key . elem(k, S) <=> elem(k, T))
+  %(set_eq)%
+
+  %% Flexible operations and predicates (plus axioms)  %%%%%%%%%%%%%%%%%%%%%%%%%
+  %% 
+  op keys : KeySet
+  pred valid : Key
+
+  op filter : KeySet -> KeySet
+  forall k : Key; S : KeySet
+  . elem(k, filter(S)) <=> elem(k, S) /\ valid(k)
+  %(filter_def)%
+end
+
+logic HRigidCASLQuant
+
+spec KeyGen =
+  data KeyGen_Data {
+    %% The hybrid-logic signature (one nominal, and two main modalities)  %%%%%%
+    %% 
+    nominal init
+
+    modalities newKey, idle, any : 2
+
+    %% The specification of the KeyGen (only four axioms)  %%%%%%%%%%%%%%%%%%%%%
+    
+    . forallH nominal c
+      . (<any> c) <=> ((<newKey> c) \/ (<idle> c))
+      %(any_def)%
+
+    . @ init : keys = empty
+      %(init_def)%
+
+    . forallH S : KeySet . forallH F : KeySet
+      . S = keys /\ F = filter(S)
+        =>
+        [newKey] existsH k : Key
+        . valid(k) /\ not elem(k, S) /\ keys = add(k, F)
+      %(newKey_effect)%
+
+    . forallH S : KeySet
+      . S = filter(keys)
+        =>
+        [idle] keys = S
+      %(idle_effect)%
+
+    %% Theorems/properties %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    %% -------------------------------------------------------------------------
+    %% Theorem: The keys preserved under transitions are valid.
+    %% -------------------------------------------------------------------------
+
+    . forallH k : Key
+      . (<newKey> elem(k, keys))
+        =>
+        (elem(k, keys) => valid(k))
+      %(newKey_key_pres_valid)% %implied
+      %% 
+      %% Proved using SPASS from the KeyGen axioms
+      %% in under 60 seconds
+
+    . forallH k : Key
+      . (<idle> elem(k, keys))
+        =>
+        (elem(k, keys) => valid(k))
+      %(idle_key_pres_valid)% %implied
+      %% 
+      %% Proved using SPASS from the KeyGen axioms
+      %% in under 5 seconds
+
+    . forallH k : Key
+      . (<any> elem(k, keys))
+        =>
+        (elem(k, keys) => valid(k))
+      %(key_pres_valid)% %implied
+      %% 
+      %% Proved using SPASS from the KeyGen axioms and the lemmas
+      %% newKey_key_pres_valid and idle_key_pres_valid
+      %% in under 5 seconds
+  }
+end
