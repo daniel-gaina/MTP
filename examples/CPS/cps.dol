@@ -1,0 +1,95 @@
+logic RigidCASL
+
+spec CPS_Data =
+  %% Rigid sorts, operations, and predicates (plus axioms)  %%%%%%%%%%%%%%%%%%%%
+  %%
+  %% Start with a strict totally ordered field of numbers...
+  %% 
+  rigid sorts Num
+
+  rigid ops 0, 1 : Num
+  . not 0 = 1
+  
+  rigid op add : Num * Num -> Num, assoc, comm, unit 0
+  rigid op mul : Num * Num -> Num, assoc, comm, unit 1
+
+  rigid op ainv : Num -> Num
+  rigid op minv : Num -> Num
+
+  forall x : Num . add(x, ainv(x)) = 0
+  forall x : Num . mul(x, minv(x)) = 1
+
+  forall x, y, z : Num . mul(x, add(y, z)) = add(mul(x, y), mul(x, z))
+
+  rigid pred lt : Num * Num
+
+  forall x, y, z : Num
+  . not lt(x, x)
+  . lt(x, y) /\ lt(y, z) => lt(x, z)
+  . not x = y => lt(x, y) \/ lt (y, x)
+  . lt(x, y) => lt(add(x, z), add(y, z))
+  . lt(0, x) /\ lt (0, y) => lt(0, mul(x, y))
+
+  %% Then define the sine and cosine functions...
+
+  rigid op sin, cos : Num -> Num
+
+  forall x, e : Num
+  . lt(0, e)
+    =>
+    exists d : Num
+    . lt(0, d) /\
+      forall y : Num
+      . lt(add(x, ainv(d)), y) /\ lt(y, add(x, d))
+        => lt(add(sin(x), ainv(e)), sin(y)) /\ lt(sin(y), add(sin(x), e))
+    %(sin_is_continuous)%
+
+  forall x, e : Num
+  . lt(0, e)
+    =>
+    exists d : Num
+    . lt(0, d) /\
+      forall y : Num
+      . lt(add(x, ainv(d)), y) /\ lt(y, add(x, d))
+        => lt(add(cos(x), ainv(e)), cos(y)) /\ lt(cos(y), add(cos(x), e))
+    %(cos_is_continuous)%
+
+  forall x, y : Num
+  . sin(add(x, ainv(y))) = add(mul(sin(x), cos(y)), ainv(mul(cos(x), sin(y))))
+  . cos(add(x, ainv(y))) = add(mul(cos(x), cos(y)), mul(sin(x), sin(y)))
+
+  . exists x : Num . not sin(x) = 0
+  . exists x : Num . not cos(x) = 0
+
+  %% Initial time, position, velocity, etc.
+
+  rigid ops x0, y0 : Num
+
+  %% Observations  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  %%
+  ops t, x, y : Num
+  op av : Num %% angular velocity
+end
+
+logic HRigidCASLQuant
+
+spec CPS =
+  data CPS_Data {
+    %% The hybrid-logic signature (one nominal, and only one modality)  %%%%%%%%
+    %% 
+    nominal init
+
+    modality next : 2
+
+    . @ init : t = 0 /\ x = x0 /\ y = y0
+
+    . forallH x : Num
+      . t = x
+        =>
+        [next] lt(x, t)
+
+    . av = 1 \/ av = ainv(1)
+    . x = add(ainv(mul(cos(mul(av, t)), minv(av))), add(x0, minv(av)))
+    . y = add(mul(sin(mul(av, t)), minv(av)), y0)
+  }
+end
