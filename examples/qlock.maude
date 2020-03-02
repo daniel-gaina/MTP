@@ -56,38 +56,39 @@ fth NOM is
  ops want try exit : Sys Agent -> Sys [ctor].
 endfth
 --- -----------------------------------------------
---- flexible data types ---
+--- Flexible data types ---
 --- there should be a one-to-one correspondence between agents and pids ---
 --- -----------------------------------------------
 fmod QLOCK{X :: PID , Y :: NOM} is
   pr SEQUENCE{X} . pr LABELS .
  --- observers
   op pid : Y$Agent -> X$Pid .
-  op pc : Y$Sys Y$Agent -> Labels .
-  op sq : Y$Sys -> Sequence .
+  op pc  : Y$Sys X$Pid -> Labels .
+  op sq  : Y$Sys -> Sequence .
 ---
  var S : Y$Sys .
- vars I J K : Y$Agent .
+ vars I J K : X$Pid .
+ vars A B C : Y$Agent .
  var Q : Sequence .
 --- init ---
  eq pc(init,I) = rm  .
  eq sq(init) = empty .
 --- want ---
- ceq pc(want(S,I),J) = wt       if pc(S,I) = rm /\ pid(J) = pid(I)            [metadata "CA-w1"].
- ceq pc(want(S,I),J) = pc(S,J) if pc(S,I) = rm /\ pid(J) ~ pid(I) = false [metadata "CA-w2"].
- ceq pc(want(S,I),J) = pc(S,J) if pc(S,I) ~ rm = false                           [metadata "CA-w3"].
- ceq sq(want(S,I)) = sq(S),pid(I) if pc(S,I) = rm .
- ceq sq(want(S,I)) = sq(S)   if pc(S,I) ~ rm = false .
+ ceq pc(want(S,A),I) = wt           if pc(S,pid(A)) = rm /\ pid(A) = I         [metadata "CA-w1"].
+ ceq pc(want(S,A),I) = pc(S,pid(A)) if pc(S,pid(A)) = rm /\ pid(A) ~ I = false [metadata "CA-w2"].
+ ceq pc(want(S,A),J) = pc(S,J)      if pc(S,pid(A)) ~ rm = false               [metadata "CA-w3"].
+ ceq sq(want(S,A)) = sq(S),pid(A)   if pc(S,pid(A)) = rm .
+ ceq sq(want(S,I)) = sq(S)          if pc(S,pid(A)) ~ rm = false .
 --- try ---
- ceq pc(try(S,I),J) = cs       if pc(S,I) = wt /\ pid(I),Q := sq(S) /\ pid(J) = pid(I)[metadata "CA-t1"].
- ceq pc(try(S,I),J) = pc(S,J) if (pid(J) ~ pid(I)) = false                                        [metadata "CA-t2"].
- ceq pc(try(S,I),J) = pc(S,J) if pc(S,I) ~ wt = false                                             [metadata "CA-t3"].
- ceq pc(try(S,I),J) = pc(S,J) if top(sq(S)) ~ pid(I) = false                                   [metadata "CA-t4"].
-  eq sq(try(S,I)) = sq(S) . 
+ ceq pc(try(S,A),I) = cs      if pc(S,pid(A)) = wt /\ pid(A),Q := sq(S) /\ J = pid(A)[metadata "CA-t1"].
+ ceq pc(try(S,A),I) = pc(S,J) if (J ~ pid(A)) = false                                [metadata "CA-t2"].
+ ceq pc(try(S,A),I) = pc(S,J) if pc(S,pid(A)) ~ wt = false                           [metadata "CA-t3"].
+ ceq pc(try(S,A),I) = pc(S,J) if top(sq(S)) ~ pid(A) = false                         [metadata "CA-t4"].
+ eq sq(try(S,A)) = sq(S) .
 --- exit ---
- ceq pc(exit(S,I),J) = rm       if pc(S,I) = cs /\ pid(J) = pid(I)             [metadata "CA-e1"].
- ceq pc(exit(S,I),J) = pc(S,J)  if pc(S,I) = cs /\ pid(I) ~ pid(J) = false [metadata "CA-e2"].
- ceq pc(exit(S,I),J) = pc(S,J)  if pc(S,I) ~ cs = false                           [metadata "CA-e3"].
- ceq sq(exit(S,I)) = get(sq(S)) if pc(S,I) = cs .
- ceq sq(exit(S,I)) = sq(S)      if pc(S,I) ~ cs = false .
+ ceq pc(exit(S,A),I) = rm        if pc(S,pid(A)) = cs /\  pid(A) =I         [metadata "CA-e1"].
+ ceq pc(exit(S,A),I) = pc(S,J)   if pc(S,pid(A)) = cs /\  pid(A) ~ I = false[metadata "CA-e2"].
+ ceq pc(exit(S,A),I) = pc(S,J)   if pc(S,pid(A)) ~ cs = false               [metadata "CA-e3"].
+ ceq sq(exit(S,A))   = get(sq(S))if pc(S,pid(A)) = cs .
+ ceq sq(exit(S,A)) = sq(S)       if pc(S,pid(A)) ~ cs = false .
 endfm 
