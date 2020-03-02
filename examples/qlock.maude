@@ -78,17 +78,17 @@ fmod QLOCK{X :: PID , Y :: NOM} is
  ceq pc(want(S,A),I) = pc(S,pid(A)) if pc(S,pid(A)) = rm /\ pid(A) ~ I = false [metadata "CA-w2"].
  ceq pc(want(S,A),J) = pc(S,J)      if pc(S,pid(A)) ~ rm = false               [metadata "CA-w3"].
  ceq sq(want(S,A)) = sq(S),pid(A)   if pc(S,pid(A)) = rm .
- ceq sq(want(S,I)) = sq(S)          if pc(S,pid(A)) ~ rm = false .
+ ceq sq(want(S,A)) = sq(S)          if pc(S,pid(A)) ~ rm = false .
 --- try ---
- ceq pc(try(S,A),I) = cs      if pc(S,pid(A)) = wt /\ pid(A),Q := sq(S) /\ J = pid(A)[metadata "CA-t1"].
- ceq pc(try(S,A),I) = pc(S,J) if (J ~ pid(A)) = false                                [metadata "CA-t2"].
- ceq pc(try(S,A),I) = pc(S,J) if pc(S,pid(A)) ~ wt = false                           [metadata "CA-t3"].
- ceq pc(try(S,A),I) = pc(S,J) if top(sq(S)) ~ pid(A) = false                         [metadata "CA-t4"].
+ ceq pc(try(S,A),I) = cs      if pc(S,pid(A)) = wt /\ pid(A),Q := sq(S) /\ pid(A) = I[metadata "CA-t1"].
+ ceq pc(try(S,A),I) = pc(S,I) if (pid(A) ~ I) = false                                [metadata "CA-t2"].
+ ceq pc(try(S,A),I) = pc(S,I) if pc(S,pid(A)) ~ wt = false                           [metadata "CA-t3"].
+ ceq pc(try(S,A),I) = pc(S,I) if top(sq(S)) ~ pid(A) = false                         [metadata "CA-t4"].
  eq sq(try(S,A)) = sq(S) .
 --- exit ---
- ceq pc(exit(S,A),I) = rm        if pc(S,pid(A)) = cs /\  pid(A) =I         [metadata "CA-e1"].
- ceq pc(exit(S,A),I) = pc(S,J)   if pc(S,pid(A)) = cs /\  pid(A) ~ I = false[metadata "CA-e2"].
- ceq pc(exit(S,A),I) = pc(S,J)   if pc(S,pid(A)) ~ cs = false               [metadata "CA-e3"].
+ ceq pc(exit(S,A),I) = rm        if pc(S,pid(A)) = cs /\  pid(A) = I        [metadata "CA-e1"].
+ ceq pc(exit(S,A),I) = pc(S,I)   if pc(S,pid(A)) = cs /\  pid(A) ~ I = false[metadata "CA-e2"].
+ ceq pc(exit(S,A),I) = pc(S,I)   if pc(S,pid(A)) ~ cs = false               [metadata "CA-e3"].
  ceq sq(exit(S,A))   = get(sq(S))if pc(S,pid(A)) = cs .
  ceq sq(exit(S,A)) = sq(S)       if pc(S,pid(A)) ~ cs = false .
 endfm 
