@@ -1,0 +1,154 @@
+%% Document structure **********************************************************
+
+\newcommand{\minisec}[1]{%
+  \par\addvspace{\smallskipamount}\noindent%
+  \textbf{\sffamily #1}\enspace%
+}
+
+%% Multiple columns ************************************************************
+
+\usepackage{multicol}
+\setlength{\multicolsep}{6.0pt plus 2.0pt minus 1.5pt}
+
+%% Lists ***********************************************************************
+
+\newcounter{InParEnum}
+\newenvironment{inparenum}{%
+  \noindent\ignorespaces%
+  \setcounter{InParEnum}{0}%
+}{%
+  \ignorespacesafterend%
+}
+\newcommand{\inparitemformat}[1]{%
+  \textsf{(\arabic{#1})}%
+}
+\newcommand{\inparitem}{%
+  \stepcounter{InParEnum}%
+  \inparitemformat{InParEnum}~%
+}
+
+%% Math support ****************************************************************
+
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{mathabx}
+\usepackage{mathtools}
+\usepackage{xy}
+\xyoption{all}
+
+%% Additional symbols **********************************************************
+
+\usepackage{scalerel}
+
+\newcommand{\bbsemicolon}{%
+  \scalerel*{%
+    \hbox{\usefont{U}{bbold}{m}{n} ;}%
+  }{;}%
+}
+
+\AtBeginDocument{%
+  \let\Dashv\relax
+  \newcommand{\Dashv}{%
+    \mathrel{\text{\reflectbox{\(\vDash\)}}}%
+  }%
+}
+
+\newcommand{\vDashv}{%
+  \mathrel{\text{\ooalign{\(\vDash\)\cr\(\Dashv\)\cr}}}%
+}
+
+%% Theorem environments ********************************************************
+
+\newtheorem{fact}[definition]{Fact}
+
+%% Institution-theoretic notations *********************************************
+
+\newcommand{\Sig}{\mathtt{Sig}}
+\newcommand{\Mod}{\mathtt{Mod}}
+\newcommand{\Sen}{\mathtt{Sen}}
+
+\renewcommand{\models}{\vDash}
+\newcommand{\nmodels}{\nvDash}
+\newcommand{\bimodels}{\vDashv}
+
+\newcommand{\comp}{\mathbin{\bbsemicolon}}
+\newcommand{\red}{\mathord{\upharpoonright}}
+
+\newcommand{\alt}{\enspace|\enspace}
+
+%% Notations specific to HDFOLS ************************************************
+
+\newcommand{\HDFOLS}{{\mathsf{HDFOLS}}}
+\newcommand{\HDCLS}{{\mathsf{HDCLS}}}
+
+\newcommand{\keyscript}[1]{\text{\normalfont\sffamily\itshape #1}}
+
+\newcommand{\nominal}{\keyscript{n}}
+\newcommand{\rigid}{\keyscript{r}}
+\newcommand{\flexible}{\keyscript{f}}
+
+\newcommand{\assign}{\leftarrow}
+
+\newcommand{\ari}{\mathit{a\mkern -1mu r}}
+\newcommand{\act}{\mathfrak{a}}
+
+%% Sentence-building operators *************************************************
+
+\newcommand{\bigand}{\bigwedge}
+\renewcommand{\implies}{\Rightarrow}
+\newcommand{\at}[1]{@_{#1}\,}
+\newcommand{\nec}[1]{[#1]}
+\newcommand{\store}[1]{{\downarrow}#1\,{\cdot}\,}
+\newcommand{\forAll}[1]{\forall #1\,{\cdot}\,}
+\newcommand{\Exists}[1]{\exists #1\,{\cdot}\,}
+\newcommand{\lnext}[1]{(#1)\,}
+
+%% Inference rules *************************************************************
+
+\usepackage{mathpartir}
+
+%% Additional environments for proofs ******************************************
+
+\usepackage{calc}
+\usepackage{longtable}
+\usepackage{booktabs}
+\newcommand{\tabStretch}[1]{\renewcommand{\arraystretch}{#1}}
+\newcommand{\tabColSep}[1]{\setlength{\tabcolsep}{#1}}
+\usepackage{array,etoolbox}
+\preto\tabular{\setcounter{tablerow}{0}}
+\newcounter{tablerow}
+\newcommand\rownumber{%
+  \stepcounter{tablerow}\thetablerow\addtocounter{tablerow}{-1}%
+}
+
+\newenvironment{proofsteps}[1]{%
+  \begingroup%
+  \setlength\LTpre{\smallskipamount}%
+  \setlength\LTpost{\smallskipamount}%
+  \setcounter{tablerow}{0}%
+  \tabStretch{1.2}\tabColSep{0em}\noindent%
+  \longtable{%
+    @{\makebox[\widthof{\footnotesize 9}][r]{\footnotesize\rownumber}}%
+    @{\hskip 1.5em}>{\refstepcounter{tablerow}}p{#1}%
+    @{\hskip 1.5em}>{\footnotesize\raggedright\arraybackslash}p{\linewidth-#1-4em}%
+  }%
+}{%
+  \endlongtable%
+  \addtocounter{table}{-1}%
+  \endgroup%
+}
+
+\newenvironment{proofcases}{%
+  \renewcommand{\descriptionlabel}[1]{%
+    \hspace\labelsep\normalfont\sffamily [\;##1\;]%
+  }%
+  \description%
+}{\enddescription}
+
+%% *****************************************************************************
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "HDFOL.tex"
+%%% End:

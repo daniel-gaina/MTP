@@ -1,0 +1,97 @@
+\begin{thebibliography}{10}
+
+\bibitem{BohrerP18}
+Brandon Bohrer and Andr{\'{e}} Platzer.
+\newblock A hybrid, dynamic logic for hybrid-dynamic information flow.
+\newblock In {\em Proceedings of the 33rd Annual {ACM/IEEE} Symposium on Logic
+  in Computer Science, {LICS} 2018, Oxford, UK, July 09--12, 2018}, pages
+  115--124. {ACM}, 2018.
+
+\bibitem{Brauner11}
+Torben Bra{\"{u}}ner.
+\newblock {\em Hybrid Logic and its Proof-Theory}, volume~37 of {\em Applied
+  Logic Series}.
+\newblock Springer, 2011.
+
+\bibitem{Diaconescu04}
+R{\u{a}}zvan Diaconescu.
+\newblock Herbrand theorems in arbitrary institutions.
+\newblock {\em Information Processing Letters}, 90(1):29--37, 2004.
+
+\bibitem{Diaconescu16}
+R{\u{a}}zvan Diaconescu.
+\newblock Quasi-varieties and initial semantics for hybridized institutions.
+\newblock {\em Journal of Logic and Computation}, 26(3):855--891, 2016.
+
+\bibitem{DiaconescuM16}
+R{\u{a}}zvan Diaconescu and Alexandre Madeira.
+\newblock Encoding hybridized institutions into first-order logic.
+\newblock {\em Mathematical Structures in Computer Science}, 26(5):745--788,
+  2016.
+
+\bibitem{Gaina17Bir}
+Daniel G{\u{a}}in{\u{a}}.
+\newblock Birkhoff style calculi for hybrid logics.
+\newblock {\em Formal Aspects of Computing}, 29(5):805--832, 2017.
+
+\bibitem{Gaina17Her}
+Daniel G{\u{a}}in{\u{a}}.
+\newblock Foundations of logic programming in hybrid logics with user-defined
+  sharing.
+\newblock {\em Theoretical Computer Science}, 686:1--24, 2017.
+
+\bibitem{GainaTR18}
+Daniel G{\u{a}}in{\u{a}}, Ionu{\c{t}} {\c{T}}u{\c{t}}u, and Adri{\'{a}}n
+  Riesco.
+\newblock Specification and verification of invariant properties of transition
+  systems.
+\newblock In {\em 25th Asia-Pacific Software Engineering Conference, {APSEC}
+  2018, Nara, Japan, 4--7 December 2018}. IEEE, 2018.
+
+\bibitem{GoguenB92}
+Joseph~A. Goguen and Rod~M. Burstall.
+\newblock Institutions: Abstract model theory for specification and
+  programming.
+\newblock {\em Journal of the {ACM}}, 39(1):95--146, 1992.
+
+\bibitem{GrooteM2014}
+Jan~Friso Groote and Mohammad~Reza Mousavi.
+\newblock {\em Modeling and Analysis of Communicating Systems}.
+\newblock {MIT} Press, 2014.
+
+\bibitem{HarelKT01}
+David Harel, Dexter Kozen, and Jerzy Tiuryn.
+\newblock Dynamic logic.
+\newblock {\em {SIGACT} News}, 32(1):66--69, 2001.
+
+\bibitem{HennickerMK19}
+Rolf Hennicker, Alexandre Madeira, and Alexander Knapp.
+\newblock A hybrid dynamic logic for event/data-based systems.
+\newblock In {\em Fundamental Approaches to Software Engineering -- 22nd
+  International Conference, {FASE} 2019, Prague, Czech Republic, April 6--11,
+  2019, Proceedings}, volume 11424 of {\em LNCS}, pages 79--97. Springer, 2019.
+
+\bibitem{MartinsMDB11}
+Manuel~A. Martins, Alexandre Madeira, R{\u{a}}zvan Diaconescu, and
+  Lu{\'{\i}}s~Soares Barbosa.
+\newblock Hybridization of institutions.
+\newblock In Andrea Corradini, Bartek Klin, and Corina C{\^{\i}}rstea, editors,
+  {\em Algebra and Coalgebra in Computer Science -- 4th International
+  Conference, {CALCO} 2011, Winchester, {UK}, August 30 -- September 2, 2011.
+  Proceedings}, volume 6859 of {\em Lecture Notes in Computer Science}, pages
+  283--297. Springer, 2011.
+
+\bibitem{TutuF15}
+Ionu{\c{t}} {\c{T}}u{\c{t}}u and Jos{\'{e}}~Luiz Fiadeiro.
+\newblock Revisiting the institutional approach to {Herbrand's} theorem.
+\newblock In Lawrence~S. Moss and Pawe{\l} Soboci{\'{n}}ski, editors, {\em 6th
+  Conference on Algebra and Coalgebra in Computer Science, {CALCO} 2015, June
+  24--26, 2015, Nijmegen, The Netherlands}, volume~35 of {\em LIPIcs}, pages
+  304--319. Schloss Dagstuhl -- Leibniz-Zentrum fuer Informatik, 2015.
+
+\bibitem{TutuF17}
+Ionu{\c{t}} {\c{T}}u{\c{t}}u and Jos{\'{e}}~Luiz Fiadeiro.
+\newblock From conventional to institution-independent logic programming.
+\newblock {\em Journal of Logic and Computation}, 27(6):1679--1716, 2017.
+
+\end{thebibliography}
