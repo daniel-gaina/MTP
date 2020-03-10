@@ -1,0 +1,720 @@
+%% BSS – A hybrid-logic specification of a bike-sharing system
+%%
+%% as per the case study reported in: I. Țuțu, C. Chiriță, A. Lopes,
+%% and J.L. Fiadeiro. Logical Support for Bike-Sharing System Design
+
+logic RigidCASL
+
+spec BSS_Configuration =
+  %% To reduce the complexity of reasoning about the BSS, the
+  %% configuration level is presented directly in terms of the
+  %% encoding of the logic of network configurations (LNC) into
+  %% first-order logic.
+  %% 
+  %% Here we describe only the LNC signature of the BSS.
+
+  %% We consider four kinds of actors: users, bicycles, docks (where
+  %% bicycles can be locked), and regions (where docks are located).
+  %% 
+  rigid sorts User, Bike, Dock, Region
+
+  %% Base-logic predicates %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  %% 
+  %% All of the following predicates correspond in LNC to (Boolean)
+  %% propositional symbols.
+
+  %% travelling: to indicate if a user is travelling or not towards
+  %% some region.
+  %%
+  pred travelling : User
+
+  %% freeDock: to indicate that there is no bicycle locked in a
+  %% particular dock.
+  %% 
+  pred freeDock : Dock
+
+  %% fullRegion: to indicate that all docks in a region have bicycles
+  %% in place.
+  %%
+  pred fullRegion : Region
+
+  %% rewardOffered: to capture the fact that users are offered free
+  %% rides when borrowing bicycles from docks located in a particular
+  %% region; not rigid, because in different configurations, rewards
+  %% may be offered at different regions.
+  %%
+  pred rewardOffered : Region
+
+  %% The locality of actors %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+  %% locality: the 'parent' modality, encoded as a binary predicate;
+  %% intuitively, locality(x, y) iff y is a parent of x; in LNC the
+  %% 'parent' modality is defined between any two kinds of actors; to
+  %% keep the specification simple, in this case we only consider the
+  %% following five situations:
+  %% 
+  pred locality : User * Bike
+  pred locality : User * Region
+  pred locality : Bike * Dock
+  pred locality : Bike * Region
+  %%
+  rigid pred locality : Dock * Region
+  %%
+  %% This last predicate is rigid, because we assume docks to be
+  %% affixed to the regions.
+
+  %% locality2: predicate capturing short chains of localities,
+  %% between a node in the forest and its grandparent.
+  %% 
+  pred locality2 : User * Bike * Region
+  pred locality2 : Bike * Dock * Region
+
+  %% The connectivity of actors %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+  %% Each of the following five predicates corresponds to a channel type.
+  %%
+  pred ask : User * Region
+  pred choose : User * Bike
+  pred choose : User * Dock
+  pred travelTo : User * Region
+  %%
+  rigid pred path : Region * Region
+  %%
+  %% Similarly to locality : Dock * Region, we assume that paths between
+  %% regions to be the same in all configurations.
+end
+
+logic HRigidCASLQuant
+
+spec BSS_Network =
+  data BSS_Configuration {
+    %% The LAN signature of the BSS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    %% We consider only one nominal, corresponding to an initial state.
+    %% 
+    nominal init
+
+    %% We declare four ANt-logic modalities/interactions.
+    %% 
+    modalities Take,      %% for obtaining a bicycle and selecting a destination
+               Travel,    %% for travelling across the city
+               Return,    %% for returning a bicycle at the destination
+               Reward : 2 %% for offering rewards when a region is full
+
+    modality Any : 2    %% for any (union) of the four modalities listed above
+
+    %% The specification of the BSS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    %% State-logic axioms ------------------------------------------------------
+
+    . forallH u : User . forallH b1 : Bike . forallH b2 : Bike
+      . locality(u, b1) /\ locality(u, b2)
+        =>
+        b1 = b2
+      %(localityUB_is_functional)%
+
+    . forallH u1 : User . forallH u2 : User . forallH b : Bike
+      . locality(u1, b) /\ locality(u2, b)
+        =>
+        u1 = u2
+      %(bike_capacity)%
+
+    . forallH u : User . forallH r1 : Region . forallH r2 : Region
+      . locality(u, r1) /\ locality(u, r2)
+        =>
+        r1 = r2
+      %(localityUR_is_functional)%
+
+    . forallH u : User
+      . (existsH b : Bike . locality(u, b))
+        =>
+        (not existsH r : Region . locality(u, r))
+      %(localityUBR_is_functional)%
+
+    . forallH b : Bike . forallH d1 : Dock . forallH d2 : Dock
+      . locality(b, d1) /\ locality(b, d2)
+        =>
+        d1 = d2
+      %(localityBD_is_functional)%
+
+    . forallH b1 : Bike . forallH b2 : Bike . forallH d : Dock
+      . locality(b1, d) /\ locality(b2, d)
+        =>
+        b1 = b2
+      %(dock_capacity)%
+
+    . forallH b : Bike . forallH r1 : Region . forallH r2 : Region
+      . locality(b, r1) /\ locality(b, r2)
+        =>
+        r1 = r2
+      %(localityBR_is_functional)%
+
+    . forallH b : Bike
+      . (existsH d : Dock . locality(b, d))
+        =>
+        (not existsH r : Region . locality(b, r))
+      %(localityBDR_is_functional)%
+
+    . forallH d : Dock . forallH r1 : Region . forallH r2 : Region
+      . locality(d, r1) /\ locality(d, r2)
+        =>
+        r1 = r2
+      %(localityDR_is_functional)%
+
+    . forallH u : User . forallH b : Bike . forallH r : Region
+      . locality2(u, b, r)
+        <=>
+        (locality(u, b) /\ locality(b, r))
+      %(def_locality2UBR)%
+
+    . forallH b : Bike . forallH d : Dock . forallH r : Region
+      . locality2(b, d, r)
+        <=>
+        (locality(b, d) /\ locality(d, r))
+      %(def_locality2DBR)%
+
+    %% Characterisations of some of the base-logic predicates ------------------
+
+    . forallH u : User
+      . travelling(u)
+        <=>
+        existsH r : Region . travelTo(u, r)
+      %(def_travelling)%
+
+    . forallH d : Dock
+      . freeDock(d)
+        <=>
+        not existsH b : Bike . locality(b, d)
+      %(def_freeDock)%
+
+    . forallH r : Region
+      . fullRegion(r)
+        <=>
+        forallH d : Dock . locality(d, r) => not freeDock(d)
+      %(def_fullRegion)%
+
+    %% ask axioms --------------------------------------------------------------
+
+    . forallH u : User . forallH r : Region
+      . ask(u, r)
+        =>
+        locality(u, r)
+      %(wp_ask)%
+
+    %% chooseUB axioms ---------------------------------------------------------
+
+    . forallH u : User . forallH b : Bike
+      . choose(u, b)
+        =>
+        existsH d : Dock . existsH r : Region
+        . ask(u, r) /\ locality2(b, d, r)
+      %(wp_chooseUB)%
+
+    . forallH u1 : User . forallH u2 : User . forallH b1 : Bike . forallH b2 : Bike
+      . choose(u1, b1) /\ choose(u2, b2)
+        =>
+        (u1 = u2 <=> b1 = b2)
+      %(chooseUB_is_an_injective_pfun)%
+      %%
+      %% choose : User * Bike is an injective partial function User -> Bike
+
+    . forallH u : User . forallH b : Bike . forallH d : Dock . forallH r : Region
+      . (ask(u, r) => existsH b1 : Bike . choose(u, b1))
+         \/
+        (locality2(b, d, r) => existsH u1 : User . choose(u1, b))
+      %(max_chooseUB)%
+      %%
+      %% The cardinality of the graph of choose is maximal.
+
+    %% chooseUD axioms ---------------------------------------------------------
+
+    . forallH u : User . forallH d : Dock
+      . choose(u, d)
+        =>
+        existsH b : Bike . existsH r : Region
+        . locality2(u, b, r) /\ travelTo(u, r) /\ locality(d, r) /\ freeDock(d)
+      %(wp_chooseUD)%
+
+    . forallH u1 : User . forallH u2 : User . forallH d1 : Dock . forallH d2 : Dock
+      . choose(u1, d1) /\ choose(u2, d2)
+        =>
+        (u1 = u2 <=> d1 = d2)
+      %(chooseUD_is_an_injective_pfun)%
+      %%
+      %% choose : User * Dock is an injective partial function User -> Dock
+
+    . forallH u : User . forallH b : Bike . forallH d : Dock . forallH r : Region
+      . (locality2(u, b, r) /\ travelTo(u, r) => existsH d1 : Dock . choose(u, d1))
+         \/
+        (locality(d, r) /\ freeDock(d) => existsH u1 : User . choose(u1, b))
+      %(max_chooseUD)%
+      %%
+      %% The cardinality of the graph of choose is maximal.
+
+    %% Take axioms *************************************************************
+
+    . (<Take> true)
+      <=>
+      existsH u : User . existsH b : Bike . existsH d : Dock . existsH r : Region
+      . locality(u, r) /\ ask(u, r) /\ locality2(b, d, r) /\ choose(u, b)
+      %(Take_def_cond)%
+      %%
+      %% Technically, the last condition, choose(u, b), would be
+      %% enough (according to the axioms wp_chooseUB and wp_ask); we
+      %% keep the other conditions explicit to provide insight into
+      %% the prerequisites for Take.
+
+    . forallH u : User . forallH b : Bike . forallH d : Dock . forallH r : Region
+      . (locality(u, r) /\ ask(u, r) /\ locality2(b, d, r) /\ choose(u, b))
+        =>
+        [Take] (locality2(u, b, r) /\ existsH r1 : Region . travelTo(u, r1))
+      %(Take_effect)%
+
+    %% Travel axioms ***********************************************************
+
+    . (<Travel> true)
+      <=>
+      existsH u : User . existsH b : Bike . existsH r1 : Region . existsH r2 : Region
+      . travelling(u) /\ locality2(u, b, r1) /\ path(r1, r2)
+      %(Travel_def_cond)%
+
+    . forallH u : User . forallH b : Bike . forallH r1 : Region . forallH r2 : Region
+      . travelling(u) /\ locality2(u, b, r1) /\ path(r1, r2)
+        =>
+        <Travel> locality2(u, b, r2)
+      %(Travel_effect)%
+
+    %% Return axioms ***********************************************************
+
+    . (<Return> true)
+      <=>
+      existsH u : User . existsH b : Bike . existsH d : Dock . existsH r : Region
+      . locality2(u, b, r) /\ travelTo(u, r)
+        /\ locality(d, r) /\ freeDock(d) /\ choose(u, d)
+      %(Return_def_cond)%
+      %%
+      %% Technically, the last condition, choose(u, d), would be
+      %% enough (according to the axiom wp_chooseUD); we keep the
+      %% other conditions explicit to provide insight into the
+      %% prerequisites for Return.
+
+    . forallH u : User . forallH b : Bike . forallH d : Dock . forallH r : Region
+      . locality2(u, b, r) /\ travelTo(u, r)
+        /\ locality(d, r) /\ freeDock(d) /\ choose(u, d)
+        =>
+        [Return] (locality2(b, d, r) /\ locality(u, r) /\ not travelling(u))
+      %(Return_effect)%
+
+    %% Reward axioms *************************************************************
+
+    . (<Reward> true)
+      <=>
+      existsH u : User . existsH r : Region
+      . travelTo(u, r) /\ fullRegion(r)
+      %(Reward_def_cond)%
+
+    . forallH r : Region
+      . (existsH u : User . travelTo(u, r) /\ fullRegion(r))
+        =>
+        [Reward] rewardOffered(r)
+      %(Reward_effect)%
+
+    %% locality axioms *********************************************************
+
+    %% locality preservation properties ----------------------------------------
+
+    . forallH b : Bike . forallH d : Dock
+      . locality(b, d) /\
+        (not existsH u : User . existsH r : Region
+         . ask(u, r) /\ locality(d, r) /\ choose(u, b))
+        => [Take] locality(b, d)
+      %(Take_pres_localityBD)%
+
+    . forallH b : Bike . forallH d : Dock
+      . locality(b, d)
+        =>
+        [Travel] locality(b, d)
+      %(Travel_pres_localityBD)%
+
+    . forallH b : Bike . forallH d : Dock
+      . locality(b, d)
+        =>
+        [Return] locality(b, d)
+      %(Return_pres_localityBD)%
+
+    . forallH b : Bike . forallH d : Dock
+      . locality(b, d)
+        =>
+        [Reward] locality(b, d)
+      %(Reward_pres_localityBD)%
+
+    %% locality reflection properties ------------------------------------------
+
+    . forallH b : Bike . forallH d : Dock
+      . (<Take> locality(b, d))
+        =>
+        locality(b, d)
+      %(wp_Take_localityBD)%
+
+    . forallH b : Bike . forallH d : Dock
+      . (<Travel> locality(b, d))
+        =>
+        locality(b, d)
+      %(wp_Travel_localityBD)%
+
+    . forallH b : Bike . forallH d : Dock
+      . (<Return> locality(b, d))
+        =>
+        (locality(b, d) \/
+         (existsH u : User . existsH r : Region
+          . locality2(u, b, r) /\ travelTo(u, r)
+            /\ locality(d, r) /\ freeDock(d) /\ choose(u, d)))
+      %(wp_Return_localityBD)%
+
+    . forallH b : Bike . forallH d : Dock
+      . (<Reward> locality(b, d))
+        =>
+        locality(b, d)
+      %(wp_Reward_localityBD)%
+
+    %% travelTo axioms *********************************************************
+
+    %% travelTo preservation properties ----------------------------------------
+
+    . forallH u : User . forallH r : Region
+      . travelTo(u, r)
+        =>
+        [Take] travelTo(u, r)
+      %(Take_pres_travelTo)%
+
+    . forallH u : User . forallH r : Region
+      . travelTo(u, r)
+        =>
+        [Travel] travelTo(u, r)
+      %(Travel_pres_travelTo)%
+
+    . forallH u : User . forallH r : Region
+      . travelTo(u, r) /\
+        (not existsH b : Bike . existsH d : Dock
+         . locality2(u, b, r) /\ locality(d, r) /\ freeDock(d) /\ choose(u, d))
+        =>
+        [Return] travelTo(u, r)
+      %(Return_pres_travelTo)%
+
+    . forallH u : User . forallH r : Region
+      . travelTo(u, r)
+        =>
+        [Reward] travelTo(u, r)
+      %(Reward_pres_travelTo)%
+
+    %% travelTo reflection properties ------------------------------------------
+
+    . forallH u : User . forallH r : Region
+      . (<Take> travelTo(u, r))
+        =>
+        (travelTo(u, r) \/
+         (existsH r0 : Region . existsH b : Bike . existsH d : Dock
+          . locality(u, r0) /\ ask(u, r0) /\ locality2(b, d, r0) /\ choose(u, b)))
+      %(wp_Take_travelTo)%
+
+    . forallH u : User . forallH r : Region
+      . (<Travel> travelTo(u, r))
+        =>
+        travelTo(u, r)
+      %(wp_Travel_travelTo)%
+
+    . forallH u : User . forallH r : Region
+      . (<Return> travelTo(u, r))
+        =>
+        travelTo(u, r)
+      %(wp_Return_travelTo)%
+
+    . forallH u : User . forallH r : Region
+      . (<Reward> travelTo(u, r))
+        =>
+        travelTo(u, r)
+      %(wp_Reward_travelTo)%
+
+    %% rewardOffered axioms ----------------------------------------------------
+
+    . forallH r : Region
+      . rewardOffered(r) /\
+        (existsH u : User . existsH b : Bike . existsH d : Dock
+         . locality(u, r) /\ ask(u, r) /\ locality2(b, d, r) /\ choose(u, b))
+        =>
+        [Take] not rewardOffered(r)
+      %(Take_alt_rewardOffered)%
+
+    %% preservation properties .................................................
+
+    . forallH r : Region
+      . rewardOffered(r) /\
+        (not existsH u : User . existsH b : Bike . existsH d : Dock
+         . locality(u, r) /\ ask(u, r) /\ locality2(b, d, r) /\ choose(u, b))
+        =>
+        [Take] rewardOffered(r)
+      %(Take_pres_rewardOffered)%
+
+    . forallH r : Region
+      . rewardOffered(r)
+        =>
+        [Travel] rewardOffered(r)
+      %(Travel_pres_rewardOffered)%
+
+    . forallH r : Region
+      . rewardOffered(r)
+        =>
+        [Return] rewardOffered(r)
+      %(Return_pres_rewardOffered)%
+
+    . forallH r : Region
+      . rewardOffered(r)
+        =>
+        [Reward] rewardOffered(r)
+      %(Reward_pres_rewardOffered)%
+
+    %% reflection properties ...................................................
+
+    . forallH r : Region
+      . (<Take> rewardOffered(r))
+        =>
+        rewardOffered(r)
+      %(wp_Take_rewardOffered)%
+
+    . forallH r : Region
+      . (<Travel> rewardOffered(r))
+        =>
+        rewardOffered(r)
+      %(wp_Travel_rewardOffered)%
+
+    . forallH r : Region
+      . (<Return> rewardOffered(r))
+        =>
+        rewardOffered(r)
+      %(wp_Return_rewardOffered)%
+
+    . forallH r : Region
+      . (<Reward> rewardOffered(r))
+        =>
+        (rewardOffered(r) \/
+         (existsH u : User . travelTo(u, r) /\ fullRegion(r)))
+      %(wp_Reward_rewardOffered)%
+
+    %% Additional BSS axioms %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    . @ init : (not existsH u : User . travelling(u)) /\
+               (not existsH r : Region . rewardOffered(r))
+      %(def_init)%
+
+    . forallH nominal c
+      . (<Any> c)
+        <=>
+        ((<Take> c) \/ (<Travel> c) \/ (<Return> c) \/ (<Reward> c))
+      %(def_Any)%
+
+    %% Theorems/properties %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    . forallH u : User . forallH b : Bike . forallH r : Region
+      . ask(u, r) /\ choose(u, b)
+        =>
+        existsH d : Dock . locality2(b, d, r)
+      %(Take_effect_obs_1)% %implied
+      %%
+      %% Proved using SPASS from the BSS axioms
+      %% in under 5 seconds
+
+    . forallH u : User . forallH b : Bike . forallH r : Region
+      . choose(u, b) /\ (existsH d : Dock . locality2(b, d, r))
+        =>
+        ask(u, r)
+      %(Take_effect_obs_2)% %implied
+      %%
+      %% Proved using SPASS from the BSS axioms
+      %% in under 5 seconds
+
+    . forallH u : User . forallH b : Bike . forallH r : Region
+      . choose(u, b)
+        =>
+        (ask(u, r) <=> existsH d : Dock . locality2(b, d, r))
+      %(Take_effect_obs)% %implied
+      %%
+      %% Proved using SPASS from the BSS axioms & obs_1, obs_2
+      %% in under 5 seconds
+
+    . forallH u : User . forallH d : Dock . forallH r : Region
+      . locality(u, r) /\ choose(u, d)
+        =>
+        locality(d, r)
+      %(Return_effect_obs)% %implied
+      %%
+      %% Proved using SPASS from the BSS axioms
+      %% in under 5 seconds
+
+    . forallH r : Region
+      . (existsH u : User . existsH b : Bike . existsH d : Dock
+         . locality(u, r) /\ ask(u, r) /\ locality2(b, d, r) /\ choose(u, b))
+        =>
+        [Take] not rewardOffered(r)
+      %(no_reward_after_Take)% %implied
+      %%
+      %% Proved using SPASS from the BSS axioms & Take_effect_obs
+      %% in under 10 seconds
+
+    . forallH b : Bike . forallH d : Dock
+      . (<Take> not locality(b, d))
+        =>
+        ((not locality(b, d)) \/
+         (existsH u : User . existsH r : Region
+          . locality(u, r) /\ ask(u, r) /\ locality2(b, d, r) /\ choose(u, b)))
+      %(wp_Take_not_localityBD)% %implied
+      %%
+      %% Proved using SPASS from the BSS axioms & Take_effect_obs
+      %% in under 10 seconds
+
+    . forallH d : Dock
+      . (<Take> freeDock(d))
+        =>
+        (freeDock(d) \/
+         (existsH u : User . existsH b : Bike . existsH r : Region
+          . locality(u, r) /\ ask(u, r) /\ locality2(b, d, r) /\ choose(u, b)))
+      %(wp_Take_freeDock)% %implied
+      %%
+      %% Proved using SPASS from the BSS axioms the theorems above
+      %% in under 30 seconds
+
+    . forallH d : Dock
+      . (<Any> freeDock(d))
+        =>
+        (freeDock(d) \/
+         (existsH u : User . existsH b : Bike . existsH r : Region
+          . locality(u, r) /\ ask(u, r) /\ locality2(b, d, r) /\ choose(u, b)))
+      %(wp_Any_freeDock)% %implied
+      %%
+      %% Proved using SPASS from the BSS axioms the theorems above
+      %% in under 10 seconds
+
+    %% Induction schemes (for reachable states) --------------------------------
+
+    . (@ init : (forallH d : Dock . forallH r : Region
+                 . (locality(d, r) /\ freeDock(d))
+                   =>
+                   not rewardOffered(r)))
+      /\
+      (forallH nominal s
+       . @ s : ((forallH d : Dock . forallH r : Region
+                 . locality(d, r) /\ freeDock(d)
+                   =>
+                   not rewardOffered(r))
+                =>
+                [Any] (forallH d : Dock . forallH r : Region
+                       . locality(d, r) /\ freeDock(d)
+                         =>
+                         not rewardOffered(r))))
+      =>
+      (forallH d : Dock . forallH r : Region
+       . locality(d, r) /\ freeDock(d)
+         =>
+         not rewardOffered(r))
+      %(ind_scheme_no_reward_when_freeDock)%
+
+    . (@ init : (forallH r : Region
+                 . rewardOffered(r)
+                   =>
+                   (existsH u : User .  travelTo(u, r))))
+      /\
+      (forallH nominal s
+       . @ s : ((forallH r : Region
+                 . rewardOffered(r)
+                   =>
+                   (existsH u : User . travelTo(u, r)))
+               =>
+               [Any] (forallH r : Region
+                      . rewardOffered(r)
+                        =>
+                        (existsH u : User . travelTo(u, r)))))
+     =>
+     (forallH r : Region
+      . rewardOffered(r)
+        =>
+        (existsH u : User . travelTo(u, r)))
+      %(ind_scheme_covert_channel)%
+
+    %% -------------------------------------------------------------------------
+    %% 
+    %% If a region has a free dock (with no bike locked there), then
+    %% there is no reward offered at that region.
+    %% 
+    %% -------------------------------------------------------------------------
+
+    . @ init : (forallH d : Dock . forallH r : Region
+      . (locality(d, r) /\ freeDock(d))
+        =>
+        not rewardOffered(r))
+      %(no_reward_when_freeDock_base)% %implied
+      %%
+      %% Proved using SPASS from the BSS axioms
+      %% in under 5 seconds
+
+    . (forallH d : Dock . forallH r : Region
+      . locality(d, r) /\ freeDock(d)
+        =>
+        not rewardOffered(r))
+      =>
+      [Any] (forallH d : Dock . forallH r : Region
+      . locality(d, r) /\ freeDock(d)
+        =>
+        not rewardOffered(r))
+      %(no_reward_when_freeDock_step)% %implied
+      %%
+      %% Proved using SPASS from the BSS axioms the theorems above
+      %% in under 10 seconds
+
+    . forallH d : Dock . forallH r : Region
+      . locality(d, r) /\ freeDock(d)
+        =>
+        not rewardOffered(r)
+      %(no_reward_when_freeDock)% %implied
+      %% 
+      %% Proved using SPASS from the BSS axioms the theorems above
+      %% in under 10 seconds
+
+    %% -------------------------------------------------------------------------
+    %%
+    %% If a reward is offered at a region, then there exists a user
+    %% travelling towards that region.
+    %% 
+    %% -------------------------------------------------------------------------
+
+    . @ init : (forallH r : Region
+      . rewardOffered(r)
+        =>
+        (existsH u : User .  travelTo(u, r)))
+      %(Covert_channel_base)% %implied
+      %% 
+      %% Proved using SPASS from the BSS axioms the theorems above
+      %% in under 5 seconds
+
+    . (forallH r : Region
+       . rewardOffered(r)
+         =>
+         (existsH u : User . travelTo(u, r)))
+      =>
+      [Any] (forallH r : Region
+       . rewardOffered(r)
+         =>
+         (existsH u : User . travelTo(u, r)))
+      %(Covert_channel_step)% %implied
+      %% 
+      %% Proved using SPASS from the BSS axioms the theorems above
+      %% in under 10 seconds
+
+    . forallH r : Region
+      . rewardOffered(r)
+        =>
+        (existsH u : User . travelTo(u, r))
+      %(Covert_channel)% %implied
+      %% 
+      %% Proved using SPASS from the BSS axioms the theorems above
+      %% in under 5 seconds
+  }
+end
