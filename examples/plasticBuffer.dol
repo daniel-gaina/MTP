@@ -1,0 +1,59 @@
+spec Buffer =
+ 
+ %% mode of operation
+ nominal free type Mode ::= lifo | fifo
+
+ %% sort of elements
+
+ rigid sort Elem
+
+ %% lists of elements
+
+ nominal free type List ::= empty | cons(E:Elem, L:List)
+
+ %% a system state is then a pair (mode, list)
+ 
+ %% we want to be able to switch mode
+
+ nominal pred shift : Mode * Mode 
+ 
+ . shift(lifo, fifo)
+ . shift(fifo, lifo)
+
+ %% we want to be able to push and pop
+
+ nominal flexible preds push, pop : List * List
+
+ %% we want these definitions to depend on the mode.
+ %% but we also want them to define an accessibility relation
+ %% so they have to be both nominal and flexible?
+
+ . forallH L : List
+   . @L. not pop(empty, L)
+
+%% can't pop from empty list in any mode
+
+ . forallH L : List . forallH E : Elem 
+   . @L . push(L, cons(E, L))
+
+%% pushing does not depend on mode
+
+ . forall L : List . forall E : Elem
+   . @fifo . pop(cons(E, L), L)
+
+%% fifo is the easy case
+
+%% for lifo we need an auxiliary function that we can define by recursion
+%% I could not think of a way to define the predicate pop recursively
+
+  flexible op popLifoAux : List ->? List
+
+ . forallH L, L' : List .
+   . @lifo . pop(L, L') <=> L' = popLifoAux(L)
+
+  . forallH L : List . forallH E, E' : Elem
+    . @ lifo . not def(popLifoAux(empty))
+    . @ lifo . popLifoAux(cons(E, empty)) = empty
+    . @ lifo . popLifoAux(cons(E, cons(E', L))) = cons(E, popLifoAux(cons(E', L)))
+
+end
