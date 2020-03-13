@@ -38,7 +38,7 @@ spec Buffer =
 
 %% pushing does not depend on mode
 
- . forall L : List . forall E : Elem
+ . forallH L : List . forallH E : Elem
    . @fifo . pop(cons(E, L), L)
 
 %% fifo is the easy case
