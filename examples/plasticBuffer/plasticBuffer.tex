@@ -1,0 +1,734 @@
+\documentclass{article}
+\usepackage[left=2cm, right=2cm, top=2cm]{geometry}
+ %*******************************************************
+ \usepackage{booktabs} % For formal tables
+%************************ packages *********************************
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage[inline]{enumitem}
+\usepackage[latin1]{inputenc}
+\usepackage{xy}
+\xyoption{all}
+\usepackage{tikz}
+\usepackage{xcolor}
+
+\usepackage[skip=0pt]{caption}
+
+%\usepackage{mathabx}
+
+%************************ shortcuts ********************************
+\newcommand{\PL}{{\mathsf{PL}}}
+\newcommand{\HPL}{{\mathsf{HPL}}}
+\newcommand{\HPLQ}{{\mathsf{HPLQ}}}
+
+\newcommand{\FOL}{{\mathsf{FOL}}}
+\newcommand{\HCL}{{\mathsf{HCL}}}
+\newcommand{\REL}{{\mathsf{REL}}}
+\newcommand{\HFOL}{{\mathsf{HFOL}}}
+\newcommand{\HREL}{{\mathsf{HREL}}}
+
+
+\newcommand{\HFOLS}{{\mathsf{HFOLS}}}
+\newcommand{\HFOLR}{{\mathsf{HFOLR}}}
+\newcommand{\HDFOL}{{\mathsf{HDFOL}}}
+
+\newcommand{\POA}{{\mathsf{POA}}}
+\newcommand{\POAR}{{\mathsf{POAR}}}
+\newcommand{\HPOA}{{\mathsf{HPOA}}}
+\newcommand{\HPOAS}{{\mathsf{HPOAS}}}
+\newcommand{\HPOAR}{{\mathsf{HPOAR}}}
+
+\newcommand{\Sig}{\mathsf{Sig}}
+\newcommand{\Mod}{\mathsf{Mod}}
+\newcommand{\Sen}{\mathsf{Sen}}
+
+\newcommand{\SSb}{\mathsf{SSb}}
+\newcommand{\SSt}{\mathsf{SSt}}
+\newcommand{\Sb}{\mathsf{Sb}}
+\newcommand{\St}{\mathsf{St}}
+\newcommand{\Nom}{\mathsf{Nom}}
+\newcommand{\Prop}{\mathsf{Prop}}
+%*******************************************************
+\newcommand{\Cat}{\mathbb{C}\mathsf{at}}
+\newcommand{\Class}{\mathbb{C}\mathsf{lass}}
+\newcommand{\Set}{\mathbb{S}\mathsf{et}}
+%*******************************************************
+\newcommand{\I}{\mathtt{I}}
+\newcommand{\SI}{\mathtt{SI}}
+%*******************************************************
+\newcommand{\N}{{\mathbb{N}}}
+\newcommand{\E}{\mathcal{E}}
+\renewcommand{\P}{\mathcal{P}}
+\newcommand{\V}{\mathcal{V}}
+\newcommand{\X}{\mathsf{X}}
+\newcommand{\Y}{\mathsf{Y}}
+\newcommand{\Z}{\mathsf{Z}}
+\newcommand{\Lis}{\mathsf{L}}
+\newcommand{\C}{\mathsf{C}}
+\newcommand{\Q}{\mathsf{Q}}
+\newcommand{\D}{\mathsf{D}}
+\newcommand{\F}{\mathsf{F}}
+\newcommand{\K}{\mathsf{K}}
+\newcommand{\A}{\mathcal{A}}
+\newcommand{\B}{\mathsf{B}}
+%*******************************************************
+\newcommand{\Sub}{{\mathsf{Sub}}}
+\newcommand{\ari}{{\mathsf{ar}}}
+\newcommand{\nom}{{\mathsf{n}}}
+\newcommand{\card}{{\mathsf{card}}}
+\newcommand{\rigid}{{\mathtt{r}}}
+\newcommand{\flexible}{{\mathtt{f}}}
+\newcommand{\ext}{{\mathtt{e}}}
+%*******************************************************
+\newcommand{\LIST}{{\mathsf{LIST}}}
+\newcommand{\List}{{\mathsf{List}}}
+\newcommand{\Elt}{{\mathsf{Elt}}}
+\newcommand{\TRIV}{{\mathsf{TRIV}}}
+\newcommand{\BUFFER}{{\mathsf{BUFFER}}}
+\newcommand{\SP}{{\mathsf{SP}}}
+
+\newcommand{\err}{{\mathtt{err}}}
+\newcommand{\Empty}{{\mathtt{empty}}}
+\newcommand{\fifo}{{\mathtt{fifo}}}
+\newcommand{\lifo}{{\mathtt{lifo}}}
+\newcommand{\Read}{{\mathtt{read}}}
+\newcommand{\del}{{\mathtt{del}}}
+\newcommand{\shift}{{\mathtt{shift}}}
+\newcommand{\lis}{{\mathtt{l}}}
+\newcommand{\buf}{{\mathtt{b}}}
+\newcommand{\ele}{{\mathtt{e}}}
+\newcommand{\Ele}{{\mathtt{E}}}
+\newcommand{\PR}{{\mathsf{PR}}}
+\newcommand{\x}{{\mathfrak{x}}}
+%*******************************************************
+\usepackage{scalerel}
+
+\newcommand{\bbsemicolon}{%
+  \scalerel*{%
+    \hbox{\usefont{U}{bbold}{m}{n} ;}%
+  }{;}%
+}
+
+\newcommand{\comp}{\mathbin{\bbsemicolon}}
+%*******************************************************
+\newcommand{\modelsm}{\mathrel{\models\!\!\!|}}
+\newcommand{\vdashv}{\mathrel{\vdash\!\!\dashv}}
+\newcommand{\red}{\!\upharpoonright\!\!}
+\newcommand{\ul}{\!\!\_}
+\newcommand{\ur}{\_\!\!}
+%*********sentence building operators********************
+\newcommand{\At}[1]{\mathsf{at}_{#1}\, }
+\newcommand{\at}[1]{@_{#1}\,}
+\newcommand{\nec}[1]{[#1]}
+\newcommand{\store}[1]{{\downarrow}#1\,{\cdot}\,}
+\newcommand{\Forall}[1]{\forall #1\,{\cdot}\,}
+\newcommand{\Exists}[1]{\exists #1\,{\cdot}\,}
+\newcommand{\pos}[1]{{\langle}#1{\rangle}}
+%*******************proof rules**************************
+\newcommand{\inferrule}[2]{$\displaystyle\frac{#1}{#2}$}
+%********************************************************
+%% entailment properties  ........................................
+\newcommand{\Union}{\textit{(Union)} }
+\newcommand{\Monotonicity}{\textit{(Monotonicity)}}
+\newcommand{\Transitivity}{\textit{(Transitivity)}}
+\newcommand{\Translation}{\textit{(Translation)}}
+%% first-order hybrid proof rules  ........................................
+ \newcommand{\Cons}{$\mathit{(Cons)}$}
+ \newcommand{\FalseE}{$\mathit{(False_E)}$}
+ \newcommand{\FalseI}{$\mathit{(False_I)}$} 
+ \newcommand{\NegE}{$\mathit{(Neg_E)}$}
+ \newcommand{\NegI}{$\mathit{(Neg_I)}$}
+ \newcommand{\NegD}{$\mathit{(Neg_D)}$} 
+ \newcommand{\DisjE}{$\mathit{(Disj_E)}$}
+ \newcommand{\DisjI}{$\mathit{(Disj_I)}$} 
+  \newcommand{\ConjE}{$\mathit{(Conj_E)}$}
+ \newcommand{\ConjI}{$\mathit{(Conj_I)}$} 
+ \newcommand{\PosI}{$\mathit{(Pos_I)}$}
+ \newcommand{\PosE}{$\mathit{(Pos_E)}$} 
+ \newcommand{\QuantI}{$\mathit{(Quant_I)}$}
+ \newcommand{\QuantE}{$\mathit{(Quant_E)}$} 
+ \newcommand{\Subst}{$\mathit{(Subst)}$}
+ \newcommand{\StoreI}{$\mathit{(Store_I)}$}
+ \newcommand{\StoreE}{$\mathit{(Store_E)}$}  
+ \newcommand{\RetI}{$\mathit{(Ret_I)}$}
+ \newcommand{\RetE}{$\mathit{(Ret_E)}$}  
+ \newcommand{\RetD}{$\mathit{(Ret_D)}$}
+ \newcommand{\RetH}{$\mathit{(Ret_H)}$}
+ %% HPL  ........................................
+ %\newcommand{\Reflexivity}{\textit{(Reflexivity)}} 
+ %\newcommand{\Congruence}{\textit{(Congruence)}}
+ %\newcommand{\Coherence}{\textit{(Coherence)}}
+%% HFOLS  ........................................
+ \newcommand{\Rnom}{$\mathit{(R^n)}$}
+ \newcommand{\Pnom}{$\mathit{(P^n)}$}
+ \newcommand{\Cnom}{$\mathit{(C^n)}$}
+ \newcommand{\Whyb}{$\mathit{(W^h)}$}
+ \newcommand{\Wrig}{$\mathit{(W^r)}$}
+ \newcommand{\Rhyb}{$\mathit{(R^h)}$}
+ \newcommand{\Shyb}{$\mathit{(S^h)}$}
+ \newcommand{\Thyb}{$\mathit{(T^h)}$}
+ \newcommand{\Fhyb}{$\mathit{(F^h)}$}
+ \newcommand{\Frig}{$\mathit{(F^r)}$}
+ \newcommand{\Ffle}{$\mathit{(F^f)}$}
+ \newcommand{\Phyb}{$\mathit{(P^h)}$}
+ \newcommand{\Rintro}{$\mathit{(R^I)}$}
+ \newcommand{\Relim}{$\mathit{(R^E)}$}
+%%% .................................................... 
+ \newcommand{\Ref}{$\mathit{(Ref)}$}
+ \newcommand{\Sym}{$\mathit{(Sym)}$}
+ \newcommand{\Rew}{$\mathit{(Rew)}$}
+ \newcommand{\Trans}{$\mathit{(Trans)}$}
+%*******************spacing******************************
+\newcommand{\Space}{\hspace{4mm}}
+%******************figure label*************************************
+\newcounter{nr}
+\newcounter{nrf}
+\newcommand{\figlabel}[2]{{\refstepcounter{nrf}\label{#1}\textsf{\small Fig. \arabic{nrf}. #2}}}
+
+ \newcommand{\myfigure}[3]{
+  \setcounter{nrf}{\value{figure}}
+  \medskip
+  \begin{minipage}{\textwidth}
+   \begin{center}
+    
+    #3
+    
+    \smallskip
+    
+    \figlabel{#1}{#2}
+    
+    \medskip
+    
+  \end{center} 
+ \end{minipage} 
+ \setcounter{figure}{\value{nrf}}
+ }
+
+\newcounter{nrt}
+\newcommand{\tablabel}[2]{{\refstepcounter{nrt}\label{#1}\textsf{\small Table \arabic{nrt}. #2}}}
+
+\newcommand{\mytable}[3]{
+  \setcounter{nrt}{\value{table}}
+  \medskip
+  \begin{minipage}{\textwidth}
+   
+   \begin{center}
+    
+    #3
+    
+    \smallskip
+    
+    \tablabel{#1}{#2}
+    
+    \medskip
+    
+  \end{center} 
+  
+ \end{minipage} 
+ \setcounter{table}{\value{nrt}}
+ }
+
+%**************proof environments************************
+
+\usepackage{calc}
+
+\usepackage{longtable}
+
+\newcommand{\tabStretch}[1]{\renewcommand{\arraystretch}{#1}}
+\newcommand{\tabColSep}[1]{\setlength{\tabcolsep}{#1}}
+\usepackage{array,etoolbox}
+
+%% BEGIN ProofSteps  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\makeatletter
+
+\newlength{\PS@lastparam}
+\newlength{\PSlastparam}
+\newcommand{\PSlp}{%
+  \setlength{\PSlastparam}{\PS@lastparam}%
+  \the\PSlastparam
+}
+\def\PS@sub@lastparam{}
+
+\newcommand{\PS@numwidth}{99}
+\newcommand{\PSnumwidth}[1]{%
+  \renewcommand{\PS@numwidth}{#1}%
+}
+
+\newcommand{\PS@style}{\small}
+\newcommand{\PS@numstyle}{\footnotesize}
+
+\newlength{\PSindent}
+\setlength{\PSindent}{0pt}
+\newlength{\PS@extraindent}
+\setlength{\PS@extraindent}{0pt}
+\newlength{\PSpre}
+\setlength{\PSpre}{\smallskipamount}
+\newlength{\PSpost}
+\setlength{\PSpost}{\smallskipamount}
+
+\newlength{\PS@Nwidth}
+\newlength{\PS@Swidth}
+\newlength{\PS@Ewidth}
+\newlength{\PScolsep}
+\setlength{\PScolsep}{1.5em}
+
+\newcommand{\PS@rownumber}{%
+  \ifPS@subsubsteps
+  \thePSsubstepc.%
+  \the\numexpr\value{PSsubsubstepc}+1\relax
+  \else
+  \ifPS@substeps
+  \thePSstepc.%
+  \the\numexpr\value{PSsubstepc}+1\relax
+  \else
+  \the\numexpr\value{PSstepc}+1\relax
+  \fi\fi
+}
+\newcommand{\PS@step}{%
+  \ifPS@subsubsteps
+  \refstepcounter{PSsubsubstepc}%
+  \else
+  \ifPS@substeps
+  \refstepcounter{PSsubstepc}%
+  \else
+  \refstepcounter{PSstepc}
+  \fi\fi%
+}
+
+\newif\ifPS@inprogress
+\newif\ifPS@substeps
+\newif\ifPS@subsubsteps
+\newif\ifPS@continued
+\newif\ifPS@subcontinued
+\newcounter{PSc}
+\newcounter{PSstepc}[PSc]
+\newcounter{PSsubstepc}[PSstepc]
+\renewcommand{\thePSsubstepc}{\thePSstepc.\arabic{PSsubstepc}}
+\newcounter{PSsubsubstepc}[PSsubstepc]
+\renewcommand{\thePSsubsubstepc}{\thePSsubstepc.\arabic{PSsubsubstepc}}
+
+\newenvironment{proofsteps}[1]{%
+  \global\settowidth{\PS@lastparam}{\PS@style\hspace*{#1}}
+  \ifPS@continued\else\refstepcounter{PSc}\fi
+  \begingroup
+  \setlength{\LTpre}{\PSpre}%
+  \setlength{\LTpost}{\PSpost}%
+  \renewcommand{\arraystretch}{1.2}
+  \setlength{\tabcolsep}{0pt}
+  \noindent\PS@style
+  \settowidth{\PS@Nwidth}{\PS@numstyle\PS@numwidth}%
+  \setlength{\PS@Swidth}{#1}%
+  \addtolength{\PS@Swidth}{-\PS@extraindent}%
+  \setlength{\PS@Ewidth}{\linewidth}%
+  \addtolength{\PS@Ewidth}{-\PSindent}%
+  \addtolength{\PS@Ewidth}{-\PS@extraindent}%
+  \addtolength{\PS@Ewidth}{-\PS@Nwidth}%
+  \addtolength{\PS@Ewidth}{-\PScolsep}%
+  \addtolength{\PS@Ewidth}{-\PS@Swidth}%
+  \addtolength{\PS@Ewidth}{-\PScolsep}%
+  \PS@inprogresstrue
+  \longtable{%
+    @{\hspace*{\PSindent}\hspace*{\PS@extraindent}\makebox[\PS@Nwidth][r]{\PS@rownumber}}%
+    @{\hskip\PScolsep}>{\PS@step}p{\PS@Swidth}%
+    @{\hskip\PScolsep}>{\footnotesize\raggedright\arraybackslash}p{\PS@Ewidth}%
+  }%
+}{%
+  \ifPS@inprogress
+  \addtocounter{table}{-1}%
+  \endlongtable  
+  \endgroup
+  \PS@continuedfalse
+  \PS@inprogressfalse
+  \else\fi
+}
+
+\newcommand{\PSbreak}[1]{%
+  \endproofsteps
+  \par\medskip
+  #1
+  \medskip\par
+  \PS@continuedtrue
+  \proofsteps{\PS@lastparam}%
+}
+
+\newif\ifPS@sub@inprogress
+\newenvironment{substeps}[1]{%
+  \global\def\PS@sub@lastparam{#1}%
+  \endproofsteps
+  \settowidth{\PS@extraindent}{\PS@numstyle\PS@numwidth}%
+  \addtolength{\PS@extraindent}{\PScolsep}%
+  \addtolength{\PS@extraindent}{\widthof{\PS@numstyle.#1}}%
+  \PS@substepstrue
+  \PS@continuedtrue
+  \PS@sub@inprogresstrue
+  \proofsteps{\PS@lastparam}%
+}{%
+  \ifPS@sub@inprogress
+    \endproofsteps
+    \ifPS@laststep
+      \PS@laststepfalse
+      \PS@inprogressfalse
+    \else
+      \setlength{\PS@extraindent}{0pt}%
+      \PS@substepsfalse
+      \PS@continuedtrue
+      \proofsteps{\PS@lastparam}%
+    \fi
+    \PS@sub@inprogressfalse
+  \else
+    \ifPS@laststep
+      \PS@laststepfalse
+      \PS@inprogressfalse
+    \else
+      \setlength{\PS@extraindent}{0pt}%
+      \PS@substepsfalse
+      \PS@continuedtrue
+      \proofsteps{\PS@lastparam}%
+    \fi
+  \fi
+}
+
+\newif\ifPS@laststep
+\newcommand{\laststep}{\global\PS@laststeptrue}
+\newif\ifPS@lastsubstep
+\newcommand{\lastsubstep}{\global\PS@lastsubsteptrue}
+
+\newenvironment{subsubsteps}[1]{%
+  \endproofsteps
+  \addtolength{\PS@extraindent}{\widthof{\PS@numstyle\PS@numwidth}}%
+  \addtolength{\PS@extraindent}{\PScolsep}%
+  \addtolength{\PS@extraindent}{\widthof{\PS@numstyle.\PS@sub@lastparam}}%
+  \addtolength{\PS@extraindent}{\widthof{\PS@numstyle.#1}}%
+  \PS@subsubstepstrue
+  \PS@continuedtrue
+  \proofsteps{\PS@lastparam}%
+}{
+  \endproofsteps
+  \ifPS@lastsubstep
+    \PS@lastsubstepfalse
+    \PS@sub@inprogressfalse
+    \PS@subsubstepsfalse
+  \else
+    \settowidth{\PS@extraindent}{\PS@numstyle\PS@numwidth}%
+    \addtolength{\PS@extraindent}{\PScolsep}%
+    \addtolength{\PS@extraindent}{\widthof{\PS@numstyle.\PS@sub@lastparam}}%
+    \PS@subsubstepsfalse
+    \PS@continuedtrue
+    \proofsteps{\PS@lastparam}%
+  \fi
+}
+
+\newcommand{\adjustcol}[1]{%
+  \global\advance\@colroom-#1%
+}
+
+\makeatother
+%% END ProofSteps  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% *******************************************************************
+\newcommand{\psqed}{%
+  \vspace{-\baselineskip}\vspace{-1\smallskipamount}
+}
+
+\newcommand*{\pcformat}[1]{%
+  [\;{\normalfont\itshape #1}\;]%
+}
+
+\newenvironment{proofcases}[1][]{%
+  \description[font=\pcformat, leftmargin=\parindent, #1]%
+}{\enddescription}
+\newcommand{\proofcase}[1]{%
+\item[\textnormal{\textsf{[#1]}}]%
+}
+%**************Theorem environments********************************* 
+\newtheorem{framework}{Framework}[section]
+\newtheorem{assumption}{Assumption}
+\newtheorem{notation}{Notation}
+\newtheorem{remark}{Remark}[section]
+\newtheorem{fact}{Fact}[section]
+\newtheorem{example}{Example}
+\newtheorem{lemma}{Lemma}
+%**************Theorem environments********************************* 
+% ***************************************************************
+
+\newcommand{\minisec}[1]{%
+  \par\addvspace{\smallskipamount}\noindent%
+  \textit{#1}.\enspace%
+}
+%*******************************************************
+\begin{document}
+
+\section{Plastic buffer} \label{section:case:study}
+
+In this section, we describe briefly 
+\begin{enumerate*}
+\item  \emph{the specification method}, and 
+\item \emph{the verification technique} 
+\end{enumerate*}
+we intend to build on top of the foundation developed in the present contribution. 
+
+
+\subsection{Specification method}
+
+We envision a specification methodology where the rigid data types are built outside the hybrid specification.
+For example, a hybrid specification in $\HFOLR$ has a signature $(\Nom,\Lambda,\Sigma^\rigid\subseteq\Sigma)$, where $\Sigma^\rigid=(S^\rigid,F^\rigid,P^\rigid)$ and $\Sigma=(S,F,P)$.
+Practitioners will start by specifying the rigid data types, i.e. a first-order specification with the signature $\Sigma^\rigid$. 
+This is followed by the definition of 
+\begin{enumerate*}[label=(\alph*)]
+\item nominals, 
+\item accessibility relations between states, and 
+\item flexible data types,
+\end{enumerate*} 
+ in such a way that  no `junk' and no `confusion' are added to the rigid data types, i.e. the $\Sigma^\rigid$-models previously defined are preserved.
+ For the sake of simplicity, in practice, a variable is identified only by its name; by a slight abuse of notation, for each inclusion $\chi\colon\Delta\hookrightarrow\Delta'$ and any $\Delta$-sentence $\gamma$, we let $\gamma$ denote $\chi(\gamma)$.
+ 
+ In this paper, only basic specifications $\SP$ are considered, that is $\SP=(\Sig(\SP),\Sen(\SP))$, where $\Sig(\SP)$ is a signature and $\Sen(\SP)$ is a set of sentences over $\Sig(\SP)$.
+
+\begin{example} \label{ex:list}
+We define the following specification of lists in $\FOL$:
+
+\begin{itemize}
+\item [] 
+ 
+ spec $\LIST$
+ 
+ sorts $\Elt\ \List $ 
+ 
+ op $\err\colon \to \Elt$ 
+ 
+ op $\Empty \colon \to \List$ 
+ 
+ op  $\_\comp\_ \colon \List \Elt \to \List$ 
+ 
+ vars $\Lis\ \Q :\List$ 
+ 
+ var $\F : \Elt$ 
+   
+ eq-1 $\Forall{\Lis}\Lis \comp \err = \Lis$
+ 
+ eq-2 $\Forall{\Lis} \Lis = \Empty \vee \Exists{\Q, \F } \Lis = \Q \comp \F$
+
+\end{itemize}
+
+\psqed\qed\end{example}
+ 
+ The constant $\err$ can be regarded as an error element which can be used to describe partial functions on lists. 
+ According to the first sentence, $\err$ should not be regarded as an element of any list.
+ By the second sentence, a list is either empty or it is obtained from another list by adding one element.
+ The specification $\LIST$ provides the rigid data types for the hybrid specification presented next.
+ 
+
+\begin{example} \label{ex:buffer}
+The hybrid specification $\BUFFER$ defined below consists of a buffer with two distinct operation modes:
+\begin{enumerate*}[label=(\alph*)]
+\item `lifo', where it behaves as a stack, and
+\item `fifo', where it behaves as a queue.
+\end{enumerate*}
+The alternation of configurations is triggered by an event `shift'.
+
+ \begin{itemize}
+ \item[]
+ 
+ spec $\BUFFER[\LIST]$
+ 
+ nominals $\lifo\ \fifo$
+ 
+ modality $\shift:2$
+ 
+ op $\Read : \List \to \Elt$
+ 
+ op $\del : \List \to \List$ 
+ 
+ vars $\Ele\ \F: \Elt$
+ 
+ var $\Lis:\List$
+ 
+ rel-1 $\at{\fifo}\underline{\shift}(\lifo)$
+   
+ rel-2 $\at{\lifo}\underline{\shift}(\fifo)$ 
+   
+ eq-3 $\Read(\Empty) = \err$
+   
+ eq-4 $\Forall{ \Lis,\Ele} (@_\lifo\Read)(\Lis \comp \Ele) =  \Ele$
+   
+ eq-5 $\Forall{\Ele}(@_\fifo\Read)(\Empty \comp \Ele) =  \Ele$
+   
+ eq-6 $\Forall{\Lis,\Ele,\F}(@_\fifo\Read)(\Lis \comp \Ele \comp \F) =  (@_\fifo\Read)(\Lis \comp \Ele)$
+   
+ eq-7 $\del(\Empty) = \Empty$
+   
+ eq-8 $\Forall{\Lis,\Ele}(@_\lifo\del)(\Lis \comp \Ele) =  \Lis$
+   
+ eq-9 $\Forall{\Ele}(@_\fifo\del)(\Empty \comp \Ele) =  \Empty$
+   
+ eq-10 $\Forall{\Lis,\Ele,\F} (@_\fifo\del)(\Lis \comp \Ele \comp \F) =  (@_\fifo\del)(\Lis \comp \Ele) \comp \F$
+ \end{itemize}
+\psqed\qed\end{example}
+  
+ The $\REL$ component of the hybrid signature consists of two nominals $\fifo$ and $\lifo$ and one binary modality $\shift$. 
+ The signature of rigid symbols is the signature of $\LIST$.
+ There are two flexible operation symbols, $\del$ and $\Read$.
+  
+ The system has two operation modes, $\lifo$, when it behaves like a stack, and $\fifo$, when it behaves like a queue. 
+ The binary modality $\shift$ makes the transition between $\lifo$ and $\fifo$ modes according to the nominal relations $\at{\fifo}\underline{\shift}(\lifo)$ and $\at{\lifo}\underline{\shift}(\fifo)$.
+ The function symbol $\Read$ denotes the operation which returns the top/front of a stack/queue, and $\del$ denotes the operation `pop'. 
+ Notice that $\Read$ and $\del$ play different roles in each operation mode.
+ 
+ The models of $\BUFFER$ consists of all Kripke structures $(W,M)$ over the signature of $\BUFFER$ which 
+ \begin{enumerate*}[label=(\alph*)]
+  \item have a rigid $\LIST$ structure, that is $M_\lifo\red_{\Sig(\LIST)}=M_\fifo\red_{\Sig(\LIST)}$ is a model of $\LIST$, and 
+  
+  \item satisfy the axioms defined in Example~\ref{ex:buffer}.
+\end{enumerate*}
+ This construction is particularly useful for structured specifications which are obtained from basic specifications by applying specification building operators such as union, translation, hiding or freeness.
+ As for Example~\ref{ex:buffer}, notice that any Kripke structure over $\Sig(\BUFFER)$ which satisfies $\Sen(\BUFFER)$ (i.e. all sentences defined in Example~\ref{ex:list} and Example~\ref{ex:buffer}) is a model of $\BUFFER$.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Formal verification}
+
+ This section is dedicated to proving that  $\BUFFER$ satisfies the following property:
+ $$ \Forall{\Lis}(@_\lifo\del)((@_\fifo\del)(\Lis))=(@_\fifo\del)((@_\lifo\del)(\Lis))$$
+ This means that the order of deleting the front and the top element from a list is irrelevant w.r.t. the final result.
+ In order to implement efficient proof strategies, one often needs to derive new proof rules from the original ones.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\mytable{tab:derived-rules}{Derived proof rules for $\HFOLR$}{
+\small
+\begin{tabular}{|l l|} 
+\hline
+ & \\ 
+ \Ref~\inferrule{}{\Gamma\vdash \Forall{X}t = t} &
+ \Sym~\inferrule{\Gamma\vdash \Forall{X}t_1=t_2}{\Gamma\vdash \Forall{X}t_2 = t_1 } \\
+ 
+  & \\
+  
+  \Trans~\inferrule{\Gamma\vdash \Forall{X} t_1 = t_2 \Space \Gamma\vdash\Forall{X} t_2 = t_3}{\Gamma\vdash \Forall{X}t_1=t_3} &
+  \Rew~\inferrule{\Gamma\vdash \Forall{X}t_1 = t_2} {\Gamma\vdash \Forall{Y} t[\theta(t_1)_p] = t[\theta(t_2)]_p} 
+ [ \ $\theta\colon X\to T_{@\Sigma}(Y)$ \ ] \\
+ & \\ 
+\hline
+\end{tabular}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+
+  Since the present contribution is not dedicated to the presentation of a formal method, minimally, we define a system of proof rules in Table~\ref{tab:derived-rules}, which allows one to avoid complex formal proofs for obvious  properties.
+  Notice that $e[t_1\leftarrow t_2]$ is the sentence obtained from $e$ by substituting $t_2$ for $t_1$, while  $t|_p$ is the subterm of $t$ at position $p$ and $t[\theta(t_i)]_p$ is the term obtained from $t$ by substituting $\theta(t_i)$ for $t|_p$ at position $p$. 
+
+ For the sake of simplicity, we denote 
+ by $\Delta$ the signature $\Sig(\BUFFER)$,
+ by $\Gamma$ the set of sentences $\Sen(\BUFFER)$, and
+ by $\mathtt{\PR(\Lis)}$ the formula $(@_\lifo\del)((@_\fifo\del)(\Lis))=(@_\fifo\del)((@_\lifo\del)(\Lis))$.
+
+\begin{lemma} 
+ We assume that the variable $\Lis$ is of sort $\List$, and the variables $\Ele$ and $\F$ are of sort $\Elt$.
+ \label{lemma:buffer} \
+
+\begin{enumerate}
+\item  \label{lemma:buffer-1} $\Gamma\vdash \PR(\Empty)$;
+
+\item  \label{lemma:buffer-2} $\Gamma\vdash \Forall{\Ele}\PR(\Empty\comp\Ele)$;
+
+\item  \label{lemma:buffer-3} $\Gamma\vdash \Forall{\Lis,\Ele,\F}\PR(\Lis \comp \Ele \comp \F)$;
+
+\item \label{lemma:buffer-4} $\Gamma\vdash \Forall{\Lis,\Ele}\PR(\Lis \comp \Ele)$;
+
+\item \label{lemma:buffer-4} $\Gamma\vdash \Forall{\Lis}\PR(\Lis)$. 
+\end{enumerate}
+\end{lemma}
+\begin{proof}
+
+The first two assertions are straightforward to prove.
+We start with the third assertion.
+ \begin{proofsteps}{32em}
+  
+  \label{ps:buffer-3-1}
+  $\Gamma\vdash \Forall{\Lis,\Ele,\F}(@_\lifo\del)((@_\fifo\del)(\Lis\comp\Ele\comp\F))=
+  (@_\lifo\del)((@_\fifo\del)(\Lis\comp\Ele)\comp\F)$  & 
+  by \Rew~ from eq-10\\
+  
+  \label{ps:buffer-3-2}
+  $\Gamma\vdash\Forall{\Lis,\Ele,\F} (@_\lifo\del)((@_\fifo\del)(\Lis\comp\Ele)\comp\F) = 
+  (@_\fifo\del)(\Lis\comp\Ele)$ &
+  by \Rew~from eq-8\\ 
+  
+  \label{ps:buffer-3-3}
+  $\Gamma\vdash\Forall{\Lis,\Ele,\F} (@_\fifo\del)((@_\lifo\del)(\Lis\comp\Ele\comp\F))= 
+  (@_\fifo\del)(\Lis\comp\Ele)$ & 
+  by \Rew~ from eq-8 \\
+  
+  \label{ps:buffer-3-4}
+  $\Gamma\vdash\Forall{\Lis,\Ele,\F} (@_\fifo\del)(\Lis\comp\Ele) =
+  (@_\fifo\del)((@_\lifo\del)(\Lis\comp\Ele\comp\F))$ & 
+  by \Sym~ from  \ref{ps:buffer-3-3}\\
+  
+  $\Gamma\vdash\Forall{\Lis,\Ele,\F}(@_\lifo\del)((@_\fifo\del)(\Lis\comp\Ele\comp\F))=
+  (@_\fifo\del)((@_\lifo\del)(\Lis\comp\Ele\comp\F))$ & 
+  by \Trans~ from \ref{ps:buffer-3-1}, \ref{ps:buffer-3-2} and \ref{ps:buffer-3-4}
+ \end{proofsteps}
+ 
+ We prove the fourth assertion:
+ \begin{proofsteps}{21em}
+   
+  \label{ps:buffer-4-1} $\Gamma\vdash_{\Delta[\Lis,\Ele]} \Lis = \Empty \vee \Exists{\Q,\F}  \Lis=\Q\comp\F$ & 
+  from eq-2, 
+  \newline since eq-2  is a rigid sentence\\
+ 
+  \label{ps:buffer-4-2} $\Gamma\cup \{ \Lis = \Empty\} \vdash_{\Delta[\Lis,\Ele]} \PR[\Lis\comp\Ele]$ & 
+   \substeps{9}
+   $\Gamma\vdash_{\Delta[\Lis,\Ele]} \PR[\Empty\comp\Ele] $  &
+   by \Rew~ from the second assertion \\
+   
+   \label{ps:buffer-22} 
+   $\Gamma\cup \{ \Lis = \Empty\} \vdash_{\Delta[\Lis,\Ele]} \PR[\Empty;\Ele]$ &
+   by \Transitivity~ and \Monotonicity\\ 
+   
+   $\Gamma\cup \{ \Lis = \Empty\} \vdash_{\Delta[\Lis,\Ele]} \PR[\Lis\comp\Ele]$ &
+   by \Rew~ and \Trans~ from \ref{ps:buffer-22}
+   \endsubsteps
+  \label{ps:buffer-4-3} 
+  $\Gamma\cup \{ \Exists{\Q,\F}\Lis = \Q\comp\F \} \vdash_{\Delta[\Lis,\Ele]} \PR[\Lis\comp\Ele]$ & 
+  \substeps{9}
+    \label{ps:buffer-31} 
+    $\Gamma\cup \{ \Lis = \Q\comp\F \} \vdash_{\Delta[\Lis,\Q,\Ele,\F]} \PR[\Q\comp\F\comp\Ele]$ & 
+    by \Rew~ from the third assertion\\
+  
+  \label{ps:buffer-32} 
+  $\Gamma\cup \{ \Lis = \Q\comp\F \} \vdash_{\Delta[\Lis,\Q,\Ele,\F]} \PR[\Lis\comp\Ele]$ & 
+  by \Rew~ and \Trans~ from \ref{ps:buffer-31}\\
+  
+   $\Gamma\cup \{ \Exists{\Q,\F}\Lis = \Q\comp\F \} \vdash_{\Delta[\Lis,\Ele]} \PR[\Lis\comp\Ele]$ & 
+  by \QuantI~ from \ref{ps:buffer-32}
+  \endsubsteps
+ \label{ps:buffer-4-4}
+ $\Gamma\vdash_{\Delta[\Lis,\Ele]} \PR(\Lis\comp\Ele)$  &
+ by \DisjE~ from \ref{ps:buffer-4-1}, \ref{ps:buffer-4-2} and \ref{ps:buffer-4-3}\\
+ 
+ $\Gamma\vdash_\Delta \Forall{\Lis,\Ele}\PR(\Lis\comp\Ele)$ &
+ 
+ from \ref{ps:buffer-4-4},
+ \newline $\Forall{\Lis,\Ele}\PR[\Lis\comp\Ele]$ is a rigid sentence 
+ \end{proofsteps}
+ 
+ The proof of the fifth assertion resembles the proof of the fourth assertion.
+ \end{proof}
+
+
+It is worth noting that the expressivity of the basic layer of $\HFOLR$ allows a simple description of the property to prove $\Forall{\Lis}(@_\lifo\del)((@_\fifo\del)(\Lis))=(@_\fifo\del)((@_\lifo\del)(\Lis))$. 
+ The same property can be expressed in $\HFOLS$ as follows:
+ $\Forall{\Lis}\Exists{x_1,x_2,y_1,y_2}$ 
+ $x_1=y_1 \wedge 
+ \at{\lifo} (x_1 = \del(x_2))) \wedge
+ \at{\fifo} (x_2 = \del(\Lis)) \wedge
+ \at{\fifo} (y_1 = \del(y_2))) \wedge
+ \at{\lifo} (y_2= \del(\Lis))$, 
+ where $x_i$, $y_i$ are variables of sort $\List$.
+It is not difficult to see that the expressivity of $\HFOLR_b$ has deep ramifications in formal verification; for example, the proofs become much simpler.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{document}
