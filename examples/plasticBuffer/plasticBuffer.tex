@@ -730,5 +730,122 @@ It is worth noting that the expressivity of the basic layer of $\HFOLR$ allows a
 It is not difficult to see that the expressivity of $\HFOLR_b$ has deep ramifications in formal verification; for example, the proofs become much simpler.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\appendix
+
+\section{Proof rules}
+
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+\mytable{tab3}{Proof rules for the basic layer}{
+ \small
+ \begin{tabular}{|l l|}
+  \hline
+  
+  & \\
+  
+   \Rnom~\inferrule{}{\Gamma\vdash \at{k} k} \hspace{0.5cm}
+  
+   \Pnom~\inferrule{ \Gamma\vdash \at{k}\underline\lambda(k_1) \Space \Gamma \vdash \at{k_1} k_1'}{\Gamma \vdash \at{k}\underline\lambda(k_1')} & 
+  
+   \Cnom~\inferrule{ \Gamma\vdash \at{k_1} e \Space \Gamma\vdash \at{k_1} k } { \Gamma \vdash \at{k} e } \\
+  
+  & \\
+  
+   \Rhyb~\inferrule{ }{ \Gamma \vdash t = t } \hspace{0.5cm}
+
+   \Shyb~\inferrule{ \Gamma \vdash t_{1} = t_{2}}{\Gamma \vdash t_{2} = t_{1}} &
+
+   \Thyb~\inferrule{\Gamma \vdash t_{1} = t_{2} \Space \Gamma \vdash t_{2} = t_{3}}{\Gamma \vdash t_{1} = t_{3}} \\
+  
+  & \\
+   
+   \Fhyb~\inferrule{\Gamma \vdash t_1 = t_2}{\Gamma \vdash \sigma(t_1) = \sigma(t_2)} [\ $\sigma\in\overline{F}$\ ] & 
+   
+   \Phyb~\inferrule{\Gamma \vdash t_1 = t_2 \Space \Gamma \vdash \pi(t_1)}{\Gamma \vdash \pi(t_2)} [\ $\pi\in\overline{P}$] \\
+   
+  & \\
+   
+   \Whyb~\inferrule{\Gamma \vdash \at{k_1} k \Space \Gamma\vdash \rho}{\Gamma \vdash \varphi_{k\leftarrow k_1}(\rho)} &
+   
+   \Wrig~\inferrule{ \Gamma\vdash \at{k_1} k }{ \Gamma \vdash \varphi_{k\leftarrow k_1}(t) =_s t }~[\ $s\in S^\rigid$\ ] \\
+  
+  & \\
+  
+   \Relim~\inferrule{\Gamma\vdash \at{k}\rho}{\Gamma\vdash\At{k} \rho} &
+   \Rintro~\inferrule{\Gamma\vdash\At{k} \rho}{\Gamma\vdash \at{k}\rho}\\
+   
+  & \\ 
+  
+ \hline
+ \end{tabular}
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{table}[h]
+ \small
+%%%
+ \begin{tabular}{|l l|}
+  
+  \hline
+  
+  & \\
+
+  \Cons~\inferrule{\varphi(\Gamma)\vdash \varphi(e)}{\Gamma\vdash e}~[ \ $\varphi$ is conservative  \ ] &  
+  
+  \Subst~\inferrule{\Gamma\vdash \at{k}\theta( e') }{\Gamma \vdash \at{k}\Exists{\chi}e'}~[ \ $\theta\colon 1_\chi\to 1_\Delta$ \ ] \\
+
+  
+  & \\
+  
+  \NegI~\inferrule{\Gamma\cup\{\at{k} e \}\vdash \bot}{\Gamma\vdash \at{k} \neg e} & 
+  
+  \NegE~\inferrule{\Gamma\vdash \at{k} \neg e}{\Gamma\cup\{\at{k} e\}\vdash \bot} \hfill
+
+  \NegD~\inferrule{\Gamma\vdash \at{k}\neg\neg e }{ \Gamma \vdash \at{k} e} \\ 
+  
+   & \\
+  
+  \FalseI~\inferrule{\Gamma\vdash  \at{k} e \Space \Gamma\vdash \at{k} \neg e }{ \Gamma \vdash\bot} & 
+  
+  \FalseE~\inferrule{ \Gamma\vdash \bot }{\Gamma \vdash E} \\ 
+  
+  & \\
+  
+  \DisjI~\inferrule{ \Gamma\vdash \at{k} e }{ \Gamma \vdash \at{k} \vee E}~[ \ $e\in E$ \ ] & 
+  \DisjE~\inferrule{\Gamma\vdash \at{k} \vee E  \Space \Gamma\cup\{\at{k} e\}\vdash \gamma \mbox{ for all } e\in E }{\Gamma\vdash\gamma}  \\
+  
+  & \\
+  
+  \PosI~\inferrule{\chi_z(\Gamma)\cup\{ \at{k}\underline\lambda(z),\at{z}\chi_z(e)\}\vdash \chi_z(\gamma)} { \Gamma \cup \{ \at{k}\pos{\lambda}e \} \vdash \gamma } & 
+  \PosE~\inferrule { \Gamma \cup \{ \at{k} \pos{\lambda}e \}\vdash \gamma } {\chi_z(\Gamma)\cup\{ \at{k}\underline\lambda(z),\at{z}\chi_z(e)\}\vdash \chi_z(\gamma)} \\ 
+  
+  & \\
+    
+  \QuantI~\inferrule{ \chi(\Gamma)\cup \{ \at{k'} e' \}\vdash \chi(\gamma) } { \Gamma \cup \{ \at{k} \Exists{\chi}e' \}\vdash \gamma }~[ \ $k'=F(\chi)(k)$ \ ] & 
+  
+  \QuantE~\inferrule{\Gamma \cup \{ \at{k} \Exists{\chi}e' \}\vdash \gamma}{ \chi(\Gamma)\cup \{ \at{k'} e' \}\vdash \chi(\gamma) }~[ \ $k'=F(\chi)(k)$ \ ] \\
+  
+  & \\
+  
+ 
+  \StoreI~\inferrule{ \Gamma\vdash \at{k}\varphi_{z\leftarrow k}(e'') }{ \Gamma \vdash \at{k}\store{z}e''} & 
+   
+  \StoreE~\inferrule{ \Gamma\vdash \at{k}\store{z} e''  }{ \Gamma \vdash \at{k} \varphi_{z\leftarrow k}(e'')} \\
+ 
+ & \\
+ 
+  \RetI~\inferrule{\Gamma \vdash e }{\Gamma\vdash \at{k} e} & 
+  
+  \RetE~\inferrule{\chi_z(\Gamma)\vdash @_z \chi_z(e)}{\Gamma\vdash e} \\ 
+   
+   & \\ 
+ \hline
+  
+\end{tabular}
+%%%
+\caption {Proof rules for stratified institutions}
+\label{tab1}
+\end{table}
+
 
 \end{document}
