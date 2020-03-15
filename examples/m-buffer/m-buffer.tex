@@ -1,0 +1,541 @@
+\documentclass{article}
+\usepackage[left=2cm, right=2cm, top=2cm]{geometry}
+ %*******************************************************
+ \usepackage{booktabs} % For formal tables
+%************************ packages *********************************
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage[inline]{enumitem}
+\usepackage[latin1]{inputenc}
+\usepackage{xy}
+\xyoption{all}
+\usepackage{tikz}
+\usepackage{xcolor}
+
+\usepackage[skip=0pt]{caption}
+
+%\usepackage{mathabx}
+
+%************************ shortcuts ********************************
+\newcommand{\PL}{{\mathsf{PL}}}
+\newcommand{\HPL}{{\mathsf{HPL}}}
+\newcommand{\HPLQ}{{\mathsf{HPLQ}}}
+
+\newcommand{\FOL}{{\mathsf{FOL}}}
+\newcommand{\HCL}{{\mathsf{HCL}}}
+\newcommand{\REL}{{\mathsf{REL}}}
+\newcommand{\HFOL}{{\mathsf{HFOL}}}
+\newcommand{\HREL}{{\mathsf{HREL}}}
+
+
+\newcommand{\HFOLS}{{\mathsf{HFOLS}}}
+\newcommand{\HFOLR}{{\mathsf{HFOLR}}}
+\newcommand{\HDFOL}{{\mathsf{HDFOL}}}
+
+\newcommand{\POA}{{\mathsf{POA}}}
+\newcommand{\POAR}{{\mathsf{POAR}}}
+\newcommand{\HPOA}{{\mathsf{HPOA}}}
+\newcommand{\HPOAS}{{\mathsf{HPOAS}}}
+\newcommand{\HPOAR}{{\mathsf{HPOAR}}}
+
+\newcommand{\Sig}{\mathsf{Sig}}
+\newcommand{\Mod}{\mathsf{Mod}}
+\newcommand{\Sen}{\mathsf{Sen}}
+
+\newcommand{\SSb}{\mathsf{SSb}}
+\newcommand{\SSt}{\mathsf{SSt}}
+\newcommand{\Sb}{\mathsf{Sb}}
+\newcommand{\St}{\mathsf{St}}
+\newcommand{\Nom}{\mathsf{Nom}}
+\newcommand{\Prop}{\mathsf{Prop}}
+%*******************************************************
+\newcommand{\Cat}{\mathbb{C}\mathsf{at}}
+\newcommand{\Class}{\mathbb{C}\mathsf{lass}}
+\newcommand{\Set}{\mathbb{S}\mathsf{et}}
+%*******************************************************
+\newcommand{\I}{\mathtt{I}}
+\newcommand{\SI}{\mathtt{SI}}
+%*******************************************************
+\newcommand{\N}{{\mathbb{N}}}
+\newcommand{\E}{\mathcal{E}}
+\renewcommand{\P}{\mathcal{P}}
+\newcommand{\V}{\mathcal{V}}
+\newcommand{\X}{\mathsf{X}}
+\newcommand{\Y}{\mathsf{Y}}
+\newcommand{\Z}{\mathsf{Z}}
+\newcommand{\Lis}{\mathsf{L}}
+\newcommand{\C}{\mathsf{C}}
+\newcommand{\Q}{\mathsf{Q}}
+\newcommand{\D}{\mathsf{D}}
+\newcommand{\F}{\mathsf{F}}
+\newcommand{\K}{\mathsf{K}}
+\newcommand{\A}{\mathcal{A}}
+\newcommand{\B}{\mathsf{B}}
+%*******************************************************
+\newcommand{\Sub}{{\mathsf{Sub}}}
+\newcommand{\ari}{{\mathsf{ar}}}
+\newcommand{\nom}{{\mathsf{n}}}
+\newcommand{\card}{{\mathsf{card}}}
+\newcommand{\rigid}{{\mathtt{r}}}
+\newcommand{\flexible}{{\mathtt{f}}}
+\newcommand{\ext}{{\mathtt{e}}}
+%*******************************************************
+\newcommand{\LIST}{{\mathsf{LIST}}}
+\newcommand{\ELT}{{\mathsf{ELT}}}
+\newcommand{\BOOL}{{\mathsf{BOOL}}}
+\newcommand{\List}{{\mathsf{List}}}
+\newcommand{\Elt}{{\mathsf{Elt}}}
+\newcommand{\TRIV}{{\mathsf{TRIV}}}
+\newcommand{\BUFFER}{{\mathsf{BUFFER}}}
+\newcommand{\SP}{{\mathsf{SP}}}
+
+\newcommand{\False}{{\mathtt{false}}}
+\newcommand{\True}{{\mathtt{true}}}
+\newcommand{\If}{{\mathtt{if}}}
+\newcommand{\In}{{\mathtt{in}}}
+\newcommand{\err}{{\mathtt{err}}}
+\newcommand{\Empty}{{\mathtt{empty}}}
+\newcommand{\fifo}{{\mathtt{fifo}}}
+\newcommand{\lifo}{{\mathtt{lifo}}}
+\newcommand{\Read}{{\mathtt{read}}}
+\newcommand{\init}{{\mathtt{init}}}
+\newcommand{\Next}{{\mathtt{next}}}
+\newcommand{\del}{{\mathtt{del}}}
+\newcommand{\shift}{{\mathtt{shift}}}
+\newcommand{\lis}{{\mathtt{l}}}
+\newcommand{\buf}{{\mathtt{b}}}
+\newcommand{\ele}{{\mathtt{e}}}
+\newcommand{\Ele}{{\mathsf{E}}}
+\newcommand{\PR}{{\mathsf{PR}}}
+\newcommand{\x}{{\mathfrak{x}}}
+%*******************************************************
+\usepackage{scalerel}
+
+\newcommand{\bbsemicolon}{%
+  \scalerel*{%
+    \hbox{\usefont{U}{bbold}{m}{n} ;}%
+  }{;}%
+}
+
+\newcommand{\comp}{\mathbin{\bbsemicolon}}
+%*******************************************************
+\newcommand{\modelsm}{\mathrel{\models\!\!\!|}}
+\newcommand{\vdashv}{\mathrel{\vdash\!\!\dashv}}
+\newcommand{\red}{\!\upharpoonright\!\!}
+\newcommand{\ul}{\!\!\_}
+\newcommand{\ur}{\_\!\!}
+%*********sentence building operators********************
+\newcommand{\At}[1]{\mathsf{at}_{#1}\, }
+\newcommand{\at}[1]{@_{#1}\,}
+\newcommand{\nec}[1]{[#1]}
+\newcommand{\store}[1]{{\downarrow}#1\,{\cdot}\,}
+\newcommand{\Forall}[1]{\forall #1\,{\cdot}\,}
+\newcommand{\Exists}[1]{\exists #1\,{\cdot}\,}
+\newcommand{\pos}[1]{{\langle}#1{\rangle}}
+%*******************proof rules**************************
+\newcommand{\inferrule}[2]{$\displaystyle\frac{#1}{#2}$}
+%********************************************************
+%% entailment properties  ........................................
+\newcommand{\Union}{\textit{(Union)} }
+\newcommand{\Monotonicity}{\textit{(Monotonicity)}}
+\newcommand{\Transitivity}{\textit{(Transitivity)}}
+\newcommand{\Translation}{\textit{(Translation)}}
+%% first-order hybrid proof rules  ........................................
+ \newcommand{\Cons}{$\mathit{(Cons)}$}
+ \newcommand{\FalseE}{$\mathit{(False_E)}$}
+ \newcommand{\FalseI}{$\mathit{(False_I)}$} 
+ \newcommand{\NegE}{$\mathit{(Neg_E)}$}
+ \newcommand{\NegI}{$\mathit{(Neg_I)}$}
+ \newcommand{\NegD}{$\mathit{(Neg_D)}$} 
+ \newcommand{\DisjE}{$\mathit{(Disj_E)}$}
+ \newcommand{\DisjI}{$\mathit{(Disj_I)}$} 
+  \newcommand{\ConjE}{$\mathit{(Conj_E)}$}
+ \newcommand{\ConjI}{$\mathit{(Conj_I)}$} 
+ \newcommand{\PosI}{$\mathit{(Pos_I)}$}
+ \newcommand{\PosE}{$\mathit{(Pos_E)}$} 
+ \newcommand{\QuantI}{$\mathit{(Quant_I)}$}
+ \newcommand{\QuantE}{$\mathit{(Quant_E)}$} 
+ \newcommand{\Subst}{$\mathit{(Subst)}$}
+ \newcommand{\StoreI}{$\mathit{(Store_I)}$}
+ \newcommand{\StoreE}{$\mathit{(Store_E)}$}  
+ \newcommand{\RetI}{$\mathit{(Ret_I)}$}
+ \newcommand{\RetE}{$\mathit{(Ret_E)}$}  
+ \newcommand{\RetD}{$\mathit{(Ret_D)}$}
+ \newcommand{\RetH}{$\mathit{(Ret_H)}$}
+ %% HPL  ........................................
+ %\newcommand{\Reflexivity}{\textit{(Reflexivity)}} 
+ %\newcommand{\Congruence}{\textit{(Congruence)}}
+ %\newcommand{\Coherence}{\textit{(Coherence)}}
+%% HFOLS  ........................................
+ \newcommand{\Rnom}{$\mathit{(R^n)}$}
+ \newcommand{\Pnom}{$\mathit{(P^n)}$}
+ \newcommand{\Cnom}{$\mathit{(C^n)}$}
+ \newcommand{\Whyb}{$\mathit{(W^h)}$}
+ \newcommand{\Wrig}{$\mathit{(W^r)}$}
+ \newcommand{\Rhyb}{$\mathit{(R^h)}$}
+ \newcommand{\Shyb}{$\mathit{(S^h)}$}
+ \newcommand{\Thyb}{$\mathit{(T^h)}$}
+ \newcommand{\Fhyb}{$\mathit{(F^h)}$}
+ \newcommand{\Frig}{$\mathit{(F^r)}$}
+ \newcommand{\Ffle}{$\mathit{(F^f)}$}
+ \newcommand{\Phyb}{$\mathit{(P^h)}$}
+ \newcommand{\Rintro}{$\mathit{(R^I)}$}
+ \newcommand{\Relim}{$\mathit{(R^E)}$}
+%%% .................................................... 
+ \newcommand{\Ref}{$\mathit{(Ref)}$}
+ \newcommand{\Sym}{$\mathit{(Sym)}$}
+ \newcommand{\Rew}{$\mathit{(Rew)}$}
+ \newcommand{\Trans}{$\mathit{(Trans)}$}
+%*******************spacing******************************
+\newcommand{\Space}{\hspace{4mm}}
+%******************figure label*************************************
+\newcounter{nr}
+\newcounter{nrf}
+\newcommand{\figlabel}[2]{{\refstepcounter{nrf}\label{#1}\textsf{\small Fig. \arabic{nrf}. #2}}}
+
+ \newcommand{\myfigure}[3]{
+  \setcounter{nrf}{\value{figure}}
+  \medskip
+  \begin{minipage}{\textwidth}
+   \begin{center}
+    
+    #3
+    
+    \smallskip
+    
+    \figlabel{#1}{#2}
+    
+    \medskip
+    
+  \end{center} 
+ \end{minipage} 
+ \setcounter{figure}{\value{nrf}}
+ }
+
+\newcounter{nrt}
+\newcommand{\tablabel}[2]{{\refstepcounter{nrt}\label{#1}\textsf{\small Table \arabic{nrt}. #2}}}
+
+\newcommand{\mytable}[3]{
+  \setcounter{nrt}{\value{table}}
+  \medskip
+  \begin{minipage}{\textwidth}
+   
+   \begin{center}
+    
+    #3
+    
+    \smallskip
+    
+    \tablabel{#1}{#2}
+    
+    \medskip
+    
+  \end{center} 
+  
+ \end{minipage} 
+ \setcounter{table}{\value{nrt}}
+ }
+
+%**************proof environments************************
+
+\usepackage{calc}
+
+\usepackage{longtable}
+
+\newcommand{\tabStretch}[1]{\renewcommand{\arraystretch}{#1}}
+\newcommand{\tabColSep}[1]{\setlength{\tabcolsep}{#1}}
+\usepackage{array,etoolbox}
+
+%% BEGIN ProofSteps  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\makeatletter
+
+\newlength{\PS@lastparam}
+\newlength{\PSlastparam}
+\newcommand{\PSlp}{%
+  \setlength{\PSlastparam}{\PS@lastparam}%
+  \the\PSlastparam
+}
+\def\PS@sub@lastparam{}
+
+\newcommand{\PS@numwidth}{99}
+\newcommand{\PSnumwidth}[1]{%
+  \renewcommand{\PS@numwidth}{#1}%
+}
+
+\newcommand{\PS@style}{\small}
+\newcommand{\PS@numstyle}{\footnotesize}
+
+\newlength{\PSindent}
+\setlength{\PSindent}{0pt}
+\newlength{\PS@extraindent}
+\setlength{\PS@extraindent}{0pt}
+\newlength{\PSpre}
+\setlength{\PSpre}{\smallskipamount}
+\newlength{\PSpost}
+\setlength{\PSpost}{\smallskipamount}
+
+\newlength{\PS@Nwidth}
+\newlength{\PS@Swidth}
+\newlength{\PS@Ewidth}
+\newlength{\PScolsep}
+\setlength{\PScolsep}{1.5em}
+
+\newcommand{\PS@rownumber}{%
+  \ifPS@subsubsteps
+  \thePSsubstepc.%
+  \the\numexpr\value{PSsubsubstepc}+1\relax
+  \else
+  \ifPS@substeps
+  \thePSstepc.%
+  \the\numexpr\value{PSsubstepc}+1\relax
+  \else
+  \the\numexpr\value{PSstepc}+1\relax
+  \fi\fi
+}
+\newcommand{\PS@step}{%
+  \ifPS@subsubsteps
+  \refstepcounter{PSsubsubstepc}%
+  \else
+  \ifPS@substeps
+  \refstepcounter{PSsubstepc}%
+  \else
+  \refstepcounter{PSstepc}
+  \fi\fi%
+}
+
+\newif\ifPS@inprogress
+\newif\ifPS@substeps
+\newif\ifPS@subsubsteps
+\newif\ifPS@continued
+\newif\ifPS@subcontinued
+\newcounter{PSc}
+\newcounter{PSstepc}[PSc]
+\newcounter{PSsubstepc}[PSstepc]
+\renewcommand{\thePSsubstepc}{\thePSstepc.\arabic{PSsubstepc}}
+\newcounter{PSsubsubstepc}[PSsubstepc]
+\renewcommand{\thePSsubsubstepc}{\thePSsubstepc.\arabic{PSsubsubstepc}}
+
+\newenvironment{proofsteps}[1]{%
+  \global\settowidth{\PS@lastparam}{\PS@style\hspace*{#1}}
+  \ifPS@continued\else\refstepcounter{PSc}\fi
+  \begingroup
+  \setlength{\LTpre}{\PSpre}%
+  \setlength{\LTpost}{\PSpost}%
+  \renewcommand{\arraystretch}{1.2}
+  \setlength{\tabcolsep}{0pt}
+  \noindent\PS@style
+  \settowidth{\PS@Nwidth}{\PS@numstyle\PS@numwidth}%
+  \setlength{\PS@Swidth}{#1}%
+  \addtolength{\PS@Swidth}{-\PS@extraindent}%
+  \setlength{\PS@Ewidth}{\linewidth}%
+  \addtolength{\PS@Ewidth}{-\PSindent}%
+  \addtolength{\PS@Ewidth}{-\PS@extraindent}%
+  \addtolength{\PS@Ewidth}{-\PS@Nwidth}%
+  \addtolength{\PS@Ewidth}{-\PScolsep}%
+  \addtolength{\PS@Ewidth}{-\PS@Swidth}%
+  \addtolength{\PS@Ewidth}{-\PScolsep}%
+  \PS@inprogresstrue
+  \longtable{%
+    @{\hspace*{\PSindent}\hspace*{\PS@extraindent}\makebox[\PS@Nwidth][r]{\PS@rownumber}}%
+    @{\hskip\PScolsep}>{\PS@step}p{\PS@Swidth}%
+    @{\hskip\PScolsep}>{\footnotesize\raggedright\arraybackslash}p{\PS@Ewidth}%
+  }%
+}{%
+  \ifPS@inprogress
+  \addtocounter{table}{-1}%
+  \endlongtable  
+  \endgroup
+  \PS@continuedfalse
+  \PS@inprogressfalse
+  \else\fi
+}
+
+\newcommand{\PSbreak}[1]{%
+  \endproofsteps
+  \par\medskip
+  #1
+  \medskip\par
+  \PS@continuedtrue
+  \proofsteps{\PS@lastparam}%
+}
+
+\newif\ifPS@sub@inprogress
+\newenvironment{substeps}[1]{%
+  \global\def\PS@sub@lastparam{#1}%
+  \endproofsteps
+  \settowidth{\PS@extraindent}{\PS@numstyle\PS@numwidth}%
+  \addtolength{\PS@extraindent}{\PScolsep}%
+  \addtolength{\PS@extraindent}{\widthof{\PS@numstyle.#1}}%
+  \PS@substepstrue
+  \PS@continuedtrue
+  \PS@sub@inprogresstrue
+  \proofsteps{\PS@lastparam}%
+}{%
+  \ifPS@sub@inprogress
+    \endproofsteps
+    \ifPS@laststep
+      \PS@laststepfalse
+      \PS@inprogressfalse
+    \else
+      \setlength{\PS@extraindent}{0pt}%
+      \PS@substepsfalse
+      \PS@continuedtrue
+      \proofsteps{\PS@lastparam}%
+    \fi
+    \PS@sub@inprogressfalse
+  \else
+    \ifPS@laststep
+      \PS@laststepfalse
+      \PS@inprogressfalse
+    \else
+      \setlength{\PS@extraindent}{0pt}%
+      \PS@substepsfalse
+      \PS@continuedtrue
+      \proofsteps{\PS@lastparam}%
+    \fi
+  \fi
+}
+
+\newif\ifPS@laststep
+\newcommand{\laststep}{\global\PS@laststeptrue}
+\newif\ifPS@lastsubstep
+\newcommand{\lastsubstep}{\global\PS@lastsubsteptrue}
+
+\newenvironment{subsubsteps}[1]{%
+  \endproofsteps
+  \addtolength{\PS@extraindent}{\widthof{\PS@numstyle\PS@numwidth}}%
+  \addtolength{\PS@extraindent}{\PScolsep}%
+  \addtolength{\PS@extraindent}{\widthof{\PS@numstyle.\PS@sub@lastparam}}%
+  \addtolength{\PS@extraindent}{\widthof{\PS@numstyle.#1}}%
+  \PS@subsubstepstrue
+  \PS@continuedtrue
+  \proofsteps{\PS@lastparam}%
+}{
+  \endproofsteps
+  \ifPS@lastsubstep
+    \PS@lastsubstepfalse
+    \PS@sub@inprogressfalse
+    \PS@subsubstepsfalse
+  \else
+    \settowidth{\PS@extraindent}{\PS@numstyle\PS@numwidth}%
+    \addtolength{\PS@extraindent}{\PScolsep}%
+    \addtolength{\PS@extraindent}{\widthof{\PS@numstyle.\PS@sub@lastparam}}%
+    \PS@subsubstepsfalse
+    \PS@continuedtrue
+    \proofsteps{\PS@lastparam}%
+  \fi
+}
+
+\newcommand{\adjustcol}[1]{%
+  \global\advance\@colroom-#1%
+}
+
+\makeatother
+%% END ProofSteps  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% *******************************************************************
+\newcommand{\psqed}{%
+  \vspace{-\baselineskip}\vspace{-1\smallskipamount}
+}
+
+\newcommand*{\pcformat}[1]{%
+  [\;{\normalfont\itshape #1}\;]%
+}
+
+\newenvironment{proofcases}[1][]{%
+  \description[font=\pcformat, leftmargin=\parindent, #1]%
+}{\enddescription}
+\newcommand{\proofcase}[1]{%
+\item[\textnormal{\textsf{[#1]}}]%
+}
+%**************Theorem environments********************************* 
+\newtheorem{framework}{Framework}[section]
+\newtheorem{assumption}{Assumption}
+\newtheorem{notation}{Notation}
+\newtheorem{remark}{Remark}[section]
+\newtheorem{fact}{Fact}[section]
+\newtheorem{example}{Example}
+\newtheorem{lemma}{Lemma}
+%**************Theorem environments********************************* 
+% ***************************************************************
+
+\newcommand{\minisec}[1]{%
+  \par\addvspace{\smallskipamount}\noindent%
+  \textit{#1}.\enspace%
+}
+%*******************************************************
+\begin{document}
+\section{Modeling}
+Formal specification of a buffer with an infinite number of states.
+
+\subsection{Rigid data types}
+
+\begin{example} Specification of lists of arbitrary elements: \tt
+ 
+ spec! LISTS
+ 
+ pr BOOL
+ 
+ sorts Elt List .
+ 
+ op err : -> Elt .
+ 
+ op empty : -> List .
+ 
+ op $\_\comp\_$ : Elt List -> List .
+ 
+ op \_in\_ : Elt List -> Bool .
+  
+ eq-1 $\Forall{\Lis}\Lis \comp \err = \Lis$
+ 
+ eq-2 $\Forall{\Ele} \Ele\ \In\ \Empty =\False$
+
+ eq-3 $\Forall{\Ele,\Ele'} (\Ele\ \In\ \Ele' \comp \Lis)   \If\  \Ele = \Ele'$ 
+
+ eq-4 $\Forall{\Ele,\Ele'}\Ele\ \In\ \Ele' \comp \Lis = \Ele\ \In\ \Lis\ \If \neg (\Ele = \Ele')$
+
+\end{example}
+
+
+\subsection{Nominals}
+ \begin{example} Specification of nominals: \tt
+ 
+  spec! NOMINAL
+ 
+  sort Nominal .
+  
+  op init : -> Nominal .
+  
+  op next :  Nominal -> Nominal . 
+ \end{example}
+ 
+ \subsection{Flexible data types}
+ 
+ \begin{example} Specification of the attributes $\Read$ and $\del$:\tt
+  
+  spec BUFFER[LISTS,NOMINAL] 
+  
+  op read : List -> Elt .
+ 
+  op del : List -> List .
+  
+  eq-5 $\Forall{\Z}\at{\Z}\Read(\Empty)=\err$
+  
+  eq-6 $\Forall{\Z}\at{\Z}\del(\Empty)=\Empty$
+  
+  eq-7 $\Forall{\Z}\at{\Z}\Read(\Empty)=\err$
+
+  eq-8 $\Forall{\Ele ,\Lis} \at{\init}\Read(\Ele \comp \Lis) = \Ele$
+ 
+  eq-9 $\Forall{\Ele,\Lis} \at{\init}\del( \Ele \comp \Lis) = \Lis$ 
+
+  eq-10 $\Forall{\Z,\Ele,\Lis}\at{\Next(\Z)}\Read(\Ele \comp \Lis)= \at{\Z}\Read(\Lis)$
+
+  eq-11 $\Forall{\Z,\Ele,\Lis}\at{\Next(\Z)}\del(\Ele \comp \Lis) = \Ele ; \del(\Z,\Lis)$ 
+ \end{example}
+ 
+ \section{Formal verification}
+
+\end{document}
