@@ -55,7 +55,9 @@ spec CPS_Data =
     %(cos_is_continuous)%
 
   forall x, y : Num
+  %% sin(x - y) = sin(x)*cos(y) - cos(x)*sin(y)
   . sin(add(x, ainv(y))) = add(mul(sin(x), cos(y)), ainv(mul(cos(x), sin(y))))
+  %% cos(x - y) = cos(x)*cos(y) + sin(x)*sin(y)
   . cos(add(x, ainv(y))) = add(mul(cos(x), cos(y)), mul(sin(x), sin(y)))
 
   . exists x : Num . not sin(x) = 0
@@ -89,7 +91,9 @@ spec CPS =
         [next] lt(x, t)
 
     . av = 1 \/ av = ainv(1)
+    %% x(t) = x0 / av - cos(av * t) / av
     . x = add(ainv(mul(cos(mul(av, t)), minv(av))), add(x0, minv(av)))
+    %% y(t) = y0 + sin(av * t) / av
     . y = add(mul(sin(mul(av, t)), minv(av)), y0)
   }
 end
