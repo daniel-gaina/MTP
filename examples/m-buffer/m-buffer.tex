@@ -524,16 +524,14 @@ Formal specification of a buffer with an infinite number of states.
   eq-5 $\Forall{\Z}\at{\Z}\Read(\Empty)=\err$
   
   eq-6 $\Forall{\Z}\at{\Z}\del(\Empty)=\Empty$
-  
-  eq-7 $\Forall{\Z}\at{\Z}\Read(\Empty)=\err$
 
-  eq-8 $\Forall{\Ele ,\Lis} \at{\init}\Read(\Ele \comp \Lis) = \Ele$
+  eq-7 $\Forall{\Ele ,\Lis} \at{\init}\Read(\Ele \comp \Lis) = \Ele$
  
-  eq-9 $\Forall{\Ele,\Lis} \at{\init}\del( \Ele \comp \Lis) = \Lis$ 
+  eq-8 $\Forall{\Ele,\Lis} \at{\init}\del( \Ele \comp \Lis) = \Lis$ 
 
-  eq-10 $\Forall{\Z,\Ele,\Lis}\at{\Next(\Z)}\Read(\Ele \comp \Lis)= \at{\Z}\Read(\Lis)$
+  eq-9 $\Forall{\Z,\Ele,\Lis}\at{\Next(\Z)}\Read(\Ele \comp \Lis)= \at{\Z}\Read(\Lis)$
 
-  eq-11 $\Forall{\Z,\Ele,\Lis}\at{\Next(\Z)}\del(\Ele \comp \Lis) = \Ele ; \del(\Z,\Lis)$ 
+  eq-10 $\Forall{\Z,\Ele,\Lis}\at{\Next(\Z)}\del(\Ele \comp \Lis) = \Ele ; \del(\Z,\Lis)$ 
  \end{example}
  
  \section{Formal verification}
