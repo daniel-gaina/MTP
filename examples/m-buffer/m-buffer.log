@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.4.16)  16 MAR 2020 10:35
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2019.4.1)  16 MAR 2020 16:02
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -848,15 +848,24 @@ Package caption Info: End \AtBeginDocument code.
 LaTeX Font Info:    Try loading font information for U+bbold on input line 487.
 
 
-(/usr/local/texlive/2018/texmf-dist/tex/latex/bbold/Ubbold.fd) [1
+(/usr/local/texlive/2018/texmf-dist/tex/latex/bbold/Ubbold.fd)
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 543.
+
+
+(/usr/local/texlive/2018/texmf-dist/tex/latex/base/omscmr.fd
+File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
+)
+LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10> not available
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 543.
+ [1
 
 {/usr/local/texlive/2018/texmf-var/fonts/map/pdftex/updmap/pdftex.map}] (./m-bu
 ffer.aux) ) 
 Here is how much of TeX's memory you used:
- 18132 strings out of 492649
- 326354 string characters out of 6129622
+ 18150 strings out of 492649
+ 326679 string characters out of 6129623
  430621 words of memory out of 5000000
- 21646 multiletter control sequences out of 15000+600000
+ 21661 multiletter control sequences out of 15000+600000
  10250 words of font info for 44 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  55i,7n,54p,3209b,205s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -873,7 +882,7 @@ b></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmss8.pfb>
 sr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></us
 r/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr
 /local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt8.pfb>
-Output written on m-buffer.pdf (1 page, 117155 bytes).
+Output written on m-buffer.pdf (1 page, 120742 bytes).
 PDF statistics:
  63 PDF objects out of 1000 (max. 8388607)
  46 compressed objects within 1 object stream

@@ -535,5 +535,13 @@ Formal specification of a buffer with an infinite number of states.
  \end{example}
  
  \section{Formal verification}
-
+ 
+ The property we are interested in proving formally is 
+ $\Gamma \vdash \Forall{\Lis, \Ele}  \Exists{\Z} \Read(\Z,\Lis) = \Ele\ \If (\Ele\ \In\ \Lis) = \True$, where $\Gamma$ consists of all equations in $\BUFFER$
+ We proceed by induction on the structure of $\Lis$.
+\begin{itemize}
+\item induction base: $\Gamma \vdash \Forall{\Ele} \Exists{\Z} \Read(\Z,\Empty) = \Ele\ \If (\Ele\ \In\ \Empty) = \True$
+ 
+\item induction step:
+\end{itemize}
 \end{document}
