@@ -495,28 +495,22 @@ We define the following specification of lists in $\FOL$:
  spec $\LIST$
  
  sorts $\Elt\ \List $ 
- 
- op $\err\colon \to \Elt$ 
- 
+  
  op $\Empty \colon \to \List$ 
  
- op  $\_\comp\_ \colon \List \Elt \to \List$ 
+ op  $\_\comp\_ \colon \List\ \Elt \to \List$ 
  
  vars $\Lis\ \Q :\List$ 
  
  var $\F : \Elt$ 
-   
- eq-1 $\Forall{\Lis}\Lis \comp \err = \Lis$
- 
- eq-2 $\Forall{\Lis} \Lis = \Empty \vee \Exists{\Q, \F } \Lis = \Q \comp \F$
+    
+ eq-1 $\Forall{\Lis} \Lis = \Empty \vee \Exists{\Q, \F } \Lis = \Q \comp \F$
 
 \end{itemize}
 
 \psqed\qed\end{example}
  
- The constant $\err$ can be regarded as an error element which can be used to describe partial functions on lists. 
- According to the first sentence, $\err$ should not be regarded as an element of any list.
- By the second sentence, a list is either empty or it is obtained from another list by adding one element.
+ According to the above sentence, a list is either empty or it is obtained from another list by adding one element.
  The specification $\LIST$ provides the rigid data types for the hybrid specification presented next.
  
 
@@ -549,21 +543,13 @@ The alternation of configurations is triggered by an event `shift'.
    
  rel-2 $\at{\lifo}\underline{\shift}(\fifo)$ 
    
- eq-3 $\Read(\Empty) = \err$
+ eq-2 $\del(\Empty) = \Empty$
    
- eq-4 $\Forall{ \Lis,\Ele} (@_\lifo\Read)(\Lis \comp \Ele) =  \Ele$
+ eq-3 $\Forall{\Lis,\Ele}(@_\lifo\del)(\Lis \comp \Ele) =  \Lis$
    
- eq-5 $\Forall{\Ele}(@_\fifo\Read)(\Empty \comp \Ele) =  \Ele$
+ eq-4 $\Forall{\Ele}(@_\fifo\del)(\Empty \comp \Ele) =  \Empty$
    
- eq-6 $\Forall{\Lis,\Ele,\F}(@_\fifo\Read)(\Lis \comp \Ele \comp \F) =  (@_\fifo\Read)(\Lis \comp \Ele)$
-   
- eq-7 $\del(\Empty) = \Empty$
-   
- eq-8 $\Forall{\Lis,\Ele}(@_\lifo\del)(\Lis \comp \Ele) =  \Lis$
-   
- eq-9 $\Forall{\Ele}(@_\fifo\del)(\Empty \comp \Ele) =  \Empty$
-   
- eq-10 $\Forall{\Lis,\Ele,\F} (@_\fifo\del)(\Lis \comp \Ele \comp \F) =  (@_\fifo\del)(\Lis \comp \Ele) \comp \F$
+ eq-5 $\Forall{\Lis,\Ele,\F} (@_\fifo\del)(\Lis \comp \Ele \comp \F) =  (@_\fifo\del)(\Lis \comp \Ele) \comp \F$
  \end{itemize}
 \psqed\qed\end{example}
   
@@ -573,8 +559,8 @@ The alternation of configurations is triggered by an event `shift'.
   
  The system has two operation modes, $\lifo$, when it behaves like a stack, and $\fifo$, when it behaves like a queue. 
  The binary modality $\shift$ makes the transition between $\lifo$ and $\fifo$ modes according to the nominal relations $\at{\fifo}\underline{\shift}(\lifo)$ and $\at{\lifo}\underline{\shift}(\fifo)$.
- The function symbol $\Read$ denotes the operation which returns the top/front of a stack/queue, and $\del$ denotes the operation `pop'. 
- Notice that $\Read$ and $\del$ play different roles in each operation mode.
+ The function symbol $\del$ denotes the operation `pop'. 
+ Notice that $\del$ play different roles in each operation mode.
  
  The models of $\BUFFER$ consists of all Kripke structures $(W,M)$ over the signature of $\BUFFER$ which 
  \begin{enumerate*}[label=(\alph*)]
@@ -644,22 +630,22 @@ The alternation of configurations is triggered by an event `shift'.
 
 The first two assertions are straightforward to prove.
 We start with the third assertion.
- \begin{proofsteps}{32em}
+ \begin{proofsteps}{34em}
   
   \label{ps:buffer-3-1}
   $\Gamma\vdash \Forall{\Lis,\Ele,\F}(@_\lifo\del)((@_\fifo\del)(\Lis\comp\Ele\comp\F))=
   (@_\lifo\del)((@_\fifo\del)(\Lis\comp\Ele)\comp\F)$  & 
-  by \Rew~ from eq-10\\
+  by \Rew~ from eq-5\\
   
   \label{ps:buffer-3-2}
   $\Gamma\vdash\Forall{\Lis,\Ele,\F} (@_\lifo\del)((@_\fifo\del)(\Lis\comp\Ele)\comp\F) = 
   (@_\fifo\del)(\Lis\comp\Ele)$ &
-  by \Rew~from eq-8\\ 
+  by \Rew~from eq-3\\ 
   
   \label{ps:buffer-3-3}
   $\Gamma\vdash\Forall{\Lis,\Ele,\F} (@_\fifo\del)((@_\lifo\del)(\Lis\comp\Ele\comp\F))= 
   (@_\fifo\del)(\Lis\comp\Ele)$ & 
-  by \Rew~ from eq-8 \\
+  by \Rew~ from eq-3 \\
   
   \label{ps:buffer-3-4}
   $\Gamma\vdash\Forall{\Lis,\Ele,\F} (@_\fifo\del)(\Lis\comp\Ele) =
@@ -672,13 +658,13 @@ We start with the third assertion.
  \end{proofsteps}
  
  We prove the fourth assertion:
- \begin{proofsteps}{21em}
+ \begin{proofsteps}{27em}
    
   \label{ps:buffer-4-1} $\Gamma\vdash_{\Delta[\Lis,\Ele]} \Lis = \Empty \vee \Exists{\Q,\F}  \Lis=\Q\comp\F$ & 
-  from eq-2, 
-  \newline since eq-2  is a rigid sentence\\
+  from eq-1, since eq-1  is a rigid sentence\\
  
   \label{ps:buffer-4-2} $\Gamma\cup \{ \Lis = \Empty\} \vdash_{\Delta[\Lis,\Ele]} \PR[\Lis\comp\Ele]$ & 
+  by the following proof steps
    \substeps{9}
    $\Gamma\vdash_{\Delta[\Lis,\Ele]} \PR[\Empty\comp\Ele] $  &
    by \Rew~ from the second assertion \\
@@ -691,7 +677,8 @@ We start with the third assertion.
    by \Rew~ and \Trans~ from \ref{ps:buffer-22}
    \endsubsteps
   \label{ps:buffer-4-3} 
-  $\Gamma\cup \{ \Exists{\Q,\F}\Lis = \Q\comp\F \} \vdash_{\Delta[\Lis,\Ele]} \PR[\Lis\comp\Ele]$ & 
+  $\Gamma\cup \{ \Exists{\Q,\F}\Lis = \Q\comp\F \} \vdash_{\Delta[\Lis,\Ele]} \PR[\Lis\comp\Ele]$ &
+  by the following proof steps 
   \substeps{9}
     \label{ps:buffer-31} 
     $\Gamma\cup \{ \Lis = \Q\comp\F \} \vdash_{\Delta[\Lis,\Q,\Ele,\F]} \PR[\Q\comp\F\comp\Ele]$ & 
@@ -710,8 +697,7 @@ We start with the third assertion.
  
  $\Gamma\vdash_\Delta \Forall{\Lis,\Ele}\PR(\Lis\comp\Ele)$ &
  
- from \ref{ps:buffer-4-4},
- \newline $\Forall{\Lis,\Ele}\PR[\Lis\comp\Ele]$ is a rigid sentence 
+ from \ref{ps:buffer-4-4}, since $\Forall{\Lis,\Ele}\PR[\Lis\comp\Ele]$ is a rigid sentence 
  \end{proofsteps}
  
  The proof of the fifth assertion resembles the proof of the fourth assertion.
