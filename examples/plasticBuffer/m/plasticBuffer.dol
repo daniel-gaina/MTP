@@ -1,5 +1,6 @@
 spec Buffer =
- 
+
+
  %% mode of operation
  nominal free type Mode ::= lifo | fifo
 

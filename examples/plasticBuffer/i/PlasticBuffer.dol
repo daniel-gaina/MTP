@@ -1,6 +1,6 @@
 spec PlasticBuffer =
   sort Mode
-  ops fifo, lifo : Mode
+  ops fifo, lifo : Mode 
 
   sorts Elem, List
 
