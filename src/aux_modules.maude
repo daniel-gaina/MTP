@@ -1,0 +1,40 @@
+view Oid from TRIV to CONFIGURATION is
+ sort Elt to Oid .
+endv
+
+fmod MAYBE{X :: TRIV} is
+ sort Maybe{X} .
+ subsort X$Elt < Maybe{X} .
+ op maybe : -> Maybe{X} [ctor] .
+endfm
+
+view Module from TRIV to META-MODULE is
+ sort Elt to Module .
+endv
+
+fmod DATABASE is
+ pr SET{Module} * (sort Set{Module} to Database) .
+endfm
+
+fmod AUX-MODULE-OPS is
+ pr META-LEVEL .
+
+ var  SSDS : SubsortDeclSet .
+ vars IL IL' : ImportList .
+ var  OPDS : OpDeclSet .
+ var  SS : SortSet .
+ var  MAS : MembAxSet .
+ var  EqS : EquationSet .
+ var  RS : RuleSet .
+ var  M : Module .
+ var  H : Header .
+
+ op setImports : Module ImportList -> Module .
+ eq setImports(fmod H is IL sorts SS . SSDS OPDS MAS EqS endfm, IL')
+    = fmod H is IL' sorts SS . SSDS OPDS MAS EqS endfm .
+ eq setImports(mod H is IL sorts SS . SSDS OPDS MAS EqS RS endm, IL')
+    = mod H is IL' sorts SS . SSDS OPDS MAS EqS RS endm .
+
+ op addImports : Module ImportList -> Module .
+ eq addImports(M, IL) = setImports(M, (getImports(M) IL)) .
+endfm

@@ -1,0 +1,128 @@
+load aux_modules.maude
+load file.maude
+
+fmod MTP-SIGN is
+ pr META-LEVEL .
+
+ sorts HLogicDef HLogic @Token@ .
+
+ op hlogic__ : @Token@ HLogic -> HLogicDef [ctor] .
+
+ op hybridizeBase__ : @Token@ @Token@ -> HLogic [ctor] .
+ op addQuantOrConstr__ : @Token@ @Token@ -> HLogic [ctor] .
+endfm
+
+fmod META-MTP-SIGN is
+ including AUX-MODULE-OPS .
+
+ op BUBBLES : -> FModule .
+ op GRAMMAR : -> FModule [memo] .
+
+ eq BUBBLES
+    = (fmod 'GRAMMAR is
+        including 'QID-LIST .
+        sorts none .
+        none
+        op 'token : 'Qid -> '@Token@
+             [special(
+               (id-hook('Bubble, '1 '1)
+                op-hook('qidSymbol, '<Qids>, nil, 'Qid)))] .
+        none
+        none
+     endfm) .
+ eq GRAMMAR = addImports(BUBBLES, (including 'MTP-SIGN .)) .
+endfm
+
+
+fmod COMMAND-PROCESSING is
+ pr META-MTP-SIGN .
+ pr META-LEVEL .
+ pr LEXICAL .
+
+ var  RP? : [ResultPair] .
+ vars S S' : String .
+ var  QIL : QidList .
+ vars Q Q' : Qid .
+
+ op foo : -> Module .
+
+ op parse : String -> Module .
+ ceq parse(S) = foo
+  if RP? := metaParse(GRAMMAR, tokenize(S), anyType) [print RP?] .
+
+ op isLoadComm : String -> Bool .
+ ceq isLoadComm(S) = true
+  if 'load QIL := tokenize(S) .
+ eq isLoadComm(S) = false [owise] .
+
+ op isExitComm : String -> Bool .
+ ceq isExitComm(S) = true
+  if 'exit := tokenize(S) .
+ eq isExitComm(S) = false [owise] .
+
+ op parseLoadComm : String -> String .
+ ceq parseLoadComm(S) = string(Q')
+  if Q Q' QIL := tokenize(S) .
+endfm
+
+mod MTP is
+ pr (MAYBE * (op maybe to null)){Oid} .
+ pr COMMAND-PROCESSING .
+ inc STD-STREAM .
+ pr DATABASE .
+ inc FILE .
+
+ vars Text Original Read Source : String .
+ var  Attrs : AttributeSet .
+ vars FHIn FHOut : Oid .
+ var  DB : Database .
+
+ *** Object and class definition
+ op MTP : -> Cid .
+ op mtp : -> Oid .
+
+ *** Attributes
+ op file:_ : Maybe{Oid} -> Attribute [ctor] .
+ op run : -> Configuration [ctor] .
+ op db:_ : Database -> Attribute [ctor] .
+ op out:_ : String -> Attribute [ctor] .
+
+ rl [openedFile] : openedFile(mtp, fileManager, FHIn)
+    < mtp : MTP | file: null, Attrs >
+ => < mtp : MTP | file: FHIn, Attrs >
+    getLine(FHIn, mtp) .
+
+ rl [loadModule] : gotLine(mtp, FHIn, Text)
+    < mtp : MTP | file: FHIn, out: Read, db: DB, Attrs >
+ => if Text == ""
+    then < mtp : MTP | file: FHIn, out: "", db: parse(Read), Attrs >
+         closeFile(FHIn, mtp)
+    else < mtp : MTP | file: FHIn, out: (Read + Text), db: DB, Attrs >
+         getLine(FHIn, mtp)
+    fi .
+
+ crl [loadComm] : gotLine(mtp, stdin, Text)
+    < mtp : MTP | out: Read, db: DB, Attrs >
+ => < mtp : MTP | out: Read, db: DB, Attrs >
+    openFile(fileManager, mtp, Source, "r")
+  if isLoadComm(Text) /\
+     Source := parseLoadComm(Text) .
+
+ crl [exit] : gotLine(mtp, stdin, Text)
+     < mtp : MTP | out: Read, db: DB, Attrs >
+  => write(stdin, mtp, "Thanks for using MTP!")
+  if isExitComm(Text) .
+
+ rl [closedFile] : closedFile(mtp, FHIn)
+    < mtp : MTP | file: FHIn, Attrs >
+ => < mtp : MTP | file: null, Attrs >
+    getLine(stdin, mtp, "MTP> ") .
+
+ eq run =
+    <> < mtp : MTP | file: null, out: "", db: empty >
+    getLine(stdin, mtp, "MTP> ") .
+endm
+
+set print attribute on .
+
+erew run .
