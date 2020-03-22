@@ -1,0 +1,33 @@
+spec PlasticBuffer =
+  sort Mode
+  ops fifo, lifo : Mode 
+
+  sorts Elem, List
+
+  op empty : List
+  op cons : Elem * List -> List
+
+  forall l : List
+  . l = empty
+    \/ (exists e : Elem; k : List . l = cons(e, k))
+
+  op del : Mode * List -> List
+
+  forall m : Mode
+  . del(m, empty) = empty
+
+  forall e : Elem
+  . del(fifo, cons(e, empty)) = empty
+
+  forall e, e' : Elem; l : List
+  . del(fifo, cons(e, cons(e', l))) = cons(e, del(fifo, cons(e', l)))
+
+  forall e : Elem; l : List
+  . del(lifo, cons(e, l)) = l
+
+  %% Theorems ........................................................
+
+  forall l : List
+  . del(lifo, del(fifo, l)) = del(fifo, del(lifo, l))
+  %implied
+end

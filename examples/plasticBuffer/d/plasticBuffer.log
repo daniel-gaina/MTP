@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.4.16)  15 MAR 2020 21:29
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2019.4.1)  17 MAR 2020 13:37
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -851,25 +851,28 @@ Package caption Info: longtable package is loaded.
 Package: ltcaption 2013/06/09 v1.4-94 longtable captions (AR)
 )
 Package caption Info: End \AtBeginDocument code.
-LaTeX Font Info:    Try loading font information for U+bbold on input line 503.
+LaTeX Font Info:    Try loading font information for U+bbold on input line 501.
 
 
 (/usr/local/texlive/2018/texmf-dist/tex/latex/bbold/Ubbold.fd) [1
 
 {/usr/local/texlive/2018/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
-Overfull \hbox (15.0pt too wide) in paragraph at lines 615--616
+Overfull \hbox (15.0pt too wide) in paragraph at lines 601--602
 []$[]$
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 615--616
+Underfull \hbox (badness 10000) in paragraph at lines 601--602
 
  []
 
 [2]
-Underfull \hbox (badness 10000) in paragraph at lines 780--782
+Underfull \hbox (badness 10000) in paragraph at lines 766--768
 
  []
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
 
 [3] [4] (./plasticBuffer.aux)
 
@@ -878,12 +881,12 @@ LaTeX Warning: There were multiply-defined labels.
  ) 
 Here is how much of TeX's memory you used:
  18210 strings out of 492649
- 327411 string characters out of 6129622
- 451972 words of memory out of 5000000
+ 327411 string characters out of 6129623
+ 446969 words of memory out of 5000000
  21706 multiletter control sequences out of 15000+600000
  18416 words of font info for 75 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 55i,12n,54p,3214b,478s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 55i,12n,54p,3214b,466s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/local/texlive/2018/texmf-dist/fonts/type1/public/bbold-type1/bbold10.pf
 b></usr/local/texlive/2018/texmf-dist/fonts/type1/public/bbold-type1/bbold7.pfb
 ></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb>
@@ -916,7 +919,7 @@ blic/amsfonts/cm/cmtt10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/pub
 lic/amsfonts/cm/cmtt8.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/publi
 c/amsfonts/cm/cmtt9.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/
 amsfonts/symbols/msam10.pfb>
-Output written on plasticBuffer.pdf (4 pages, 314677 bytes).
+Output written on plasticBuffer.pdf (4 pages, 313235 bytes).
 PDF statistics:
  151 PDF objects out of 1000 (max. 8388607)
  111 compressed objects within 2 object streams
