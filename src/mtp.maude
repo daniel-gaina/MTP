@@ -4,9 +4,9 @@ load file.maude
 fmod MTP-SIGN is
  pr META-LEVEL .
 
- sorts HLogicDef HLogic @Token@ .
+ sorts HLogicDef HLogic @Token@ @Bubble@ .
 
- op hlogic__ : @Token@ HLogic -> HLogicDef [ctor] .
+ op hlogic_=_ : @Token@ HLogic -> HLogicDef [ctor] .
 
  op hybridizeBase__ : @Token@ @Token@ -> HLogic [ctor] .
  op addQuantOrConstr__ : @Token@ @Token@ -> HLogic [ctor] .
@@ -27,6 +27,17 @@ fmod META-MTP-SIGN is
              [special(
                (id-hook('Bubble, '1 '1)
                 op-hook('qidSymbol, '<Qids>, nil, 'Qid)))] .
+        op 'bubble : 'QidList -> '@Bubble@
+             [special(
+               (id-hook('Bubble, '1 '-1 '`( '`))
+                op-hook('qidListSymbol, '__, 'QidList 'QidList, 'QidList)
+                op-hook('qidSymbol, '<Qids>, nil, 'Qid)
+                id-hook('Exclude, 'eq 'ceq 'rl 'crl 'mb 'cmb 'sd 'csd
+                                  'var 'vars 'strat 'endm
+                                  'endfm 'endsm 'sorts 'subsort 'subsorts
+                                  'subclass 'subclasses 'op 'ops
+                                  'protecting 'pr 'including 'inc 'extending
+                                  'ctor 'assoc 'comm '==)))] .
         none
         none
      endfm) .
@@ -40,15 +51,20 @@ fmod COMMAND-PROCESSING is
  pr LEXICAL .
 
  var  RP? : [ResultPair] .
+ vars T T' T1 T2 : Term .
  vars S S' : String .
  var  QIL : QidList .
  vars Q Q' : Qid .
+ var  Srt : Sort .
 
  op foo : -> Module .
 
- op parse : String -> Module .
- ceq parse(S) = foo
-  if RP? := metaParse(GRAMMAR, tokenize(S), anyType) [print RP?] .
+ op parseModule : Term -> Module .
+ eq parseModule('hlogic_=_['token[T],T']) = foo .
+
+ op parseModule : String -> Module .
+ ceq parseModule(S) = parseModule(T)
+  if {T, Srt} := metaParse(GRAMMAR, tokenize(S), anyType) [print T " - " Srt] .
 
  op isLoadComm : String -> Bool .
  ceq isLoadComm(S) = true
@@ -87,19 +103,9 @@ mod MTP is
  op db:_ : Database -> Attribute [ctor] .
  op out:_ : String -> Attribute [ctor] .
 
- rl [openedFile] : openedFile(mtp, fileManager, FHIn)
-    < mtp : MTP | file: null, Attrs >
- => < mtp : MTP | file: FHIn, Attrs >
-    getLine(FHIn, mtp) .
-
- rl [loadModule] : gotLine(mtp, FHIn, Text)
-    < mtp : MTP | file: FHIn, out: Read, db: DB, Attrs >
- => if Text == ""
-    then < mtp : MTP | file: FHIn, out: "", db: parse(Read), Attrs >
-         closeFile(FHIn, mtp)
-    else < mtp : MTP | file: FHIn, out: (Read + Text), db: DB, Attrs >
-         getLine(FHIn, mtp)
-    fi .
+ ***                        ***
+ ***          LOAD          ***
+ ***                        ***
 
  crl [loadComm] : gotLine(mtp, stdin, Text)
     < mtp : MTP | out: Read, db: DB, Attrs >
@@ -108,15 +114,50 @@ mod MTP is
   if isLoadComm(Text) /\
      Source := parseLoadComm(Text) .
 
- crl [exit] : gotLine(mtp, stdin, Text)
-     < mtp : MTP | out: Read, db: DB, Attrs >
-  => write(stdin, mtp, "Thanks for using MTP!")
-  if isExitComm(Text) .
+ rl [openedFile] : openedFile(mtp, fileManager, FHIn)
+    < mtp : MTP | file: null, Attrs >
+ => < mtp : MTP | file: FHIn, Attrs >
+    getLine(FHIn, mtp) .
+
+ rl [loadModule] : gotLine(mtp, FHIn, Text)
+    < mtp : MTP | file: FHIn, out: Read, db: DB, Attrs >
+ => if Text == ""
+    then < mtp : MTP | file: FHIn, out: "", db: parseModule(Read), Attrs >
+         closeFile(FHIn, mtp)
+    else < mtp : MTP | file: FHIn, out: (Read + Text), db: DB, Attrs >
+         getLine(FHIn, mtp)
+    fi .
 
  rl [closedFile] : closedFile(mtp, FHIn)
     < mtp : MTP | file: FHIn, Attrs >
  => < mtp : MTP | file: null, Attrs >
     getLine(stdin, mtp, "MTP> ") .
+
+ ***                         ***
+ ***          EXIT           ***
+ ***                         ***
+
+ crl [exit] : gotLine(mtp, stdin, Text)
+     < mtp : MTP | out: Read, db: DB, Attrs >
+  => write(stdin, mtp, "Thanks for using MTP!")
+  if isExitComm(Text) .
+
+ ***                        ***
+ ***          ERROR         ***
+ ***                        ***
+
+ crl [no-command] :
+     gotLine(mtp, stdin, Text)
+     < mtp : MTP | Attrs >
+  => < mtp : MTP | Attrs >
+     write(stdin, mtp, "The introduced command does not exit.")
+     getLine(stdin, mtp, "MTP> ")
+  if not isExitComm(Text) /\
+     not isLoadComm(Text) .
+
+ ***                        ***
+ ***          RUN           ***
+ ***                        ***
 
  eq run =
     <> < mtp : MTP | file: null, out: "", db: empty >
