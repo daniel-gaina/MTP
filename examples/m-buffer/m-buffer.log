@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.4.16)  29 MAR 2020 13:43
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.4.16)  29 MAR 2020 15:55
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -715,18 +715,18 @@ Package: array 2018/04/07 v2.4g Tabular extension package (FMi)
  (./m-buffer.aux)
 \openout1 = `m-buffer.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 444.
-LaTeX Font Info:    ... okay on input line 444.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 444.
-LaTeX Font Info:    ... okay on input line 444.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 444.
-LaTeX Font Info:    ... okay on input line 444.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 444.
-LaTeX Font Info:    ... okay on input line 444.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 444.
-LaTeX Font Info:    ... okay on input line 444.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 444.
-LaTeX Font Info:    ... okay on input line 444.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 443.
+LaTeX Font Info:    ... okay on input line 443.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 443.
+LaTeX Font Info:    ... okay on input line 443.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 443.
+LaTeX Font Info:    ... okay on input line 443.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 443.
+LaTeX Font Info:    ... okay on input line 443.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 443.
+LaTeX Font Info:    ... okay on input line 443.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 443.
+LaTeX Font Info:    ... okay on input line 443.
 *geometry* driver: auto-detecting
 *geometry* detected driver: pdftex
 *geometry* verbose mode - [ preamble ] result:
@@ -735,14 +735,14 @@ LaTeX Font Info:    ... okay on input line 444.
 * layout: <same size as paper>
 * layoutoffset:(h,v)=(0.0pt,0.0pt)
 * modes: 
-* h-part:(L,W,R)=(56.9055pt, 500.484pt, 56.9055pt)
+* h-part:(L,W,R)=(42.67912pt, 528.93675pt, 42.67912pt)
 * v-part:(T,H,B)=(56.9055pt, 642.66711pt, 95.39737pt)
 * \paperwidth=614.295pt
 * \paperheight=794.96999pt
-* \textwidth=500.484pt
+* \textwidth=528.93675pt
 * \textheight=642.66711pt
-* \oddsidemargin=-15.36449pt
-* \evensidemargin=-15.36449pt
+* \oddsidemargin=-29.59087pt
+* \evensidemargin=-29.59087pt
 * \topmargin=-52.36449pt
 * \headheight=12.0pt
 * \headsep=25.0pt
@@ -761,16 +761,16 @@ LaTeX Font Info:    ... okay on input line 444.
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
-LaTeX Font Info:    Try loading font information for U+msa on input line 444.
+LaTeX Font Info:    Try loading font information for U+msa on input line 443.
 (/usr/local/texlive/2018/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Try loading font information for U+msb on input line 444.
+LaTeX Font Info:    Try loading font information for U+msb on input line 443.
 
 (/usr/local/texlive/2018/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
-Package xypdf Info: Line width: 0.39998pt on input line 444.
+Package xypdf Info: Line width: 0.39998pt on input line 443.
 
 ABD: EveryShipout initializing macros
 (/usr/local/texlive/2018/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
@@ -845,30 +845,30 @@ Package caption Info: longtable package is loaded.
 Package: ltcaption 2013/06/09 v1.4-94 longtable captions (AR)
 )
 Package caption Info: End \AtBeginDocument code.
-LaTeX Font Info:    Try loading font information for U+bbold on input line 460.
+LaTeX Font Info:    Try loading font information for U+bbold on input line 459.
 
 
 (/usr/local/texlive/2018/texmf-dist/tex/latex/bbold/Ubbold.fd)
-LaTeX Font Info:    Try loading font information for OMS+cmr on input line 529.
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 527.
 
 
 (/usr/local/texlive/2018/texmf-dist/tex/latex/base/omscmr.fd
 File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 529.
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 527.
  [1
 
 {/usr/local/texlive/2018/texmf-var/fonts/map/pdftex/updmap/pdftex.map}] [2] (./
 m-buffer.aux) ) 
 Here is how much of TeX's memory you used:
- 18133 strings out of 492649
- 326680 string characters out of 6129622
- 432414 words of memory out of 5000000
- 21644 multiletter control sequences out of 15000+600000
+ 18134 strings out of 492649
+ 326729 string characters out of 6129622
+ 434418 words of memory out of 5000000
+ 21645 multiletter control sequences out of 15000+600000
  10250 words of font info for 44 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 55i,7n,54p,3209b,332s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 55i,7n,54p,3209b,474s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/local/texlive/2018/texmf-dist/fonts/type1/public/bbold-typ
 e1/bbold10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/
 cm/cmbx10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/c
@@ -879,14 +879,15 @@ r10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7
 .pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmss10.
 pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmss8.pf
 b></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb
-></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb><
-/usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></
-usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></u
-sr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt8.pfb>
-Output written on m-buffer.pdf (2 pages, 132808 bytes).
+></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy5.pfb><
+/usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></u
+sr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></us
+r/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr
+/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt8.pfb>
+Output written on m-buffer.pdf (2 pages, 142342 bytes).
 PDF statistics:
- 70 PDF objects out of 1000 (max. 8388607)
- 51 compressed objects within 1 object stream
+ 74 PDF objects out of 1000 (max. 8388607)
+ 54 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  13 words of extra memory for PDF output out of 10000 (max. 10000000)
 

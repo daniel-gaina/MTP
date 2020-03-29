@@ -1,5 +1,5 @@
 \documentclass{article}
-\usepackage[left=2cm, right=2cm, top=2cm]{geometry}
+\usepackage[left=1.5cm, right=1.5cm, top=2cm]{geometry}
  %*******************************************************
  \usepackage{booktabs} % For formal tables
 %************************ packages *********************************
@@ -52,12 +52,11 @@
 \newcommand{\F}{\mathtt{F}}
 \newcommand{\K}{\mathtt{K}}
 %*******************************************************
-\newcommand{\Sub}{{\mathsf{Sub}}}
 \newcommand{\ari}{{\mathsf{ar}}}
 \newcommand{\nom}{{\mathsf{n}}}
 \newcommand{\card}{{\mathsf{card}}}
 \newcommand{\rigid}{{\mathtt{r}}}
-\newcommand{\flexible}{{\mathtt{f}}}
+\newcommand{\f}{{\mathtt{f}}}
 \newcommand{\ext}{{\mathtt{e}}}
 %*******************************************************
 \newcommand{\LIST}{{\mathsf{LIST}}}
@@ -525,11 +524,51 @@ Formal specification of a buffer with an infinite number of states.
  The property we are interested in proving formally is 
  $\Gamma \vdash_\Sigma \Forall{\L, \E}  \Exists{\Z} (\at{Z}\Read)(\L) = \E\If (\E\In \L) = \True$, where $\Sigma=\Sig(\BUFFER)$ and $\Gamma=\Sen(\BUFFER)$.
  We proceed by induction on the structure of $\L$.
-\begin{itemize}
+\begin{itemize}[leftmargin=*]
 \item ind. base: $\Gamma \vdash \Forall{\E} \Exists{\Z} (\at{\Z}\Read)(\Empty) = \E\If (\E\In \Empty) = \True$, which is true since $\E\In \Empty=\False$
  
-\item ind. step: $\Gamma\cup \{ \Forall{\E} \Exists{\Z} \Read(\Z,\lt) \If (\E \In \lt)=\True  \}\vdash_{\Sig[\lt,\e]} \Forall{\E}  \Exists{\Z} \Read(\Z,\lt\comp\e) = \E\If (\E\In \lt\comp\e) = \True $,
+\item ind. step: $\Gamma\cup \{ \Forall{\E} \Exists{\Z} (\at{\Z}\Read)(\lt) \If (\E \In \lt)=\True  \}\vdash_{\Sig[\lt,\e]} \Forall{\E}  \Exists{\Z} (\at{\Z}\Read)(\e\comp\lt) = \E\If (\E\In \e\comp\lt) = \True $,
+ 
+ where $\e: \to \Elt$ and $\lt:\to \List$ 
+  
+  \item apply theorem of constants:
+  
+  $\Gamma\cup \{ \Forall{\E} \Exists{\Z} (\at{\Z}\Read)(\lt) \If (\E \In \lt)=\True  \}\vdash_{\Sig[\lt,\e,\e']}  \Exists{\Z} (\at{\Z}\Read)(\e\comp\lt) = \e' \If (\e'\In \e\comp\lt) = \True$,
+  
+  where $\e':\to \Elt$
+  
+  \item apply case analysis:
+  
+  \begin{enumerate}[leftmargin=*]
+   \item $\Gamma\cup \{ \Forall{\E} \Exists{\Z} (\at{\Z}\Read)(\lt) \If (\E \In \lt)=\True, \e'=\e  \}\vdash_{\Sig[\lt,\e,\e']}  \Exists{\Z} (\at{\Z}\Read)(\e\comp\lt) = \e' \If (\e'\In \e\comp\lt) = \True$
+   
+   \begin{enumerate}
+    \item $\Gamma\cup \{ \Forall{\E} \Exists{\Z} (\at{\Z}\Read)(\lt) \If (\E \In \lt)=\True, \e'=\e  \}\vdash_{\Sig[\lt,\e,\e']}  \Exists{\Z} (\at{\Z}\Read)(\e\comp\lt) = \e $
+    
+    \item apply quantification rule for $\theta\colon\{\Z\}\to\Sigma[\lt,\e,\e']$ defined by $\theta(\Z)=\init$
+    
+    \item $\Gamma\cup \{ \Forall{\E} \Exists{\Z} (\at{\Z}\Read)(\lt) \If (\E \In \lt)=\True, \e'=\e  \}\vdash_{\Sig[\lt,\e,\e']}   (\at{\init}\Read)(\e\comp\lt) = \e$, 
+    which is true by the 6th equation
 
-where $\e\colon \to \Elt$ and $\lt\colon\to \List$ 
-\end{itemize}
+   \end{enumerate}
+   
+   \item $\Gamma\cup \{ \Forall{\E} \Exists{\Z} (\at{\Z}\Read)(\lt) \If (\E \In \lt)=\True, \neg(\e'=\e)  \}\vdash_{\Sig[\lt,\e,\e']}  \Exists{\Z} (\at{\Z}\Read)(\e\comp\lt) = \e' \If (\e'\In \e\comp\lt) = \True$
+   
+   \begin{enumerate}[leftmargin=*]
+   
+   \item $\Gamma\cup \{ \Forall{\E} \Exists{\Z} (\at{\Z}\Read)(\lt) \If (\E \In \lt)=\True, \neg(\e'=\e)  \}\vdash_{\Sig[\lt,\e,\e']}  \Exists{\Z} (\at{\Z}\Read)(\e\comp\lt) = \e' \If (\e'\In \lt) = \True$
+   
+   \item witness $\Z\leftarrow \Next(\Z)$
+   
+   $\Gamma\cup \{ \Forall{\E} \Exists{\Z} (\at{\Z}\Read)(\lt) \If (\E \In \lt)=\True, \neg(\e'=\e)  \}\vdash_{\Sig[\lt,\e,\e']}  \Exists{\Z} (\at{\Next(\Z)}\Read)(\e\comp\lt) = \e' \If (\e'\In \lt) = \True$
+
+  \item    $\Gamma\cup \{ \Forall{\E} \Exists{\Z} (\at{\Z}\Read)(\lt) \If (\E \In \lt)=\True, \neg(\e'=\e)  \}\vdash_{\Sig[\lt,\e,\e']}  \Exists{\Z} (\at{\Z}\Read)(\lt) = \e' \If (\e'\In \lt) = \True$, which is true since 
+  
+  $\Forall{\E} \Exists{\Z} (\at{\Z}\Read)(\lt) \If (\E \In \lt)=\True\vdash_{\Sig[\lt,\e,\e']}  \Exists{\Z} (\at{\Z}\Read)(\lt) = \e' \If (\e'\In \lt) = \True$
+   
+  \end{enumerate} 
+  
+  \end{enumerate}
+  
+  \end{itemize}
 \end{document}
