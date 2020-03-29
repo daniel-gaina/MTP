@@ -24,30 +24,11 @@
 \newcommand{\HPLQ}{{\mathsf{HPLQ}}}
 
 \newcommand{\FOL}{{\mathsf{FOL}}}
-\newcommand{\HCL}{{\mathsf{HCL}}}
-\newcommand{\REL}{{\mathsf{REL}}}
-\newcommand{\HFOL}{{\mathsf{HFOL}}}
-\newcommand{\HREL}{{\mathsf{HREL}}}
-
-
-\newcommand{\HFOLS}{{\mathsf{HFOLS}}}
-\newcommand{\HFOLR}{{\mathsf{HFOLR}}}
-\newcommand{\HDFOL}{{\mathsf{HDFOL}}}
-
-\newcommand{\POA}{{\mathsf{POA}}}
-\newcommand{\POAR}{{\mathsf{POAR}}}
-\newcommand{\HPOA}{{\mathsf{HPOA}}}
-\newcommand{\HPOAS}{{\mathsf{HPOAS}}}
-\newcommand{\HPOAR}{{\mathsf{HPOAR}}}
 
 \newcommand{\Sig}{\mathsf{Sig}}
 \newcommand{\Mod}{\mathsf{Mod}}
 \newcommand{\Sen}{\mathsf{Sen}}
 
-\newcommand{\SSb}{\mathsf{SSb}}
-\newcommand{\SSt}{\mathsf{SSt}}
-\newcommand{\Sb}{\mathsf{Sb}}
-\newcommand{\St}{\mathsf{St}}
 \newcommand{\Nom}{\mathsf{Nom}}
 \newcommand{\Prop}{\mathsf{Prop}}
 %*******************************************************
@@ -59,20 +40,17 @@
 \newcommand{\SI}{\mathtt{SI}}
 %*******************************************************
 \newcommand{\N}{{\mathbb{N}}}
-\newcommand{\E}{\mathcal{E}}
+\newcommand{\E}{\mathtt{E}}
 \renewcommand{\P}{\mathcal{P}}
-\newcommand{\V}{\mathcal{V}}
-\newcommand{\X}{\mathsf{X}}
-\newcommand{\Y}{\mathsf{Y}}
-\newcommand{\Z}{\mathsf{Z}}
-\newcommand{\Lis}{\mathsf{L}}
-\newcommand{\C}{\mathsf{C}}
-\newcommand{\Q}{\mathsf{Q}}
-\newcommand{\D}{\mathsf{D}}
-\newcommand{\F}{\mathsf{F}}
-\newcommand{\K}{\mathsf{K}}
-\newcommand{\A}{\mathcal{A}}
-\newcommand{\B}{\mathsf{B}}
+\renewcommand{\L}{\mathtt{L}}
+\newcommand{\X}{\mathtt{X}}
+\newcommand{\Y}{\mathtt{Y}}
+\newcommand{\Z}{\mathtt{Z}}
+\newcommand{\C}{\mathtt{C}}
+\newcommand{\Q}{\mathtt{Q}}
+\newcommand{\D}{\mathtt{D}}
+\newcommand{\F}{\mathtt{F}}
+\newcommand{\K}{\mathtt{K}}
 %*******************************************************
 \newcommand{\Sub}{{\mathsf{Sub}}}
 \newcommand{\ari}{{\mathsf{ar}}}
@@ -93,8 +71,8 @@
 
 \newcommand{\False}{{\mathtt{false}}}
 \newcommand{\True}{{\mathtt{true}}}
-\newcommand{\If}{{\mathtt{if}}}
-\newcommand{\In}{{\mathtt{in}}}
+\newcommand{\If}{{\ \mathtt{if}\ }}
+\newcommand{\In}{{\ \mathtt{in}\ }}
 \newcommand{\err}{{\mathtt{err}}}
 \newcommand{\Empty}{{\mathtt{empty}}}
 \newcommand{\fifo}{{\mathtt{fifo}}}
@@ -104,12 +82,9 @@
 \newcommand{\Next}{{\mathtt{next}}}
 \newcommand{\del}{{\mathtt{del}}}
 \newcommand{\shift}{{\mathtt{shift}}}
-\newcommand{\lis}{{\mathtt{l}}}
-\newcommand{\buf}{{\mathtt{b}}}
-\newcommand{\ele}{{\mathtt{e}}}
-\newcommand{\Ele}{{\mathsf{E}}}
+\newcommand{\lt}{{\mathtt{l}}}
+\newcommand{\e}{{\mathtt{e}}}
 \newcommand{\PR}{{\mathsf{PR}}}
-\newcommand{\x}{{\mathfrak{x}}}
 %*******************************************************
 \usepackage{scalerel}
 
@@ -472,30 +447,33 @@ Formal specification of a buffer with an infinite number of states.
 
 \subsection{Rigid data types}
 
-\begin{example} Specification of lists of arbitrary elements: \tt
- 
- spec! LISTS
+\begin{example} Specification of lists of arbitrary elements: 
+ \begin{itemize} \tt
+ \item [] spec! LISTS
  
  pr BOOL
  
  sorts Elt List .
- 
- op err : -> Elt .
  
  op empty : -> List .
  
  op $\_\comp\_$ : Elt List -> List .
  
  op \_in\_ : Elt List -> Bool .
-  
- eq-1 $\Forall{\Lis}\Lis \comp \err = \Lis$
  
- eq-2 $\Forall{\Ele} \Ele\ \In\ \Empty =\False$
+ vars E E' : Elt .
+ 
+ var L : List .
+\end{itemize} 
 
- eq-3 $\Forall{\Ele,\Ele'} (\Ele\ \In\ \Ele' \comp \Lis)   \If\  \Ele = \Ele'$ 
+\begin{enumerate}[label=(\arabic*)]
+ \item $\Forall{\E} \E \In\ \Empty =\False$
 
- eq-4 $\Forall{\Ele,\Ele'}\Ele\ \In\ \Ele' \comp \Lis = \Ele\ \In\ \Lis\ \If \neg (\Ele = \Ele')$
+ \item $\Forall{\E,\E'} (\E \In\ \E' \comp \L)\   \If  \E = \E'$ 
 
+ \item $\Forall{\E,\E'}\E\In \E' \comp \L = \E\In \L\If \neg (\E = \E')$
+  \setcounter{nr}{\value{enumi}}
+\end{enumerate}
 \end{example}
 
 
@@ -513,35 +491,45 @@ Formal specification of a buffer with an infinite number of states.
  
  \subsection{Flexible data types}
  
- \begin{example} Specification of the attributes $\Read$ and $\del$:\tt
+ \begin{example} Specification of the attributes $\Read$ and $\del$:
+  \begin{itemize} \tt
+  \item[] 
+   spec BUFFER[LISTS,NOMINAL] 
   
-  spec BUFFER[LISTS,NOMINAL] 
-  
-  op read : List -> Elt .
+   op read : List -> [Elt] .
  
-  op del : List -> List .
-  
-  eq-5 $\Forall{\Z}\at{\Z}\Read(\Empty)=\err$
-  
-  eq-6 $\Forall{\Z}\at{\Z}\del(\Empty)=\Empty$
-
-  eq-7 $\Forall{\Ele ,\Lis} \at{\init}\Read(\Ele \comp \Lis) = \Ele$
+   op del : List -> List .
+   
+   var E : Elt .
  
-  eq-8 $\Forall{\Ele,\Lis} \at{\init}\del( \Ele \comp \Lis) = \Lis$ 
+   var L : List .
+   
+   var Z : Nominal .
+   \end{itemize}
+  \begin{enumerate}[label=(\arabic*)]
+  \setcounter{enumi}{\value{nr}}
+  \item $\Forall{\Z}(\at{\Z}\del)(\Empty)=\Empty$
 
-  eq-9 $\Forall{\Z,\Ele,\Lis}\at{\Next(\Z)}\Read(\Ele \comp \Lis)= \at{\Z}\Read(\Lis)$
+  \item $\Forall{\E ,\L} (\at{\init}\Read)(\E \comp \L) = \E$
+ 
+  \item $\Forall{\E,\L} (\at{\init}\del)( \E \comp \L) = \L$ 
 
-  eq-10 $\Forall{\Z,\Ele,\Lis}\at{\Next(\Z)}\del(\Ele \comp \Lis) = \Ele ; \del(\Z,\Lis)$ 
+  \item $\Forall{\Z,\E,\L}(\at{\Next(\Z)}\Read)(\E \comp \L)= (\at{\Z}\Read)(\L)$
+
+  \item $\Forall{\Z,\E,\L}(\at{\Next(\Z)}\del)(\E \comp \L) = \E \comp (\at{\Z}\del)(\L)$ 
+ \end{enumerate} 
  \end{example}
  
  \section{Formal verification}
  
  The property we are interested in proving formally is 
- $\Gamma \vdash \Forall{\Lis, \Ele}  \Exists{\Z} \Read(\Z,\Lis) = \Ele\ \If (\Ele\ \In\ \Lis) = \True$, where $\Gamma$ consists of all equations in $\BUFFER$
- We proceed by induction on the structure of $\Lis$.
+ $\Gamma \vdash_\Sigma \Forall{\L, \E}  \Exists{\Z} (\at{Z}\Read)(\L) = \E\If (\E\In \L) = \True$, where $\Sigma=\Sig(\BUFFER)$ and $\Gamma=\Sen(\BUFFER)$.
+ We proceed by induction on the structure of $\L$.
 \begin{itemize}
-\item induction base: $\Gamma \vdash \Forall{\Ele} \Exists{\Z} \Read(\Z,\Empty) = \Ele\ \If (\Ele\ \In\ \Empty) = \True$
+\item ind. base: $\Gamma \vdash \Forall{\E} \Exists{\Z} (\at{\Z}\Read)(\Empty) = \E\If (\E\In \Empty) = \True$, which is true since $\E\In \Empty=\False$
  
-\item induction step:
+\item ind. step: $\Gamma\cup \{ \Forall{\E} \Exists{\Z} \Read(\Z,\lt) \If (\E \In \lt)=\True  \}\vdash_{\Sig[\lt,\e]} \Forall{\E}  \Exists{\Z} \Read(\Z,\lt\comp\e) = \E\If (\E\In \lt\comp\e) = \True $,
+
+where $\e\colon \to \Elt$ and $\lt\colon\to \List$ 
 \end{itemize}
 \end{document}
