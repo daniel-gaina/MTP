@@ -1,0 +1,54 @@
+spec MBuffer =
+  sorts Elem
+
+  free type List ::= empty | add(Elem; List)
+
+  pred __elem__ : Elem * List
+
+  forall e, e' : Elem; l : List
+  . not (e elem empty)
+  . e elem add(e', l) <=> e = e' \/ e elem l
+
+  free type Nominal ::= init | next(Nominal)
+
+  op read : Nominal * List ->? Elem
+  forall z : Nominal; e : Elem; l : List
+  . read(init, add(e, l)) = e
+  . read(next(z), add(e, l)) = read(z, l)
+
+  %% Theorems ........................................................
+
+  forall e : Elem, l : List
+  . e elem l
+    =>
+    exists z : Nominal
+    . read(z, l) = e
+  %(LProp)% %implied
+  %%
+  %% Proved using SPASS using the comorphism CASL2SoftFOLInduction
+  %% almost instantly
+
+  %% Alternatively, use the following induction axiom and the
+  %% comorphism CASL2SoftFOL. The proof is obtained once again with
+  %% SPASS almost instantly.
+ 
+  . (forall e : Elem
+     . e elem empty
+       => 
+       exists z : Nominal
+       . read(z, empty) = e)
+    /\
+    (forall e, e' : Elem; l : List
+     . e elem add(e', l)
+        /\ (e elem l => exists z : Nominal . read(z, l) = e)
+       =>
+       exists z : Nominal
+       . read(z, add(e', l)) = e)
+    =>
+    forall e : Elem; l : List
+    . e elem l
+      =>
+      exists z : Nominal
+      . read(z, l) = e
+    %(LProp_Induction_scheme)%
+end
