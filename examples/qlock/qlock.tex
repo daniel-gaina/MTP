@@ -1,0 +1,316 @@
+\documentclass{article}
+\usepackage[left=1.5cm, right=1.5cm, top=2cm]{geometry}
+ %*******************************************************
+ \usepackage{booktabs} % For formal tables
+%************************ packages *********************************
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage[inline]{enumitem}
+\usepackage[latin1]{inputenc}
+\usepackage{xy}
+\xyoption{all}
+\usepackage{tikz}
+\usepackage{xcolor}
+
+\usepackage[skip=0pt]{caption}
+
+%\usepackage{mathabx}
+
+%************************ shortcuts ********************************
+\newcommand{\PL}{{\mathsf{PL}}}
+\newcommand{\HPL}{{\mathsf{HPL}}}
+\newcommand{\HPLQ}{{\mathsf{HPLQ}}}
+
+\newcommand{\FOL}{{\mathsf{FOL}}}
+
+\newcommand{\Sig}{\mathsf{Sig}}
+\newcommand{\Mod}{\mathsf{Mod}}
+\newcommand{\Sen}{\mathsf{Sen}}
+
+\newcommand{\Nom}{\mathsf{Nom}}
+\newcommand{\Prop}{\mathsf{Prop}}
+%*******************************************************
+%*******************************************************
+\newcommand{\X}{\mathtt{X}}
+\newcommand{\Y}{\mathtt{Y}}
+\newcommand{\Z}{\mathtt{Z}}
+\newcommand{\Q}{\mathtt{Q}}
+\newcommand{\B}{\mathtt{B}}
+\newcommand{\A}{\mathtt{A}}
+\newcommand{\C}{\mathtt{C}}
+\newcommand{\D}{\mathtt{D}}
+\newcommand{\E}{\mathtt{E}}
+\newcommand{\F}{\mathtt{F}}
+\newcommand{\I}{\mathtt{I}}
+\newcommand{\J}{\mathtt{J}}
+\newcommand{\K}{\mathtt{K}}
+\renewcommand{\L}{\mathtt{L}}
+\newcommand{\N}{{\mathtt{N}}}
+\newcommand{\M}{{\mathtt{M}}}
+\renewcommand{\P}{\mathtt{P}}
+\renewcommand{\S}{\mathtt{S}}
+%*******************************************************
+\newcommand{\ari}{{\mathsf{ar}}}
+\newcommand{\nom}{{\mathsf{n}}}
+\newcommand{\pc}{{\mathtt{pc}}}
+\newcommand{\pid}{{\mathtt{pid}}}
+\newcommand{\sq}{{\mathtt{sq}}}
+\newcommand{\re}{{\mathtt{re}}}
+\newcommand{\wt}{{\mathtt{wt}}}
+\newcommand{\cs}{{\mathtt{cs}}}
+\newcommand{\var}{{\mathtt{var}\ }}
+\newcommand{\vars}{{\mathtt{vars}\ }}
+\newcommand{\op}{{\mathtt{op}\ }}
+\newcommand{\ops}{{\mathtt{ops}\ }}
+%*******************************************************
+\newcommand{\LIST}{{\mathtt{LIST}}}
+\newcommand{\ELT}{{\mathtt{ELT}}}
+\newcommand{\BOOL}{{\mathtt{BOOL}}}
+\newcommand{\List}{{\mathtt{List}}}
+\newcommand{\Elt}{{\mathtt{Elt}}}
+\newcommand{\TRIV}{{\mathtt{TRIV}}}
+\newcommand{\BUFFER}{{\mathtt{BUFFER}}}
+\newcommand{\Pid}{{\mathtt{Pid}}}
+\newcommand{\Sys}{{\mathtt{Sys}}}
+\newcommand{\Agent}{{\mathtt{Agent}}}
+\newcommand{\Sequence}{{\mathtt{Sequence}}}
+\newcommand{\Label}{{\mathtt{Label}}}
+
+\newcommand{\Top}{{\mathtt{top}}}
+\newcommand{\False}{{\mathtt{false}}}
+\newcommand{\True}{{\mathtt{true}}}
+\newcommand{\If}{{\ \mathtt{if}\ }}
+\newcommand{\In}{{\ \mathtt{in}\ }}
+\newcommand{\err}{{\mathtt{err}}}
+\newcommand{\Empty}{{\mathtt{empty}}}
+\newcommand{\fifo}{{\mathtt{fifo}}}
+\newcommand{\lifo}{{\mathtt{lifo}}}
+\newcommand{\Read}{{\mathtt{read}}}
+\newcommand{\init}{{\mathtt{init}}}
+\newcommand{\Next}{{\mathtt{next}}}
+\newcommand{\del}{{\mathtt{del}}}
+\newcommand{\shift}{{\mathtt{shift}}}
+\newcommand{\lt}{{\mathtt{l}}}
+\newcommand{\e}{{\mathtt{e}}}
+\newcommand{\PR}{{\mathsf{PR}}}
+\newcommand{\want}{{\mathtt{want}}}
+\newcommand{\try}{{\mathtt{try}}}
+\newcommand{\exit}{{\mathtt{exit}}}
+\newcommand{\get}{{\mathtt{get}}}
+%*******************************************************
+\usepackage{scalerel}
+
+\newcommand{\bbsemicolon}{%
+  \scalerel*{%
+    \hbox{\usefont{U}{bbold}{m}{n} ;}%
+  }{;}%
+}
+
+\newcommand{\comp}{\mathbin{\bbsemicolon}}
+%*******************************************************
+\newcommand{\modelsm}{\mathrel{\models\!\!\!|}}
+\newcommand{\vdashv}{\mathrel{\vdash\!\!\dashv}}
+\newcommand{\red}{\!\upharpoonright\!\!}
+\newcommand{\ul}{\!\!\_}
+\newcommand{\ur}{\_\!\!}
+%*********sentence building operators********************
+\newcommand{\At}[1]{\mathsf{at}_{#1}\, }
+\newcommand{\at}[1]{@_{#1}\,}
+\newcommand{\nec}[1]{[#1]}
+\newcommand{\store}[1]{{\downarrow}#1\,{\cdot}\,}
+\newcommand{\Forall}[1]{\forall #1\,{\cdot}\,}
+\newcommand{\Exists}[1]{\exists #1\,{\cdot}\,}
+\newcommand{\pos}[1]{{\langle}#1{\rangle}}
+\renewcommand{\land}{\ \bigwedge\ }
+%*******************proof rules**************************
+\newcommand{\inferrule}[2]{$\displaystyle\frac{#1}{#2}$}
+%********************************************************
+%% entailment properties  ........................................
+
+%**************Theorem environments********************************* 
+\newtheorem{framework}{Framework}[section]
+\newtheorem{assumption}{Assumption}
+\newtheorem{notation}{Notation}
+\newtheorem{remark}{Remark}[section]
+\newtheorem{fact}{Fact}[section]
+\newtheorem{example}{Example}
+\newtheorem{lemma}{Lemma}
+%**************Theorem environments********************************* 
+% ***************************************************************
+
+\newcommand{\minisec}[1]{%
+  \par\addvspace{\smallskipamount}\noindent%
+  \textit{#1}.\enspace%
+}
+%*******************************************************
+\begin{document}
+\section{Modeling}
+We present the specification of a mutual exclusion protocol.
+\subsection{Rigid data types}
+
+\begin{example}[Labels]
+ \begin{verbatim}
+ 
+ spec! LABEL
+ sort Label .
+ ops re wt cs : -> Label [ctor].
+ op _~_ : Label Label -> Bool [comm].
+ var  L : Label .
+ eq (re ~ wt) = false .
+ eq (re ~ cs) = false .
+ eq (wt ~ cs) = false .
+---
+ ceq true = false if re = wt .
+ ceq true = false if re = cs .
+ ceq true = false if wt = cs .
+\end{verbatim}
+\end{example}
+
+\begin{example}[Process identifiers]
+\begin{verbatim}
+
+ spec* PID
+ inc BOOL .
+ sort Pid .
+ op _~_ : Pid Pid -> Bool [comm].
+ vars I J : Pid .
+ eq I ~ I = true .
+ ceq I = J if I ~ J [nonexec]. 
+\end{verbatim}
+\end{example}
+
+
+
+\begin{example}[lists of process identifiers] 
+\begin{verbatim}
+ 
+ spec! SEQUENCE{X :: PID}
+ sort Sequence .
+ subsorts X$Pid < Sequence .
+--- constructors 
+ op empty : -> Sequence [ctor] .
+ op _,_ : Sequence Sequence -> Sequence [ctor id: empty assoc].
+ vars Q Q' : Sequence . var I : X$Pid .
+--- 
+ op top : Sequence -> X$Pid .
+ eq top(empty) = empty .
+ eq top(I,Q) = I .
+---
+ op get : Sequence -> Sequence .
+ eq get(empty) = empty .
+ eq get(I,Q) = Q .
+---
+ ceq true = false if Q,I,Q' := empty .
+ ceq [lemma-top]: top(Q,I) = top(Q) if top(Q) :: X$Pid .
+
+\end{verbatim}
+\end{example}
+
+\subsection{Nominals}
+
+\begin{example}[Agents]
+\begin{verbatim}
+ 
+ spec* AGENT
+ sort Agent
+\end{verbatim}
+\end{example}
+
+\begin{example}[Nominals]
+\begin{verbatim} 
+
+ spec! NOMINAL{Y :: AGENT}
+ sorts Sys.
+ --- actions
+ op init : -> Sys [ctor].
+ ops want try exit : Sys Y$Agent -> Sys [ctor].
+\end{verbatim}
+\end{example}
+
+
+\subsection{Flexible data types}
+ \begin{example} [Mutual exclusion protocol] \
+ 
+ \begin{itemize}[leftmargin=*] \tt
+ \item[] spec* QLOCK\{X :: PID, Y :: AGENT\} 
+ 
+ \item[] pr SEQUENCE\{X\} . pr NOMINAL\{Y\} . pr LABEL . 
+ 
+ \item[] \tt --- observers
+
+ \item[] $\op \pid : \to \X\$\Pid $ --- extract pid from agents
+ 
+ \item[] $\op \sq  : \to \Sequence $ --- gives the waiting queue for each state
+ 
+ \item[] $\op \pc  : \to \Label $ --- indicates the label of each agent at a given state
+\end{itemize}
+
+\begin{itemize} [leftmargin=*] \tt
+ \item [] --- variables 
+ 
+ \item[] $\vars \S\ \S_1\ \S_2 : \Sys$
+ 
+ \item[] $\vars \I\ \J\ \K : \X\$\Pid$
+ 
+ \item[] $\vars \A\ \B\ \C : \Y\$\Agent$
+ 
+ \item[] $\var \Q:\Sequence$
+\end{itemize}
+ 
+\begin{enumerate}[label=(\arabic*),leftmargin=*] \tt
+ 
+ \item[] --- restrictions ---
+ 
+ \item $\Forall{\A,\S_1,\S_2}\at{\S_1}\at{\A}\pid=\at{\S_2} \at{\A} \pid$  --- pid depends only of the agent
+ 
+ \item $\Forall{\A,\B,\S}\at{\S}\at{\A}\sq=\at{\S} \at{\B}\sq$ --- sq depends only of the current state
+ 
+ \item[]  --- init ---
+ 
+ \item $\Forall{\A} \at{\init} \at{\A} \pc= \re$
+
+ \item $\at{\init}\sq=\Empty$ 
+ 
+ \item[] --- want --- 
+
+ \item $\Forall{\S,\A,\B} \at{\want(\S,\A)} \at{\B}  \pc=\wt \If \at{\S} \at{\A} \pc=\re \land \A=\B$
+ 
+ \item $\Forall{\S,\A,\B} \at{\want(\S,\A)} \at{\B} \pc= \at{\S} \at{\B} \pc \If  \neg(\A = \B) $
+ 
+ \item $\Forall{\S,\A,\B} \at{\want(\S,\A)} \at{\B}  \pc= \at{\S} \at{\B} \pc \If  \neg(\at{\A}\at{\S}\pc = \re)$
+  
+ \item $\Forall{\S,\A} \at{\want(\S,\A)}\sq = (\at{\S}\sq), (\at{\A} \pid) \If \at{\S} \at{\A} \pc=\re$
+
+ \item $\Forall{\S,\A} \at{\want(\S,\A)}\sq = \at{\S}\sq \If \neg(\at{\S} \at{\A} \pc=\re)$  
+ 
+ \item [] --- try ---
+
+ \item $\Forall{\S,\A,\B} \at{\try(\S,\A)} \at{\B} \pc= \cs \If \at{\S} \at{\A} \pc = \wt \land (\at{\A}\pid), \Q := \at{\S} \sq \land \A = \B$
+ 
+ \item $\Forall{\S,\A,\B} \at{\try(\S,\A)} \at{\B} \pc = \at{\S} \at{\B} \pc \If  \neg(\A=\B)$
+ 
+ \item $\Forall{\S,\A,\B} \at{\try(\S,\A)} \at{\B} \pc=  \at{\S}  \at{\B} \pc \If \neg(\at{\S} \at{\A} \pc = \wt )$
+  
+ \item $\Forall{\S,\A,\B} \at{\B}\at{\try(\S,\A)}\pc= \at{\B} \at{\S} \pc \If  \neg(\Top(\at{\S}\sq) = \at{\A}\pid) $
+  
+
+ \item $\Forall{\S,\A} \at{\try(\S,\A)} \sq = \at{\S}\sq$  
+ 
+ \item [] --- exit ---
+ 
+ \item $\Forall{\S, \A,\B}  \at{\exit(\S,\A) }\at{\B}\pc = \re \text{ if } \at{\S} \at{\A} \pc = \cs \land \A = \B$
+ 
+ \item $\Forall{\S, \A,\B}  \at{\exit(\S,\A) }\at{\B}\pc =  \at{\A }\at{\B}\pc \text{ if } \neg(\A = \B)$
+ 
+ \item $\Forall{\S, \A,\B}  \at{\exit(\S,\A) }\at{\B}\pc =  \at{\A }\at{\B}\pc \text{ if } \neg(\at{\S} \at{\A} \pc = \cs)$
+ 
+ \item $\Forall{\S,\A} \at{\exit(\S,\A)}\sq = \get (\at{\S}\sq) \text{ if } \at{\S}\at{\A} \pc = \cs$
+ 
+  \item $\Forall{\S,\A} \at{\exit(\S,\A)}\sq = \at{\S}\sq \text{ if } \neg(\at{\S}\at{\A} \pc = \cs)$
+ \end{enumerate}
+ 
+ \end{example}
+
+\end{document}
