@@ -21,20 +21,46 @@ fmod AUX-MODULE-OPS is
 
  var  SSDS : SubsortDeclSet .
  vars IL IL' : ImportList .
- var  OPDS : OpDeclSet .
- var  SS : SortSet .
- var  MAS : MembAxSet .
  var  EqS : EquationSet .
+ vars ODS ODS' : OpDeclSet .
+ vars SS SS' : SortSet .
+ var  MAS : MembAxSet .
+ var  Ct : Constant .
  var  RS : RuleSet .
  var  M : Module .
  var  H : Header .
+ var  Q : Qid .
 
  op setImports : Module ImportList -> Module .
- eq setImports(fmod H is IL sorts SS . SSDS OPDS MAS EqS endfm, IL')
-    = fmod H is IL' sorts SS . SSDS OPDS MAS EqS endfm .
- eq setImports(mod H is IL sorts SS . SSDS OPDS MAS EqS RS endm, IL')
-    = mod H is IL' sorts SS . SSDS OPDS MAS EqS RS endm .
+ eq setImports(fmod H is IL sorts SS . SSDS ODS MAS EqS endfm, IL')
+    = fmod H is IL' sorts SS . SSDS ODS MAS EqS endfm .
+ eq setImports(mod H is IL sorts SS . SSDS ODS MAS EqS RS endm, IL')
+    = mod H is IL' sorts SS . SSDS ODS MAS EqS RS endm .
+
+ op setSorts : Module SortSet -> Module .
+ eq setSorts(fmod H is IL sorts SS . SSDS ODS MAS EqS endfm, SS')
+    = fmod H is IL sorts SS' . SSDS ODS MAS EqS endfm .
+ eq setSorts(mod H is IL sorts SS . SSDS ODS MAS EqS RS endm, SS')
+    = mod H is IL sorts SS' . SSDS ODS MAS EqS RS endm .
+
+ op setOps : Module OpDeclSet -> Module .
+ eq setOps(fmod H is IL sorts SS . SSDS ODS MAS EqS endfm, ODS')
+    = fmod H is IL sorts SS . SSDS ODS' MAS EqS endfm .
+ eq setOps(mod H is IL sorts SS . SSDS ODS MAS EqS RS endm, ODS')
+    = mod H is IL sorts SS . SSDS ODS' MAS EqS RS endm .
 
  op addImports : Module ImportList -> Module .
  eq addImports(M, IL) = setImports(M, (getImports(M) IL)) .
+
+ op addSorts : Module SortSet -> Module .
+ eq addSorts(M, SS) = setSorts(M, getSorts(M) ; SS) .
+
+ op addOps : Module OpDeclSet -> Module .
+ eq addOps(M, ODS) = setOps(M, getOps(M) ODS) .
+
+ op downQid : Term -> [Qid] [memo] .
+ eq downQid(Ct) = qid(substr(string(getName(Ct)), 1, length(string(getName(Ct))))) .
+
+ op emptyModule : Qid -> Module .
+ eq emptyModule(Q) = mod Q is nil sorts none . none none none none none endm .
 endfm

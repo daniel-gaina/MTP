@@ -1,3 +1,7 @@
-hlogic Foo =
-hybridizeBase Foo1
-Foo2
+spec MyLogic =
+
+  rigid sort Sort1
+  rigid sort Sort2
+
+  nominal pred myPred : Sort1 * Sort2
+  . Foo2

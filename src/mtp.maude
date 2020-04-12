@@ -4,12 +4,23 @@ load file.maude
 fmod MTP-SIGN is
  pr META-LEVEL .
 
- sorts HLogicDef HLogic @Token@ @Bubble@ .
+ sorts Spec @Sen@ @SenList@ @Token@ @Bubble@ @Arity@ @Def@ @DefSet@
+       @NeTokenList@ .
+ subsort @Sen@ < @SenList@ .
+ subsort @Token@ < @Arity@ .
+ subsort @Def@ < @DefSet@ .
 
- op hlogic_=_ : @Token@ HLogic -> HLogicDef [ctor] .
+ op __ : @SenList@ @SenList@ -> @SenList@ [ctor assoc] .
+ op __ : @DefSet@ @DefSet@ -> @DefSet@ [ctor assoc comm] .
 
- op hybridizeBase__ : @Token@ @Token@ -> HLogic [ctor] .
- op addQuantOrConstr__ : @Token@ @Token@ -> HLogic [ctor] .
+ op _*_ : @Arity@ @Arity@ -> @Arity@ [ctor assoc] .
+
+ op spec_=_ : @Token@ @DefSet@ -> Spec [ctor] .
+
+ op rigid`sort_ : @Token@ -> @Def@ [ctor] .
+ op nominal`pred_:__ : @Token@ @Arity@ @SenList@ -> @Def@ [ctor] .
+
+ op ._ : @Token@ -> @Sen@ [ctor] .
 endfm
 
 fmod META-MTP-SIGN is
@@ -38,6 +49,12 @@ fmod META-MTP-SIGN is
                                   'subclass 'subclasses 'op 'ops
                                   'protecting 'pr 'including 'inc 'extending
                                   'ctor 'assoc 'comm '==)))] .
+        op 'neTokenList : 'QidList -> '@NeTokenList@
+             [special(
+               (id-hook('Bubble, '1 '-1 '`( '`))
+                op-hook('qidListSymbol, '__, 'QidList 'QidList, 'QidList)
+                op-hook('qidSymbol, '<Qids>, nil, 'Qid)
+                id-hook('Exclude, '. ':)))] .
         none
         none
      endfm) .
@@ -50,21 +67,57 @@ fmod COMMAND-PROCESSING is
  pr META-LEVEL .
  pr LEXICAL .
 
+ vars T T' T'' T1 T2 : Term .
  var  RP? : [ResultPair] .
- vars T T' T1 T2 : Term .
+ vars M M' M'' : Module .
+ var  TyL : TypeList .
+ var  TL : TermList .
  vars S S' : String .
  var  QIL : QidList .
  vars Q Q' : Qid .
  var  Srt : Sort .
 
- op foo : -> Module .
+ op parseModName : Term -> Qid .
+ eq parseModName(T) = downQid(T) .
 
  op parseModule : Term -> Module .
- eq parseModule('hlogic_=_['token[T],T']) = foo .
+ ceq parseModule('spec_=_['token[T],T']) = parseModule2(M, T')
+  if Q := downQid(T) /\
+     M := emptyModule(Q) .
+
+ op parseModule2 : Module Term -> Module .
+ ceq parseModule2(M, '__[T, T']) = M''
+  if M' := parseDef(M, T) /\
+     M'' := parseModule2(M', T') .
+ eq parseModule2(M, T) = parseDef(M, T) [owise] .
+
+ op parseDef : Module Term -> Module .
+ ceq parseDef(M, 'rigid`sort_['token[T]]) = M'
+  if Srt := downQid(T) /\
+     M' := addSorts(M, Srt) .
+ ceq parseDef(M, 'nominal`pred_:__['token[T],T',T'']) = M''
+  if Q := downQid(T) /\
+     TyL := parseTypeList(M, T') /\
+     M' := addOps(M, op Q : TyL -> 'Bool [none] .) /\
+     M'' := parseSen(M', T'') .
+ eq parseDef(M, T) = M [owise print "owise"] . *** TODO!!!
+
+ op parseSen : Module Term -> Module .
+ eq parseSen(M, T) = M .
+
+ op parseTypeList : Module Term -> TypeList .
+ ceq parseTypeList(M, 'token[T]) = Q
+  if Q := downQid(T) .
+ eq parseTypeList(M, '_*_[TL]) = parseTypeList*(M, TL) .
+
+ op parseTypeList* : Module TermList -> TypeList .
+ eq parseTypeList*(M, empty) = nil .
+ eq parseTypeList*(M, (T, TL)) = parseTypeList(M, T) parseTypeList*(M, TL) .
 
  op parseModule : String -> Module .
- ceq parseModule(S) = parseModule(T)
-  if {T, Srt} := metaParse(GRAMMAR, tokenize(S), anyType) [print T " - " Srt] .
+ ceq parseModule(S) = M
+  if {T, Srt} := metaParse(GRAMMAR, tokenize(S), anyType) /\
+     M := parseModule(T) [print T " - " Srt "\n" M] .
 
  op isLoadComm : String -> Bool .
  ceq isLoadComm(S) = true
@@ -164,7 +217,7 @@ mod MTP is
     wrote(mtp, stdout)
     < mtp : MTP | Attrs >
  => < mtp : MTP | Attrs >
-    getLine(stdin, mtp, "MTP> ")  .
+    getLine(stdin, mtp, "MTP> ") .
 
  ***                        ***
  ***          RUN           ***
