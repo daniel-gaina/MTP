@@ -247,7 +247,7 @@ We present the specification of a mutual exclusion protocol.
  
  \item[] \tt --- observers
 
- \item[] $\op \pid : \to \X\$\Pid $ --- extract pid from agents
+ \item[] $\op \pid : \to \X\$\Pid $ --- extract pid from agents 
  
  \item[] $\op \sq  : \to \Sequence $ --- gives the waiting queue for each state
  
@@ -255,7 +255,7 @@ We present the specification of a mutual exclusion protocol.
 \end{itemize}
 
 \begin{itemize} [leftmargin=*] \tt
- \item [] --- variables 
+ \item[] --- variables 
  
  \item[] $\vars \S\ \S_1\ \S_2 : \Sys$
  
@@ -381,10 +381,10 @@ We are interested in proving formally
       & by case analysis  \\
       
       $\QLOCK_{TC}+\{\a=\b, \at{\s}\at{\b}\pc =\re \}\vdash \newline
-      \Top(\at{\s}\sq,\at{\b}\pid)=\at{\b}\pid\text{ if } \re =\cs$ & by rew  \\
+      \Top(\at{\s}\sq,\at{\b}\pid)=\at{\b}\pid\text{ if } \wt =\cs$ & by rew  \\
       
-      discharged & since $\QLOCK\vdash \true =\false \text{ if } \re=\cs$   
-     \endsubsteps
+      discharged & since $\QLOCK\vdash \true =\false \text{ if } \wt=\cs$   
+     %\endsubsteps
    \end{proofsteps}   
    
  \item[$\try$]
