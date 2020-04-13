@@ -1,5 +1,6 @@
 \documentclass{article}
 \usepackage[left=1.5cm, right=1.5cm, top=2cm]{geometry}
+\input{env}
  %*******************************************************
  \usepackage{booktabs} % For formal tables
 %************************ packages *********************************
@@ -13,7 +14,7 @@
 \xyoption{all}
 \usepackage{tikz}
 \usepackage{xcolor}
-
+\usepackage[colorlinks=true,linkcolor=green]{hyperref}
 \usepackage[skip=0pt]{caption}
 
 %\usepackage{mathabx}
@@ -52,6 +53,9 @@
 \renewcommand{\P}{\mathtt{P}}
 \renewcommand{\S}{\mathtt{S}}
 %*******************************************************
+\renewcommand{\a}{{\mathtt{a}}}
+\renewcommand{\b}{{\mathtt{b}}}
+\newcommand{\s}{{\mathtt{s}}}
 \newcommand{\ari}{{\mathsf{ar}}}
 \newcommand{\nom}{{\mathsf{n}}}
 \newcommand{\pc}{{\mathtt{pc}}}
@@ -66,6 +70,7 @@
 \newcommand{\ops}{{\mathtt{ops}\ }}
 %*******************************************************
 \newcommand{\LIST}{{\mathtt{LIST}}}
+\newcommand{\QLOCK}{{\mathtt{QLOCK}}}
 \newcommand{\ELT}{{\mathtt{ELT}}}
 \newcommand{\BOOL}{{\mathtt{BOOL}}}
 \newcommand{\List}{{\mathtt{List}}}
@@ -79,8 +84,8 @@
 \newcommand{\Label}{{\mathtt{Label}}}
 
 \newcommand{\Top}{{\mathtt{top}}}
-\newcommand{\False}{{\mathtt{false}}}
-\newcommand{\True}{{\mathtt{true}}}
+\newcommand{\false}{{\mathtt{false}}}
+\newcommand{\true}{{\mathtt{true}}}
 \newcommand{\If}{{\ \mathtt{if}\ }}
 \newcommand{\In}{{\ \mathtt{in}\ }}
 \newcommand{\err}{{\mathtt{err}}}
@@ -144,6 +149,8 @@
   \par\addvspace{\smallskipamount}\noindent%
   \textit{#1}.\enspace%
 }
+%*******************************************************
+\newcounter{nr}
 %*******************************************************
 \begin{document}
 \section{Modeling}
@@ -259,58 +266,129 @@ We present the specification of a mutual exclusion protocol.
  \item[] $\var \Q:\Sequence$
 \end{itemize}
  
-\begin{enumerate}[label=(\arabic*),leftmargin=*] \tt
+\begin{enumerate}[label=(\arabic*),ref=\arabic*, leftmargin=*] \tt
  
  \item[] --- restrictions ---
  
- \item $\Forall{\A,\S_1,\S_2}\at{\S_1}\at{\A}\pid=\at{\S_2} \at{\A} \pid$  --- pid depends only of the agent
+ \item \label{sen-1} $\Forall{\A,\S_1,\S_2}\at{\S_1}\at{\A}\pid=\at{\S_2} \at{\A} \pid$  --- pid depends only of the agent
  
- \item $\Forall{\A,\B,\S}\at{\S}\at{\A}\sq=\at{\S} \at{\B}\sq$ --- sq depends only of the current state
+ \item \label{sen-2} $\Forall{\A,\B,\S}\at{\S}\at{\A}\sq=\at{\S} \at{\B}\sq$ --- sq depends only of the current state
  
  \item[]  --- init ---
  
- \item $\Forall{\A} \at{\init} \at{\A} \pc= \re$
+ \item \label{sen-3}$\Forall{\A} \at{\init} \at{\A} \pc= \re$
 
- \item $\at{\init}\sq=\Empty$ 
+ \item \label{sen-4}$\at{\init}\sq=\Empty$ 
  
  \item[] --- want --- 
 
- \item $\Forall{\S,\A,\B} \at{\want(\S,\A)} \at{\B}  \pc=\wt \If \at{\S} \at{\A} \pc=\re \land \A=\B$
+ \item \label{sen-5}$\Forall{\S,\A,\B} \at{\want(\S,\A)} \at{\B}  \pc=\wt \If \at{\S} \at{\A} \pc=\re \land \A=\B$
  
- \item $\Forall{\S,\A,\B} \at{\want(\S,\A)} \at{\B} \pc= \at{\S} \at{\B} \pc \If  \neg(\A = \B) $
+ \item \label{sen-6}$\Forall{\S,\A,\B} \at{\want(\S,\A)} \at{\B} \pc= \at{\S} \at{\B} \pc \If  \neg(\A = \B) $
  
- \item $\Forall{\S,\A,\B} \at{\want(\S,\A)} \at{\B}  \pc= \at{\S} \at{\B} \pc \If  \neg(\at{\A}\at{\S}\pc = \re)$
+ \item \label{sen-7}$\Forall{\S,\A,\B} \at{\want(\S,\A)} \at{\B}  \pc= \at{\S} \at{\B} \pc \If  \neg(\at{\A}\at{\S}\pc = \re)$
   
- \item $\Forall{\S,\A} \at{\want(\S,\A)}\sq = (\at{\S}\sq), (\at{\A} \pid) \If \at{\S} \at{\A} \pc=\re$
+ \item \label{sen-8}$\Forall{\S,\A} \at{\want(\S,\A)}\sq = (\at{\S}\sq), (\at{\A} \pid) \If \at{\S} \at{\A} \pc=\re$
 
- \item $\Forall{\S,\A} \at{\want(\S,\A)}\sq = \at{\S}\sq \If \neg(\at{\S} \at{\A} \pc=\re)$  
+ \item \label{sen-9}$\Forall{\S,\A} \at{\want(\S,\A)}\sq = \at{\S}\sq \If \neg(\at{\S} \at{\A} \pc=\re)$  
  
- \item [] --- try ---
+ \item[] --- try ---
 
- \item $\Forall{\S,\A,\B} \at{\try(\S,\A)} \at{\B} \pc= \cs \If \at{\S} \at{\A} \pc = \wt \land (\at{\A}\pid), \Q := \at{\S} \sq \land \A = \B$
+ \item \label{sen-10}$\Forall{\S,\A,\B} \at{\try(\S,\A)} \at{\B} \pc= \cs \If \at{\S} \at{\A} \pc = \wt \land (\at{\A}\pid), \Q := \at{\S} \sq \land \A = \B$
  
- \item $\Forall{\S,\A,\B} \at{\try(\S,\A)} \at{\B} \pc = \at{\S} \at{\B} \pc \If  \neg(\A=\B)$
+ \item \label{sen-11}$\Forall{\S,\A,\B} \at{\try(\S,\A)} \at{\B} \pc = \at{\S} \at{\B} \pc \If  \neg(\A=\B)$
  
- \item $\Forall{\S,\A,\B} \at{\try(\S,\A)} \at{\B} \pc=  \at{\S}  \at{\B} \pc \If \neg(\at{\S} \at{\A} \pc = \wt )$
+ \item \label{sen-12}$\Forall{\S,\A,\B} \at{\try(\S,\A)} \at{\B} \pc=  \at{\S}  \at{\B} \pc \If \neg(\at{\S} \at{\A} \pc = \wt )$
   
- \item $\Forall{\S,\A,\B} \at{\B}\at{\try(\S,\A)}\pc= \at{\B} \at{\S} \pc \If  \neg(\Top(\at{\S}\sq) = \at{\A}\pid) $
+ \item \label{sen-13}$\Forall{\S,\A,\B} \at{\B}\at{\try(\S,\A)}\pc= \at{\B} \at{\S} \pc \If  \neg(\Top(\at{\S}\sq) = \at{\A}\pid) $
   
 
- \item $\Forall{\S,\A} \at{\try(\S,\A)} \sq = \at{\S}\sq$  
+ \item \label{sen-14}$\Forall{\S,\A} \at{\try(\S,\A)} \sq = \at{\S}\sq$  
  
- \item [] --- exit ---
+ \item[] --- exit ---
  
- \item $\Forall{\S, \A,\B}  \at{\exit(\S,\A) }\at{\B}\pc = \re \text{ if } \at{\S} \at{\A} \pc = \cs \land \A = \B$
+ \item \label{sen-15}$\Forall{\S, \A,\B}  \at{\exit(\S,\A) }\at{\B}\pc = \re \text{ if } \at{\S} \at{\A} \pc = \cs \land \A = \B$
  
- \item $\Forall{\S, \A,\B}  \at{\exit(\S,\A) }\at{\B}\pc =  \at{\A }\at{\B}\pc \text{ if } \neg(\A = \B)$
+ \item \label{sen-16}$\Forall{\S, \A,\B}  \at{\exit(\S,\A) }\at{\B}\pc =  \at{\A }\at{\B}\pc \text{ if } \neg(\A = \B)$
  
- \item $\Forall{\S, \A,\B}  \at{\exit(\S,\A) }\at{\B}\pc =  \at{\A }\at{\B}\pc \text{ if } \neg(\at{\S} \at{\A} \pc = \cs)$
+ \item \label{sen-17}$\Forall{\S, \A,\B}  \at{\exit(\S,\A) }\at{\B}\pc =  \at{\A }\at{\B}\pc \text{ if } \neg(\at{\S} \at{\A} \pc = \cs)$
  
- \item $\Forall{\S,\A} \at{\exit(\S,\A)}\sq = \get (\at{\S}\sq) \text{ if } \at{\S}\at{\A} \pc = \cs$
+ \item \label{sen-18}$\Forall{\S,\A} \at{\exit(\S,\A)}\sq = \get (\at{\S}\sq) \text{ if } \at{\S}\at{\A} \pc = \cs$
  
-  \item $\Forall{\S,\A} \at{\exit(\S,\A)}\sq = \at{\S}\sq \text{ if } \neg(\at{\S}\at{\A} \pc = \cs)$
+  \item \label{sen-19}$\Forall{\S,\A} \at{\exit(\S,\A)}\sq = \at{\S}\sq \text{ if } \neg(\at{\S}\at{\A} \pc = \cs)$
+  \setcounter{nr}{\value{enumi}}
  \end{enumerate}
  
  \end{example}
 
+\section{Formal verification}
+
+We are interested in proving formally 
+ $\QLOCK\vdash\Forall{\S,\A}\Top(\at{\S}\sq)=\at{\A}\pid\text{ if } \at{\S}\at{\A}\pc=\cs$.
+ 
+ ==============================================
+   \begin{enumerate}[label=(\arabic*),ref=\arabic*,leftmargin=*] \tt
+   \setcounter{enumi}{\value{nr}}
+   \item [] spec $\QLOCK_I$
+   
+   \item [] pr QLOCK .
+   
+   \item [] op s : -> Sys .
+   
+   \setcounter{enumi}{\value{nr}}
+   \item  $\Forall{\A}\Top(\at{\s}\sq)=\at{\A}\pid\text{ if } \at{\s}\at{\A}\pc=\cs$ [induction hypothesis].
+   \setcounter{nr}{\value{enumi}}
+   \end{enumerate}
+  
+  ==============================================
+  \begin{enumerate}[label=(\arabic*),ref=\arabic*,leftmargin=*] \tt
+   \setcounter{enumi}{\value{nr}} 
+   
+    \item[] spec $\QLOCK_{TC}$
+    
+    \item[] pr $\QLOCK_I$ .
+    
+    \item[] op a b : -> Y\$Agent . 
+    
+   \end{enumerate}
+   
+  ==============================================
+ 
+ Apply induction on $\S$:
+ 
+ \begin{proofcases}[itemsep=1ex]
+ \item [$\init$] In this case,
+ \begin{proofsteps}{25em}
+  $\QLOCK\vdash\Forall{\A}\Top(\at{\init}\sq)=\at{\A}\pid\text{ if } \at{\init}\at{\A}\pc=\cs$ & \\
+  
+  $\QLOCK\vdash\Forall{\A}\Top(\at{\init}\sq)=\at{\A}\pid\text{ if } \re = \cs$ & by sentence (\ref{sen-3}) \\
+  
+  discharged & since $\QLOCK\vdash \true =\false \text{ if } \re=\cs$   
+  
+  
+  \end{proofsteps} 
+ \item [$\want$] \
+    
+   
+   \begin{proofsteps}{30em}
+    $\QLOCK_I\vdash \Forall{\A,\B}\Top(\at{\want(\s,\B)}\sq)=\at{\A}\pid\text{ if } \at{\want(\s,\B)}\at{\A}\pc=\cs$ & \\
+    
+    $\QLOCK_{TC}\vdash \Top(\at{\want(\s,\b)}\sq)=\at{\a}\pid\text{ if } \at{\want(\s,\b)}\at{\a}\pc=\cs$ & 
+     
+     \substeps{9}
+      $\QLOCK_{TC}+\{\b=\a, \at{\s}\at{\b}\pc =\re \}\vdash \newline 
+      \Top(\at{\want(\s,\b)}\sq)=\at{\a}\pid\text{ if } \at{\want(\s,\b)}\at{\a}\pc=\cs$ 
+      & by case analysis  \\
+      
+      $\QLOCK_{TC}+\{\a=\b, \at{\s}\at{\b}\pc =\re \}\vdash \newline
+      \Top(\at{\s}\sq,\at{\b}\pid)=\at{\b}\pid\text{ if } \re =\cs$ & by rew  \\
+      
+      discharged & since $\QLOCK\vdash \true =\false \text{ if } \re=\cs$   
+     \endsubsteps
+   \end{proofsteps}   
+   
+ \item[$\try$]
+ 
+ \item[$\exit$]
+ \end{proofcases}
 \end{document}
