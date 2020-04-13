@@ -98,7 +98,7 @@ fmod COMMAND-PROCESSING is
  ceq parseDef(M, 'nominal`pred_:__['token[T],T',T'']) = M''
   if Q := downQid(T) /\
      TyL := parseTypeList(M, T') /\
-     M' := addOps(M, op Q : TyL -> 'Bool [none] .) /\
+     M' := addOps(M, op Q : TyL -> 'Bool [metadata("nominal")] .) /\
      M'' := parseSen(M', T'') .
  eq parseDef(M, T) = M [owise print "owise"] . *** TODO!!!
 
