@@ -374,8 +374,11 @@ We are interested in proving formally
     $\QLOCK_I\vdash \Forall{\A,\B}\Top(\at{\want(\s,\B)}\sq)=\at{\A}\pid\text{ if } \at{\want(\s,\B)}\at{\A}\pc=\cs$ & \\
     
     $\QLOCK_{TC}\vdash \Top(\at{\want(\s,\b)}\sq)=\at{\a}\pid\text{ if } \at{\want(\s,\b)}\at{\a}\pc=\cs$ & 
-     
-     \substeps{9}
+   \end{proofsteps}   
+   
+   \begin{proofcases}[itemsep=1ex]
+    \item[$b=a$, $\at{\s}\at{\b}\pc=\re$]
+     \begin{proofsteps}{30em}
       $\QLOCK_{TC}+\{\b=\a, \at{\s}\at{\b}\pc =\re \}\vdash \newline 
       \Top(\at{\want(\s,\b)}\sq)=\at{\a}\pid\text{ if } \at{\want(\s,\b)}\at{\a}\pc=\cs$ 
       & by case analysis  \\
@@ -383,9 +386,33 @@ We are interested in proving formally
       $\QLOCK_{TC}+\{\a=\b, \at{\s}\at{\b}\pc =\re \}\vdash \newline
       \Top(\at{\s}\sq,\at{\b}\pid)=\at{\b}\pid\text{ if } \wt =\cs$ & by rew  \\
       
-      discharged & since $\QLOCK\vdash \true =\false \text{ if } \wt=\cs$   
-     %\endsubsteps
-   \end{proofsteps}   
+      discharged & since $\QLOCK\vdash \true =\false \text{ if } \wt=\cs$  
+     \end{proofsteps}
+    
+    \item[$\neg(b=a)$]
+      \begin{proofsteps}{30em}
+      $\QLOCK_{TC}+\{\b\sim\a=\false \}\vdash \newline 
+      \Top(\at{\want(\s,\b)}\sq)=\at{\a}\pid\text{ if } \at{\want(\s,\b)}\at{\a}\pc=\cs$ 
+      & by case analysis  \\
+      
+      $\QLOCK_{TC}+\{\a\sim\b=\false\}\vdash \newline
+      \Top(\at{\s}\sq)=\at{\a}\pid\text{ if } \at{\s}\at{\a}\pc =\cs$ & by rew  \\
+      
+      discharged &  by the induction hypothesis
+     \end{proofsteps}
+    
+    \item[$\neg(\at{\s}\at{\b}\pc)=\re$]
+     \begin{proofsteps}{30em}
+      $\QLOCK_{TC}+\{ \at{\s}\at{\b}\pc\sim \re=\false \}\vdash \newline 
+      \Top(\at{\want(\s,\b)}\sq)=\at{\a}\pid\text{ if } \at{\want(\s,\b)}\at{\a}\pc=\cs$ 
+      & by case analysis  \\
+      
+      $\QLOCK_{TC}+\{ \at{\s}\at{\b}\pc\sim \re=\false \}\vdash \newline
+      \Top(\at{\s}\sq)=\at{\a}\pid\text{ if } \at{\s}\at{\a}\pc =\cs$ & by rew  \\
+      
+      discharged &  by the induction hypothesis
+     \end{proofsteps}
+   \end{proofcases}
    
  \item[$\try$]
  

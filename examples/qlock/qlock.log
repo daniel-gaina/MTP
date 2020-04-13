@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2019.4.1)  13 APR 2020 18:24
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2019.4.1)  13 APR 2020 20:29
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -966,19 +966,29 @@ LaTeX Font Warning: Font shape `OMS/cmtt/m/n' undefined
 
 \@EveryShipout@Output ...@Org@Shipout \box \@cclv 
                                                   
-l.392  \item[$\exit$]
-                     pdfTeX warning (ext4): destination with the same identifie
-r (name{table.1}) has been already used, duplicate ignored
+l.402      \end{proofsteps}
+                           pdfTeX warning (ext4): destination with the same ide
+ntifier (name{table.1}) has been already used, duplicate ignored
 
 \@EveryShipout@Output ...@Org@Shipout \box \@cclv 
                                                   
-l.392  \item[$\exit$]
-                     ] [4]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 394.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 394.
+l.402      \end{proofsteps}
+                           ]pdfTeX warning (ext4): destination with the same id
+entifier (name{table.1}) has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.402      \end{proofsteps}
+                           pdfTeX warning (ext4): destination with the same ide
+ntifier (name{table.1}) has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.414      \end{proofsteps}
+                            [4]
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 421.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 421.
  (./qlock.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 394.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 394.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 421.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 421.
 Package rerunfilecheck Info: File `qlock.out' has not changed.
 (rerunfilecheck)             Checksum: E0E933A0C6647EFC0ED034D5B0EB4BF7;287.
 
@@ -987,13 +997,13 @@ LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
  ) 
 Here is how much of TeX's memory you used:
- 21588 strings out of 492649
- 378894 string characters out of 6129623
- 516392 words of memory out of 5000000
- 25031 multiletter control sequences out of 15000+600000
+ 21598 strings out of 492649
+ 378961 string characters out of 6129623
+ 517464 words of memory out of 5000000
+ 25032 multiletter control sequences out of 15000+600000
  14304 words of font info for 61 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 55i,9n,54p,3206b,566s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 55i,9n,54p,3206b,736s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb
 ></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb>
 </usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb><
@@ -1010,13 +1020,14 @@ ive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/local/texlive
 texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2018/t
 exmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive/2018/tex
 mf-dist/fonts/type1/public/amsfonts/cm/cmsy9.pfb></usr/local/texlive/2018/texmf
--dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/local/texlive/2018/texmf-
-dist/fonts/type1/public/amsfonts/cm/cmtt8.pfb></usr/local/texlive/2018/texmf-di
-st/fonts/type1/public/amsfonts/cm/cmtt9.pfb>
-Output written on qlock.pdf (4 pages, 189162 bytes).
+-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/local/texlive/2018/texmf-
+dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/local/texlive/2018/texmf-d
+ist/fonts/type1/public/amsfonts/cm/cmtt8.pfb></usr/local/texlive/2018/texmf-dis
+t/fonts/type1/public/amsfonts/cm/cmtt9.pfb>
+Output written on qlock.pdf (4 pages, 198869 bytes).
 PDF statistics:
- 168 PDF objects out of 1000 (max. 8388607)
- 141 compressed objects within 2 object streams
- 42 named destinations out of 1000 (max. 500000)
+ 183 PDF objects out of 1000 (max. 8388607)
+ 155 compressed objects within 2 object streams
+ 51 named destinations out of 1000 (max. 500000)
  53 words of extra memory for PDF output out of 10000 (max. 10000000)
 
