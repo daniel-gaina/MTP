@@ -54,6 +54,7 @@
 \renewcommand{\S}{\mathtt{S}}
 %*******************************************************
 \renewcommand{\a}{{\mathtt{a}}}
+\newcommand{\q}{{\mathtt{q}}}
 \renewcommand{\b}{{\mathtt{b}}}
 \newcommand{\s}{{\mathtt{s}}}
 \newcommand{\ari}{{\mathsf{ar}}}
@@ -284,23 +285,23 @@ We present the specification of a mutual exclusion protocol.
 
  \item \label{sen-5}$\Forall{\S,\A,\B} \at{\want(\S,\A)} \at{\B}  \pc=\wt \If \at{\S} \at{\A} \pc=\re \land \A=\B$
  
- \item \label{sen-6}$\Forall{\S,\A,\B} \at{\want(\S,\A)} \at{\B} \pc= \at{\S} \at{\B} \pc \If  \neg(\A = \B) $
+ \item \label{sen-6}$\Forall{\S,\A,\B} \at{\want(\S,\A)} \at{\B} \pc= \at{\S} \at{\B} \pc \If  \A \sim \B =\false $
  
- \item \label{sen-7}$\Forall{\S,\A,\B} \at{\want(\S,\A)} \at{\B}  \pc= \at{\S} \at{\B} \pc \If  \neg(\at{\A}\at{\S}\pc = \re)$
+ \item \label{sen-7}$\Forall{\S,\A,\B} \at{\want(\S,\A)} \at{\B}  \pc= \at{\S} \at{\B} \pc \If  \at{\A}\at{\S}\pc \sim \re =\false$
   
  \item \label{sen-8}$\Forall{\S,\A} \at{\want(\S,\A)}\sq = (\at{\S}\sq), (\at{\A} \pid) \If \at{\S} \at{\A} \pc=\re$
 
- \item \label{sen-9}$\Forall{\S,\A} \at{\want(\S,\A)}\sq = \at{\S}\sq \If \neg(\at{\S} \at{\A} \pc=\re)$  
+ \item \label{sen-9}$\Forall{\S,\A} \at{\want(\S,\A)}\sq = \at{\S}\sq \If \at{\S} \at{\A} \pc \sim \re=\false$  
  
  \item[] --- try ---
 
  \item \label{sen-10}$\Forall{\S,\A,\B} \at{\try(\S,\A)} \at{\B} \pc= \cs \If \at{\S} \at{\A} \pc = \wt \land (\at{\A}\pid), \Q := \at{\S} \sq \land \A = \B$
  
- \item \label{sen-11}$\Forall{\S,\A,\B} \at{\try(\S,\A)} \at{\B} \pc = \at{\S} \at{\B} \pc \If  \neg(\A=\B)$
+ \item \label{sen-11}$\Forall{\S,\A,\B} \at{\try(\S,\A)} \at{\B} \pc = \at{\S} \at{\B} \pc \If  \A \sim \B =\false$
  
- \item \label{sen-12}$\Forall{\S,\A,\B} \at{\try(\S,\A)} \at{\B} \pc=  \at{\S}  \at{\B} \pc \If \neg(\at{\S} \at{\A} \pc = \wt )$
+ \item \label{sen-12}$\Forall{\S,\A,\B} \at{\try(\S,\A)} \at{\B} \pc=  \at{\S}  \at{\B} \pc \If \at{\S} \at{\A} \pc \sim \wt = \false$
   
- \item \label{sen-13}$\Forall{\S,\A,\B} \at{\B}\at{\try(\S,\A)}\pc= \at{\B} \at{\S} \pc \If  \neg(\Top(\at{\S}\sq) = \at{\A}\pid) $
+ \item \label{sen-13}$\Forall{\S,\A,\B} \at{\B}\at{\try(\S,\A)}\pc= \at{\B} \at{\S} \pc \If  \Top(\at{\S}\sq) \sim \at{\A}\pid =\false $
   
 
  \item \label{sen-14}$\Forall{\S,\A} \at{\try(\S,\A)} \sq = \at{\S}\sq$  
@@ -309,13 +310,13 @@ We present the specification of a mutual exclusion protocol.
  
  \item \label{sen-15}$\Forall{\S, \A,\B}  \at{\exit(\S,\A) }\at{\B}\pc = \re \text{ if } \at{\S} \at{\A} \pc = \cs \land \A = \B$
  
- \item \label{sen-16}$\Forall{\S, \A,\B}  \at{\exit(\S,\A) }\at{\B}\pc =  \at{\A }\at{\B}\pc \text{ if } \neg(\A = \B)$
+ \item \label{sen-16}$\Forall{\S, \A,\B}  \at{\exit(\S,\A) }\at{\B}\pc =  \at{\A }\at{\B}\pc \text{ if } \A \sim \B =\false$
  
- \item \label{sen-17}$\Forall{\S, \A,\B}  \at{\exit(\S,\A) }\at{\B}\pc =  \at{\A }\at{\B}\pc \text{ if } \neg(\at{\S} \at{\A} \pc = \cs)$
+ \item \label{sen-17}$\Forall{\S, \A,\B}  \at{\exit(\S,\A) }\at{\B}\pc =  \at{\A }\at{\B}\pc \text{ if } \at{\S} \at{\A} \pc \sim \cs = \false $
  
  \item \label{sen-18}$\Forall{\S,\A} \at{\exit(\S,\A)}\sq = \get (\at{\S}\sq) \text{ if } \at{\S}\at{\A} \pc = \cs$
  
-  \item \label{sen-19}$\Forall{\S,\A} \at{\exit(\S,\A)}\sq = \at{\S}\sq \text{ if } \neg(\at{\S}\at{\A} \pc = \cs)$
+  \item \label{sen-19}$\Forall{\S,\A} \at{\exit(\S,\A)}\sq = \at{\S}\sq \text{ if } \at{\S}\at{\A} \pc \sim \cs =\false$
   \setcounter{nr}{\value{enumi}}
  \end{enumerate}
  
@@ -357,7 +358,8 @@ We are interested in proving formally
  Apply induction on $\S$:
  
  \begin{proofcases}[itemsep=1ex]
- \item [$\init$] In this case,
+ \item [$\init$] \
+ 
  \begin{proofsteps}{25em}
   $\QLOCK\vdash\Forall{\A}\Top(\at{\init}\sq)=\at{\A}\pid\text{ if } \at{\init}\at{\A}\pc=\cs$ & \\
   
@@ -377,19 +379,21 @@ We are interested in proving formally
    \end{proofsteps}   
    
    \begin{proofcases}[itemsep=1ex]
-    \item[$b=a$, $\at{\s}\at{\b}\pc=\re$]
+    \item[$\b=\a$, $\at{\s}\at{\b}\pc=\re$] \
+    
      \begin{proofsteps}{30em}
       $\QLOCK_{TC}+\{\b=\a, \at{\s}\at{\b}\pc =\re \}\vdash \newline 
       \Top(\at{\want(\s,\b)}\sq)=\at{\a}\pid\text{ if } \at{\want(\s,\b)}\at{\a}\pc=\cs$ 
       & by case analysis  \\
       
-      $\QLOCK_{TC}+\{\a=\b, \at{\s}\at{\b}\pc =\re \}\vdash \newline
-      \Top(\at{\s}\sq,\at{\b}\pid)=\at{\b}\pid\text{ if } \wt =\cs$ & by rew  \\
+      $\QLOCK_{TC}+\{ \b = \a, \at{\s}\at{\b}\pc =\re \}\vdash \newline
+      \Top(\at{\s}\sq,\at{\b}\pid)=\at{\a}\pid\text{ if } \wt =\cs$ & by rew  \\
       
       discharged & since $\QLOCK\vdash \true =\false \text{ if } \wt=\cs$  
      \end{proofsteps}
     
-    \item[$\neg(b=a)$]
+    \item[$\b\sim \a =\false $] \
+    
       \begin{proofsteps}{30em}
       $\QLOCK_{TC}+\{\b\sim\a=\false \}\vdash \newline 
       \Top(\at{\want(\s,\b)}\sq)=\at{\a}\pid\text{ if } \at{\want(\s,\b)}\at{\a}\pc=\cs$ 
@@ -401,7 +405,8 @@ We are interested in proving formally
       discharged &  by the induction hypothesis
      \end{proofsteps}
     
-    \item[$\neg(\at{\s}\at{\b}\pc)=\re$]
+    \item[$ \at{\s} \at{\b} \pc \sim \re =\false $] \
+    
      \begin{proofsteps}{30em}
       $\QLOCK_{TC}+\{ \at{\s}\at{\b}\pc\sim \re=\false \}\vdash \newline 
       \Top(\at{\want(\s,\b)}\sq)=\at{\a}\pid\text{ if } \at{\want(\s,\b)}\at{\a}\pc=\cs$ 
@@ -414,8 +419,100 @@ We are interested in proving formally
      \end{proofsteps}
    \end{proofcases}
    
- \item[$\try$]
+ \item[$\try$]\
  
- \item[$\exit$]
+   \begin{proofsteps}{30em}
+    $\QLOCK_I\vdash \Forall{\A,\B}\Top(\at{\try(\s,\B)}\sq)=\at{\A}\pid\text{ if } \at{\try(\s,\B)}\at{\A}\pc=\cs$ & \\
+    
+    $\QLOCK_{TC}\vdash \Top(\at{\try(\s,\b)}\sq)=\at{\a}\pid\text{ if } \at{\try(\s,\b)}\at{\a}\pc=\cs$ & 
+   \end{proofsteps}   
+   
+   \begin{proofcases}[itemsep=1ex]
+    \item[$\b=\a$,  $\at{\s}\at{\b}\pc=\wt$,  $\at{\s}\sq=(\at{\b}\pid,\q)$] \
+    
+     \begin{proofsteps}{30em}
+     $\QLOCK_{TC}+\{\q:\to\Sequence,\b=\a, \at{\s}\sq = (\at{\b}\pid,\q) \}\vdash$ \newline
+    $\Top(\at{\try(\s,\b)}\sq)=\at{\a}\pid\text{ if } \at{\try(\s,\b)}\at{\a}\pc=\cs$ & by case analysis\\
+    
+    $\QLOCK_{TC}+\{\q:\to\Sequence,\b=\a, \at{\s}\sq = (\at{\b}\pid,\q) \}\vdash$ \newline
+    $\at{\a}\pid= \at{\a}\pid \text{ if } \cs=\cs$ & 
+    by rew, $\Top(\at{\try(\s,\b)}\sq)=\Top(\at{\s}\sq)=\Top(\at{\b}\pid,\q)=\at{\b}\pid=\at{\a}\pid$ and
+    $\at{\try(\s,\b)}\at{\a}\pc=\cs$\\
+     
+    $\QLOCK_{TC}+\{\q:\to\Sequence,\b=\a, \at{\s}\sq = (\at{\b}\pid,\q) \}\vdash$ \newline
+    $\at{\a}\pid= \at{\a}\pid $ & by implication \\
+    
+    discharged &  by reflexivity
+     \end{proofsteps} 
+     
+   \item[$ \b \sim \a =\false $] \
+   
+     \begin{proofsteps}{30em}
+      $\QLOCK_{TC}+\{\b\sim\a=\false \}\vdash \newline 
+      \Top(\at{\try(\s,\b)}\sq)=\at{\a}\pid\text{ if } \at{\try(\s,\b)}\at{\a}\pc=\cs$ 
+      & by case analysis  \\
+      
+      $\QLOCK_{TC}+\{\a\sim\b=\false\}\vdash \newline
+      \Top(\at{\s}\sq)=\at{\a}\pid\text{ if } \at{\s}\at{\a}\pc =\cs$ & by rew  \\
+      
+      discharged &  by the induction hypothesis
+     \end{proofsteps}  
+     
+      \item[ $\at{\s}\at{\b}\pc \sim \wt =\false$ ] \
+      
+     \begin{proofsteps}{30em}
+      $\QLOCK_{TC}+\{  \at{\s}\at{\b}\pc \sim \wt =\false \}\vdash \newline 
+      \Top(\at{\try(\s,\b)}\sq)=\at{\a}\pid\text{ if } \at{\try(\s,\b)}\at{\a}\pc=\cs$ 
+      & by case analysis  \\
+      
+      $\QLOCK_{TC}+\{ \at{\s}\at{\b}\pc \sim \wt =\false \}\vdash \newline
+      \Top(\at{\s}\sq)=\at{\a}\pid\text{ if } \at{\s}\at{\a}\pc =\cs$ & by rew  \\
+      
+      discharged &  by the induction hypothesis
+     \end{proofsteps}  
+     
+     \item[ $\Top(\at{\s}\sq) \sim \at{\b}\pid =\false$ ] \
+     
+     \begin{proofsteps}{30em}
+      $\QLOCK_{TC}+\{  \Top(\at{\s}\sq) \sim \at{\b}\pid =\false \}\vdash \newline 
+      \Top(\at{\try(\s,\b)}\sq)=\at{\a}\pid\text{ if } \at{\try(\s,\b)}\at{\a}\pc=\cs$ 
+      & by case analysis  \\
+      
+      $\QLOCK_{TC}+\{ \Top(\at{\s}\sq) \sim \at{\b}\pid =\false \}\vdash \newline
+      \Top(\at{\s}\sq)=\at{\a}\pid\text{ if } \at{\s}\at{\a}\pc =\cs$ & by rew  \\
+      
+      discharged &  by the induction hypothesis
+     \end{proofsteps}  
+   \end{proofcases}
+     
+ \item[$\exit$] \
+ 
+  \begin{proofsteps}{30em}
+    $\QLOCK_I\vdash \Forall{\A,\B}\Top(\at{\exit(\s,\B)}\sq)=\at{\A}\pid\text{ if } \at{\exit(\s,\B)}\at{\A}\pc=\cs$ & \\
+    
+    $\QLOCK_{TC}\vdash \Top(\at{\exit(\s,\b)}\sq)=\at{\a}\pid\text{ if } \at{\exit(\s,\b)}\at{\a}\pc=\cs$ & 
+   \end{proofsteps}  
+   \begin{proofcases}[itemsep=1ex]
+    \item[$\b=\a$, $\at{\s}\at{\b}\pc=\cs$] \
+    
+     \begin{proofsteps}{30em}
+      $\QLOCK_{TC}+\{\b=\a, \at{\s}\at{\b}\pc =\cs \}\vdash \newline 
+      \Top(\at{\exit(\s,\b)}\sq)=\at{\a}\pid\text{ if } \at{\exit(\s,\b)}\at{\a}\pc=\cs$ 
+      & by case analysis  \\
+      
+      $\QLOCK_{TC}+\{ \b=\a, \at{\s}\at{\b}\pc =\cs \}\vdash \newline
+      \Top( \get(\at{\s}\sq))=\at{\a}\pid \text{ if } \re =\cs$ & by rew  \\
+      
+      discharged & since $\QLOCK\vdash \true =\false \text{ if } \re=\cs$  
+     \end{proofsteps}
+     
+      \item[ $\b \sim \a =\false$ ] \
+      
+      \vdots
+      
+      \item [ $\at{\s}\at{\b}\pc\sim \cs =\false$ ] \
+      
+      \vdots
+ \end{proofcases}
  \end{proofcases}
 \end{document}
