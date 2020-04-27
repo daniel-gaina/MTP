@@ -5,17 +5,26 @@ fmod MTP-SIGN is
  pr META-LEVEL .
 
  sorts Spec @Sen@ @SenList@ @Token@ @Bubble@ @Arity@ @Def@ @DefSet@
-       @NeTokenList@ .
+       @NeTokenList@ @ModExp@ @ParameterDecl@ @ParameterDeclList@ .
  subsort @Sen@ < @SenList@ .
  subsort @Token@ < @Arity@ .
+ subsort @Token@ < @ModExp@ .
  subsort @Def@ < @DefSet@ .
+ subsort @ParameterDecl@ < @ParameterDeclList@ .
+
+ op _,_ : @ParameterDeclList@ @ParameterDeclList@ -> @ParameterDeclList@ [ctor assoc] .
+
+ op _{_} : @Token@ @ParameterDeclList@ -> @ModExp@ [ctor] .
+
+ op _::_ : @Token@ @Token@ -> @ParameterDecl@ [ctor] .
 
  op __ : @SenList@ @SenList@ -> @SenList@ [ctor assoc] .
  op __ : @DefSet@ @DefSet@ -> @DefSet@ [ctor assoc comm] .
 
  op _*_ : @Arity@ @Arity@ -> @Arity@ [ctor assoc] .
 
- op spec_=_ : @Token@ @DefSet@ -> Spec [ctor] .
+ op spec!_=_ : @ModExp@ @DefSet@ -> Spec [ctor] .
+ op spec*_=_ : @ModExp@ @DefSet@ -> Spec [ctor] .
 
  op rigid`sort_ : @Token@ -> @Def@ [ctor] .
  op nominal`pred_:__ : @Token@ @Arity@ @SenList@ -> @Def@ [ctor] .
@@ -67,6 +76,7 @@ fmod COMMAND-PROCESSING is
  pr META-LEVEL .
  pr LEXICAL .
 
+ vars PL PL' : ParameterDeclList .
  vars T T' T'' T1 T2 : Term .
  var  RP? : [ResultPair] .
  vars M M' M'' : Module .
@@ -76,20 +86,36 @@ fmod COMMAND-PROCESSING is
  var  QIL : QidList .
  vars Q Q' : Qid .
  var  Srt : Sort .
+ var  H : Header .
 
  op parseModName : Term -> Qid .
  eq parseModName(T) = downQid(T) .
 
  op parseModule : Term -> Module .
- ceq parseModule('spec_=_['token[T],T']) = parseModule2(M, T')
-  if Q := downQid(T) /\
-     M := emptyModule(Q) .
+ ceq parseModule('spec!_=_[T,T']) = parseModule2(M, T')
+  if H := parseHeader(T) /\
+     M := emptyModule(H) .
 
  op parseModule2 : Module Term -> Module .
  ceq parseModule2(M, '__[T, T']) = M''
   if M' := parseDef(M, T) /\
      M'' := parseModule2(M', T') .
  eq parseModule2(M, T) = parseDef(M, T) [owise] .
+
+ op parseHeader : Term -> Header .
+ ceq parseHeader('token[T]) = Q
+  if Q := downQid(T) .
+ ceq parseHeader('_`{_`}['token[T], T']) = Q{PL}
+  if Q := downQid(T) /\
+     PL := parsePL(T') .
+
+ op parsePL : Term -> ParameterDeclList .
+ ceq parsePL('_`,_[T, T']) = PL, PL'
+  if PL := parsePL(T) /\
+     PL' := parsePL(T') .
+ ceq parsePL('_::_['token[T], 'token[T']]) = Q :: Q'
+  if Q := downQid(T) /\
+     Q' := downQid(T') .
 
  op parseDef : Module Term -> Module .
  ceq parseDef(M, 'rigid`sort_['token[T]]) = M'
