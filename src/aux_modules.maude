@@ -24,9 +24,9 @@ fmod AUX-MODULE-OPS is
  var  EqS : EquationSet .
  vars ODS ODS' : OpDeclSet .
  vars SS SS' : SortSet .
+ vars RS RS' : RuleSet .
  var  MAS : MembAxSet .
  var  Ct : Constant .
- var  RS : RuleSet .
  var  M : Module .
  var  H : Header .
  var  Q : Qid .
@@ -49,6 +49,12 @@ fmod AUX-MODULE-OPS is
  eq setOps(mod H is IL sorts SS . SSDS ODS MAS EqS RS endm, ODS')
     = mod H is IL sorts SS . SSDS ODS' MAS EqS RS endm .
 
+ op setRls : Module RuleSet -> Module .
+ eq setRls(fmod H is IL sorts SS . SSDS ODS MAS EqS endfm, RS')
+    = fmod H is IL sorts SS . SSDS ODS MAS EqS endfm .
+ eq setRls(mod H is IL sorts SS . SSDS ODS MAS EqS RS endm, RS')
+    = mod H is IL sorts SS . SSDS ODS MAS EqS RS' endm .
+
  op addImports : Module ImportList -> Module .
  eq addImports(M, IL) = setImports(M, (getImports(M) IL)) .
 
@@ -58,9 +64,12 @@ fmod AUX-MODULE-OPS is
  op addOps : Module OpDeclSet -> Module .
  eq addOps(M, ODS) = setOps(M, getOps(M) ODS) .
 
+ op addRls : Module RuleSet -> Module .
+ eq addRls(M, RS) = setRls(M, getRls(M) RS) .
+
  op downQid : Term -> [Qid] [memo] .
  eq downQid(Ct) = qid(substr(string(getName(Ct)), 1, length(string(getName(Ct))))) .
 
- op emptyModule : Qid -> Module .
- eq emptyModule(Q) = mod Q is nil sorts none . none none none none none endm .
+ op emptyModule : Header -> Module .
+ eq emptyModule(H) = mod H is nil sorts none . none none none none none endm .
 endfm
