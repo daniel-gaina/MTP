@@ -1,0 +1,25 @@
+mod NAT-SET is
+ pr SET{Nat} * (sort Set{Nat} to NatSet) .
+
+ vars N N' : Nat .
+
+ rl [del] : N, N' => N .
+ rl [repeat] : N => N, N .
+endm
+
+select META-LEVEL .
+
+*** rew 3, 2, 1 .
+
+red metaRewrite(upModule('NAT-SET, false), '_`,_['s_^3['0.Zero], 's_^2['0.Zero], 's_['0.Zero]], 1) .
+
+red metaApply(upModule('NAT-SET, false),
+             '_`,_['s_^3['0.Zero], 's_^2['0.Zero]], 'del, none, 0) .
+
+red metaApply(upModule('NAT-SET, false),
+             '_`,_['s_^3['0.Zero], 's_^2['0.Zero], 's_['0.Zero]], 'del, none, 0) .
+
+red metaXapply(upModule('NAT-SET, false),
+             '_`,_['s_^3['0.Zero], 's_^2['0.Zero], 's_['0.Zero]], 'del, none, 0, unbounded, 0) .
+
+*** Cannot be done with eqs!

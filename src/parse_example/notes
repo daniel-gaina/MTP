@@ -1,0 +1,65 @@
+0 -> '0.Zero       (Constant)
+1 -> 's_['0.Zero]  (Term)
+N:Nat -> 'N:Nat    (Variable)
+
+1 + 1       -> '_+_['s_['0.Zero], 's_['0.Zero]]
+1 + 1 + 1   -> '_+_['s_['0.Zero], 's_['0.Zero], 's_['0.Zero]]
+1 + (1 + 1) -> '_+_['s_['0.Zero], '_+_['s_['0.Zero], 's_['0.Zero]]]
+
+mtList -> 'mt.List
+1 2 -> '__['s_['0.Zero], 's_^2['0.Zero]]
+
+red in META-LEVEL : upTerm(1) .
+red in META-LEVEL : upTerm(1 + 1 + 1) .
+red in META-LEVEL : downTerm('s_['0.Zero], 0) .
+
+sort Nat .
+sorts 'Nat .
+
+op _+_ : Nat Nat -> Nat [assoc comm prec(33)] .
+op '_+_ : 'Nat 'Nat -> 'Nat [assoc comm prec(33)] .
+
+eq 0 + N = N .
+eq '_+_['0.Zero, 'N:Nat] = 'N:Nat [none] .
+
+red in META-LEVEL : upModule('EXT-BOOL, false) .
+red in META-LEVEL : upModule('EXT-BOOL, true) .
+
+red in META-LEVEL : metaReduce(upModule('NAT, false), '_+_['s_['0.Zero], 's_['0.Zero], 's_['0.Zero]]) .
+
+match 0 + N with 1 + 0
+
+red in META-LEVEL : metaMatch(upModule('NAT, false), '_+_['0.Zero, 'N:Nat], '_+_['s_['0.Zero], '0.Zero], nil, 0) .
+red in META-LEVEL : metaMatch(upModule('NAT, false), '_+_['0.Zero, 'N:Nat], '_+_['s_['0.Zero], '0.Zero], nil, 1) .
+
+match 0 + N with 1 + 1
+
+red in META-LEVEL : metaMatch(upModule('NAT, false), '_+_['0.Zero, 'N:Nat], '_+_['s_['0.Zero], 's_['0.Zero]], nil, 0) .
+
+match 0 + N with 1 * (0 + 1)
+
+red in META-LEVEL : metaMatch(upModule('NAT, false), '_+_['0.Zero, 'N:Nat], '_*_['s_['0.Zero], '_+_['0.Zero, 's_['0.Zero]]], nil, 0) .
+red in META-LEVEL : metaXmatch(upModule('NAT, false), '_+_['0.Zero, 'N:Nat],
+                                                      '_*_['s_['0.Zero], '_+_['0.Zero, 's_['0.Zero]]], nil, 0, unbounded, 0) .
+red in META-LEVEL : metaXmatch(upModule('NAT, false), '_+_['0.Zero, 'N:Nat],
+                                                      '_*_['s_['0.Zero], '_+_['0.Zero, 's_['0.Zero]]], nil, 0, 0, 0) .
+red in META-LEVEL : metaXmatch(upModule('NAT, false), '_+_['0.Zero, 'N:Nat],
+                                                      '_*_['s_['0.Zero], '_+_['0.Zero, 's_['0.Zero]]], nil, 3, unbounded, 0) .
+
+red in META-LEVEL : metaXmatch(upModule('NAT, false), '_+_['0.Zero, 'N:Nat],
+                                                      '_*_['s_['0.Zero], '_+_['0.Zero, '0.Zero, 's_['0.Zero]]], nil, 0, unbounded, 0) .
+red in META-LEVEL : metaXmatch(upModule('NAT, false), '_+_['0.Zero, 'N:Nat],
+                                                      '_*_['s_['0.Zero], '_+_['0.Zero, '0.Zero, 's_['0.Zero]]], nil, 0, unbounded, 1) .
+
+
+*** Go to sets.maude
+
+red in META-LEVEL : metaRewrite, metaApply, metaXApply
+
+red in META-LEVEL : metaPrettyPrint(upModule('NAT, false), '_*_['s_['0.Zero], '_+_['0.Zero, 's_['0.Zero]]],
+                                    mixfix number rat format) .
+
+
+red in META-LEVEL : metaParse(upModule('NAT, false), '1 '* '`( '0 '+ '1 '`), 'Nat) .
+
+*** Go to parse.maude
