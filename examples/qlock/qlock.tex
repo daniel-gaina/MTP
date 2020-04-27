@@ -324,7 +324,10 @@ We present the specification of a mutual exclusion protocol.
 
 \section{Formal verification}
 
-We are interested in proving formally 
+We are interested in proving both invariant and liveness properties.
+
+\subsection{Invariant property}
+We will prove prove formally that 
  $\QLOCK\vdash\Forall{\S,\A}\Top(\at{\S}\sq)=\at{\A}\pid\text{ if } \at{\S}\at{\A}\pc=\cs$.
  
  ==============================================
@@ -515,4 +518,53 @@ We are interested in proving formally
       \vdots
  \end{proofcases}
  \end{proofcases}
+ 
+ \subsection{Liveness property}
+ In this section, we will prove formally that
+ $\QLOCK\vdash \Forall{\S,\A}\Exists{\S'}\at{\S'}\at{\A}\pc=\cs$.
+ There are several choices for the definition of witnesses. 
+ The first definition of $\theta$ is as follows: 
+ 
+$\theta(\S,\A)=\left\{\begin{array}{l l}
+ \theta(\want(\S,\A),\A) & \text{if } \at{\S}\at{\A}\pc =\re\\
+ \theta(\try(\exit(\S,\B),\C),\A) & \text{if } \at{\S}\at{\A}\pc =\wt \bigwedge \C:= \Top(\at{\exit(\S,\B)}\sq) \bigwedge \B:= \Top(\at{\S} \sq) \\
+ \S & \text{if } \at{\S}\at{\A}\pc=\cs
+\end{array}\right.$
+
+The second definition of $\theta$ is by induction on $\S$.
+\begin{proofcases}[itemsep=1ex]
+ \item[$\init$] 
+  $\Forall{\A}\theta(\init,\A)=\try(\want(\init,\A),\A)$
+ \item[$\want$] \
+ 
+  $\Forall{\S,\A,\B}\theta(\want(\S,\A),\B)=
+  \theta(\try(\exit(\want(\S,\A),\C),\D))$ 
+   
+  $\ $ if
+  $\A=\B \bigwedge$
+  $\at{\S}\at{\A}\pc =\re \bigwedge$
+  $\D:=\Top(\at{\exit(\want(\S,\A),\C)}\sq)\bigwedge$ 
+  $\at{\C}\pid,\Q:=\at{\S}\sq$
+ 
+ $\Forall{\S,\A,\B}\theta(\want(\S,\A),\B)=\theta(\S,\B) \text{ if }(\A\sim\B)=\false$
+ 
+ $\Forall{\S,\A,\B}\theta(\want(\S,\A),\B)=\theta(\S,\B) \text{ if }\at{\S}\at{\A}\pc\sim\re=\false$
+ 
+ \item[$\try$]\
+ 
+ \item[$\exit$]
+\end{proofcases}
+
+It suffices to prove that $\QLOCK\vdash \Forall{\S,\A} \Top(\at{\theta(\S,\A)}\sq)=\at{\A}\pid $.
+We apply induction on $\S$.
+\begin{proofcases}[itemsep=1ex]
+\item[$\init$]
+ 
+\item[$\want$]
+
+\item[$\try$]
+
+\item[$\exit$]
+\end{proofcases}
+
 \end{document}
