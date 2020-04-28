@@ -13,8 +13,14 @@ select META-LEVEL .
 
 red metaRewrite(upModule('NAT-SET, false), '_`,_['s_^3['0.Zero], 's_^2['0.Zero], 's_['0.Zero]], 1) .
 
+*** Apply del to 3,2
+
 red metaApply(upModule('NAT-SET, false),
              '_`,_['s_^3['0.Zero], 's_^2['0.Zero]], 'del, none, 0) .
+red metaApply(upModule('NAT-SET, false),
+             '_`,_['s_^3['0.Zero], 's_^2['0.Zero]], 'del, none, 1) .
+
+*** Apply del to 3, 2, 1
 
 red metaApply(upModule('NAT-SET, false),
              '_`,_['s_^3['0.Zero], 's_^2['0.Zero], 's_['0.Zero]], 'del, none, 0) .

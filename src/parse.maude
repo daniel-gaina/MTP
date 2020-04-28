@@ -1,0 +1,185 @@
+load aux_modules.maude
+load file.maude
+
+***(
+
+ Spec   -> spec Id = SenSet
+ SenSet -> Sen |
+           Sen SenSet
+ Sen    -> type Id |
+           operator Id : Arity -> Id |
+           trans Term => Term
+ Arity  -> Epsilon |
+           Id |
+           Id * Arity
+ Id     -> <built-in>
+ Term   -> <something built with spec syntax>
+)
+
+***(
+ spec EXAMPLE =
+  type A
+  type B
+
+  operator a : -> A .
+  operator b1 : A * A -> B .
+  operator b2 : -> B .
+
+  trans b1(a,a) => b2
+)
+
+*** red in LEXICAL : tokenize("spec EXAMPLE = type A type B operator a : -> A . operator b1 : A * A -> B . operator b2 : -> B . trans b1(a,a) => b2") .
+
+*** 'spec 'EXAMPLE '= 'type 'A 'type 'B 'operator 'a ': '-> 'A '. 'operator 'b1 ': 'A '* 'A '-> 'B '. 'operator 'b2 ': '-> 'B '. 'trans 'b1 '`( 'a '`, 'a '`) '=> 'b2
+
+
+fmod SIGN is
+ pr META-LEVEL .
+
+ sorts @Spec@ @Sen@ @SenSet@ @Token@ @Bubble@ @Arity@ .
+ subsort @Sen@ < @SenSet@ .
+ subsort @Token@ < @Arity@ .
+
+ op spec_=_ : @Token@ @SenSet@ -> @Spec@ [ctor] .
+
+ op __ : @SenSet@ @SenSet@ -> @SenSet@ [ctor assoc comm] .
+
+ op type_ : @Token@ -> @Sen@ [ctor] .
+
+ op operator_:_->_. : @Token@ @Arity@ @Token@ -> @Sen@ [ctor] .
+ op operator_:`->_. : @Token@ @Token@ -> @Sen@ [ctor] .
+
+ op _*_ : @Arity@ @Arity@ -> @Arity@ [ctor assoc] .
+
+ op trans_=>_ : @Bubble@ @Bubble@ -> @Sen@ [ctor] .
+endfm
+
+
+
+fmod META-SIGN is
+ including AUX-MODULE-OPS .
+
+ op BUBBLES : -> FModule .
+ op GRAMMAR : -> FModule [memo] .
+
+ eq BUBBLES
+    = (fmod 'GRAMMAR is
+        including 'QID-LIST .
+        sorts none .
+        none
+        op 'token : 'Qid -> '@Token@
+             [special(
+               (id-hook('Bubble, '1 '1)
+                op-hook('qidSymbol, '<Qids>, nil, 'Qid)))] .
+        op 'bubble : 'QidList -> '@Bubble@
+             [special(
+               (id-hook('Bubble, '1 '-1 '`( '`))
+                op-hook('qidListSymbol, '__, 'QidList 'QidList, 'QidList)
+                op-hook('qidSymbol, '<Qids>, nil, 'Qid)
+                id-hook('Exclude, 'eq 'ceq 'rl 'crl 'mb 'cmb 'sd 'csd
+                                  'var 'vars 'strat 'endm
+                                  'endfm 'endsm 'sorts 'subsort 'subsorts
+                                  'subclass 'subclasses 'op 'ops
+                                  'protecting 'pr 'including 'inc 'extending
+                                  'ctor 'assoc 'comm '==)))] .
+        none
+        none
+     endfm) .
+ eq GRAMMAR = addImports(BUBBLES, (including 'SIGN .)) .
+endfm
+
+fmod EXAMPLE is
+ pr META-SIGN .
+
+ op moduleQIL : -> QidList .
+ eq moduleQIL = 'spec 'EXAMPLE '= 'type 'A 'type 'B
+                                  'operator 'a ': '-> 'A '.
+                                  'operator 'b1 ': 'A '* 'A '-> 'B '.
+                                  'operator 'b2 ': '-> 'B '.
+                                  'trans 'b1 '`( 'a '`, 'a '`) '=> 'b2 .
+endfm
+
+red metaParse(GRAMMAR, moduleQIL, '@Spec@) .
+
+fmod GENERATE-MODULE is
+ pr AUX-MODULE-OPS .
+
+ vars RP RP' : ResultPair .
+ vars T T' T'' L R : Term .
+ vars QIL QIL' : QidList .
+ vars M M' M'' : Module .
+ var  TyL : TypeList .
+ var  TL : TermList .
+ vars S S' : Sort .
+ vars Q Q' : Qid .
+
+ op generate : Term ~> Module .
+ ceq generate('spec_=_['token[T],T']) = generate(M, T')
+  if Q := downQid(T) /\
+     M := emptyModule(Q) .
+
+ op generate : Module Term ~> Module .
+ ceq generate(M, '__[T, T']) = M''
+  if M' := generate(M, T) /\
+     M'' := generate(M', T') .
+
+ *** TYPES
+ ceq generate(M, 'type_['token[T]]) = M'
+  if Q := downQid(T) /\
+     M' := addSorts(M, Q) .
+
+ *** CONSTANTS
+ ceq generate(M, 'operator_:`->_.['token[T],'token[T']]) = M'
+  if Q := downQid(T) /\
+     Q' := downQid(T') /\
+     M' := addOps(M, op Q : nil -> Q' [none] .) .
+
+ *** OPS
+ ceq generate(M, 'operator_:_->_.['token[T], T', 'token[T'']]) = M'
+  if Q := downQid(T) /\
+     TyL := genTypeList(M, T') /\
+     Q' := downQid(T'') /\
+     M' := addOps(M, op Q : TyL -> Q' [none] .) .
+
+ *** TRANS
+ ceq generate(M, 'trans_=>_['bubble[T],'bubble[T']]) = M'
+  if QIL := downQidList(T) /\
+     {L, S} := metaParse(M, QIL, anyType) /\
+     QIL' := downQidList(T') /\
+     {R, S'} := metaParse(M, QIL', anyType) /\
+     M' := setRls(M, rl L => R [none] .) .
+
+ eq generate(M, T) = M [owise] .
+
+ op genTypeList : Module Term -> TypeList .
+ ceq genTypeList(M, 'token[T]) = Q
+  if Q := downQid(T) .
+ eq genTypeList(M, '_*_[TL]) = genTypeList*(M, TL) .
+
+ op genTypeList* : Module TermList -> TypeList .
+ eq genTypeList*(M, empty) = nil .
+ eq genTypeList*(M, (T, TL)) = genTypeList(M, T) genTypeList*(M, TL) .
+
+ op downQidList : TermList -> QidList .
+ eq downQidList('__[TL]) = downQidList(TL) .
+ eq downQidList((T, TL)) = downQid(T) downQidList(TL) .
+ eq downQidList(empty) = nil .
+endfm
+
+fmod EXAMPLE-GEN is
+ pr GENERATE-MODULE .
+
+ op moduleParsed : -> Term .
+ eq moduleParsed = 'spec_=_['token[''EXAMPLE.Sort],
+                       '__['type_['token[''A.Sort]],
+                       '__['type_['token[''B.Sort]],
+                       '__['operator_:`->_.['token[''a.Sort],'token[''A.Sort]],
+                       '__['operator_:_->_.['token[''b1.Sort],'_*_['token[''A.Sort],'token[''A.Sort]],'token[''B.Sort]],
+                       '__['operator_:`->_.['token[''b2.Sort],'token[''B.Sort]],
+                       'trans_=>_['bubble['__[''b1.Sort,''`(.Sort,''a.Sort,''`,.Qid,''a.Sort,''`).Sort]],'bubble[''b2.Sort]]]]]]]] .
+endfm
+
+
+set print attribute on .
+
+red generate(moduleParsed) .
