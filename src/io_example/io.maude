@@ -1,0 +1,117 @@
+load file.maude
+
+mod MTP is
+ inc STD-STREAM .
+ pr  CONVERSION .
+ pr  LEXICAL .
+ inc FILE .
+
+ vars Text Original Read Source : String .
+ var  Attrs : AttributeSet .
+ vars FHIn FHOut : Oid .
+ var  QIL : QidList .
+ vars N N' : Nat .
+ var  Q : Qid .
+
+ *** Object and class definition
+ op EXAMPLE : -> Cid .
+ op example : -> Oid .
+
+ op noFile : -> Oid [ctor] .
+
+ *** Attributes
+ op file:_ : Oid -> Attribute [ctor] .
+
+ *** op state:_ : State -> Attribute [ctor] .
+
+ *** Run command
+ op run : -> Configuration [ctor] .
+
+ ***                        ***
+ ***          LOAD          ***
+ ***                        ***
+
+ crl [loadComm] : gotLine(example, stdin, Text)
+    < example : EXAMPLE | Attrs >
+ => < example : EXAMPLE | Attrs >
+    openFile(fileManager, example, Source, "r")
+  if Q := tokenize(Text) /\
+     Source := printTokens(Q) .
+
+ crl [loadCommERROR] : gotLine(example, stdin, Text)
+    < example : EXAMPLE | Attrs >
+ => < example : EXAMPLE | Attrs >
+    write(stdout, example, "File name incorrect.\n")
+  if Q QIL := tokenize(Text) /\
+     QIL =/= nil .
+
+ rl [openedFile] : openedFile(example, fileManager, FHIn)
+    < example : EXAMPLE | file: noFile, Attrs >
+ => < example : EXAMPLE | file: FHIn, Attrs >
+    getLine(FHIn, example) .
+
+ rl [openFileError] : fileError(example, fileManager, Text)
+    < example : EXAMPLE | Attrs >
+ => < example : EXAMPLE | Attrs >
+    write(stdout, example, Text + "\n") .
+
+ ***                           ***
+ ***          GotLine          ***
+ ***                           ***
+
+crl [end] : gotLine(example, FHIn, Text)
+    < example : EXAMPLE | file: FHIn, Attrs >
+ => < example : EXAMPLE | file: FHIn, Attrs >
+    closeFile(FHIn, example)
+ if (tokenize(Text) == 'end) or (Text == "") .
+
+crl [twice] : gotLine(example, FHIn, Text)
+    < example : EXAMPLE | file: FHIn, Attrs >
+ => < example : EXAMPLE | file: FHIn, Attrs >
+    write(stdout, example, "Twice of " + string(Q) + " is " + string(N, 10) + "\n")
+ if 'twice Q := tokenize(Text) /\
+    N := rat(string(Q), 10) * 2 .
+
+crl [twice] : gotLine(example, FHIn, Text)
+    < example : EXAMPLE | file: FHIn, Attrs >
+ => < example : EXAMPLE | file: FHIn, Attrs >
+    write(stdout, example, "Cube of " + string(Q) + " is " + string(N', 10) + "\n")
+ if 'cube Q := tokenize(Text) /\
+    N := rat(string(Q), 10) /\
+    N' := N * N * N .
+
+ ***                              ***
+ ***          closedFile          ***
+ ***                              ***
+
+ rl [closedFile] : closedFile(example, FHIn)
+    < example : EXAMPLE | file: FHIn, Attrs >
+ => none .
+
+ ***                          ***
+ ***          WROTE           ***
+ ***                          ***
+
+ rl [wroteFileError] :
+    wrote(example, stdout)
+    < example : EXAMPLE | file: noFile, Attrs >
+ => < example : EXAMPLE | file: noFile, Attrs > .
+
+ rl [wroteNumber] :
+    wrote(example, stdout)
+    < example : EXAMPLE | file: FHIn, Attrs >
+ => < example : EXAMPLE | file: FHIn, Attrs >
+    getLine(FHIn, example) .
+
+ ***                        ***
+ ***          RUN           ***
+ ***                        ***
+
+ eq run =
+    <> < example : EXAMPLE | file: noFile >
+    getLine(stdin, example, "Introduce file name> ") .
+endm
+
+set print attribute on .
+
+erew run .

@@ -1,0 +1,61 @@
+********************************************************************************
+*****            Reading lines
+********************************************************************************
+
+getLine(FROM_WHERE, ME, TEXT_SHOWN)
+
+gotLine(ME, FROM_WHERE, TEXT_OBTAINED)
+fileError(ME, FROM_WHERE, REASON)
+
+Possible FROM_WHERE values: stdin (standard input) or FILE_NAME
+(previously open with openFile)
+Possible TEXT_OBTAINED values:
+ - "\n" (empty line)
+ - "" (end of file)
+ - "...\n" (something ending with a new line)
+
+********************************************************************************
+*****            Printing lines
+********************************************************************************
+
+write(WHERE, ME, TEXT)
+
+wrote(ME, WHERE)
+fileError(ME, ID, REASON)
+
+Possible WHERE values: stdout (standard output) or FILE_NAME
+(previously open with openFile)
+
+
+********************************************************************************
+*****            Opening files
+********************************************************************************
+
+openFile(fileManager, ME, PATH, MODE)
+
+openedFile(ME, fileManager, ID)
+fileError(ME, fileManager, REASON)
+
+r+: Opens a file for both reading and writing. The file pointer will be at
+the beginning of the file.
+w+: Opens a file for both writing and reading. Overwrites the existing file if the file
+exists. If the file does not exist, creates a new file for reading and writing.
+a+: Opens a file for both appending and reading. The file pointer is at the end of
+the file if the file exists. The file opens in the append mode. If the file does
+not exist, it creates a new file for reading and writing.
+
+********************************************************************************
+*****            Opening files
+********************************************************************************
+
+closeFile(FILE-HANDLE, ME)
+closedFile(ME, FILE-HANDLE)
+
+********************************************************************************
+*****            Flushing data
+********************************************************************************
+
+flush(ID, ME)
+
+flushed(ME, ID)
+fileError(ME, ID, REASON)
