@@ -10,9 +10,9 @@ fileError(ME, FROM_WHERE, REASON)
 Possible FROM_WHERE values: stdin (standard input) or FILE_NAME
 (previously open with openFile)
 Possible TEXT_OBTAINED values:
+ - "...\n" (something ending with a new line)
  - "\n" (empty line)
  - "" (end of file)
- - "...\n" (something ending with a new line)
 
 ********************************************************************************
 *****            Printing lines

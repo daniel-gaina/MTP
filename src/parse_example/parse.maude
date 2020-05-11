@@ -1,4 +1,4 @@
-load aux_modules.maude
+load ../aux_modules.maude
 load file.maude
 
 ***(

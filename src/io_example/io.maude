@@ -1,5 +1,15 @@
 load file.maude
 
+***(
+fmod COMMAND-SYNTAX is
+ pr META-LEVEL .
+
+ sort @Command@ .
+
+ op induction`on_ : Qid -> @Command@ [ctor] .
+endfm
+)
+
 mod MTP is
  inc STD-STREAM .
  pr  CONVERSION .
@@ -14,8 +24,8 @@ mod MTP is
  var  Q : Qid .
 
  *** Object and class definition
- op EXAMPLE : -> Cid .
- op example : -> Oid .
+ op EXAMPLE : -> Cid [ctor] .
+ op example : -> Oid [ctor] .
 
  op noFile : -> Oid [ctor] .
 
@@ -32,8 +42,8 @@ mod MTP is
  ***                        ***
 
  crl [loadComm] : gotLine(example, stdin, Text)
-    < example : EXAMPLE | Attrs >
- => < example : EXAMPLE | Attrs >
+    < example : EXAMPLE | file: noFile >
+ => < example : EXAMPLE | file: noFile >
     openFile(fileManager, example, Source, "r")
   if Q := tokenize(Text) /\
      Source := printTokens(Q) .
@@ -59,6 +69,7 @@ mod MTP is
  ***          GotLine          ***
  ***                           ***
 
+
 crl [end] : gotLine(example, FHIn, Text)
     < example : EXAMPLE | file: FHIn, Attrs >
  => < example : EXAMPLE | file: FHIn, Attrs >
@@ -72,7 +83,7 @@ crl [twice] : gotLine(example, FHIn, Text)
  if 'twice Q := tokenize(Text) /\
     N := rat(string(Q), 10) * 2 .
 
-crl [twice] : gotLine(example, FHIn, Text)
+crl [cube] : gotLine(example, FHIn, Text)
     < example : EXAMPLE | file: FHIn, Attrs >
  => < example : EXAMPLE | file: FHIn, Attrs >
     write(stdout, example, "Cube of " + string(Q) + " is " + string(N', 10) + "\n")
@@ -115,3 +126,27 @@ endm
 set print attribute on .
 
 erew run .
+
+eof
+
+ crl [loadComm] : gotLine(example, stdin, Text)
+     < example : EXAMPLE | file: noFile >
+  => < example : EXAMPLE | file: noFile >
+  if QIL := tokenize(Text) /\
+     {T, S} := metaParse('META-COMMAND-SYNTAX, QIL) .
+
+ T -> 'induction`on_[T]
+ T :: @Command@
+
+ op parseCommand : Module Term -> Goal
+ eq parseCommand()
+
+<> : Portal
+< Oid_1 : Cid_1 | Atts_1 > : Object
+< Oid_2 : Cid_2 | Atts_2 > : Object
+...
+< Oid_n : Cid_n | Atts_n > : Object
+msg_1 : Msg
+msg_2 : Msg
+...
+msg_m : Msg
