@@ -4,7 +4,7 @@ load file.maude
 fmod MTP-SIGN is
  pr META-LEVEL .
 
- sorts Spec @Sen@ @SenList@ @Token@ @Bubble@ @Arity@ @Def@ @DefSet@
+ sorts @Spec@ @Sen@ @SenList@ @Token@ @Bubble@ @Arity@ @Def@ @DefSet@
        @NeTokenList@ @ModExp@ @ParameterDecl@ @ParameterDeclList@ .
  subsort @Sen@ < @SenList@ .
  subsort @Token@ < @Arity@ .
@@ -23,8 +23,8 @@ fmod MTP-SIGN is
 
  op _*_ : @Arity@ @Arity@ -> @Arity@ [ctor assoc] .
 
- op spec!_=_ : @ModExp@ @DefSet@ -> Spec [ctor] .
- op spec*_=_ : @ModExp@ @DefSet@ -> Spec [ctor] .
+ op spec!_=_ : @ModExp@ @DefSet@ -> @Spec@ [ctor] .
+ op spec*_=_ : @ModExp@ @DefSet@ -> @Spec@ [ctor] .
 
  op rigid`sort_ : @Token@ -> @Def@ [ctor] .
  op nominal`pred_:__ : @Token@ @Arity@ @SenList@ -> @Def@ [ctor] .
@@ -70,8 +70,16 @@ fmod META-MTP-SIGN is
  eq GRAMMAR = addImports(BUBBLES, (including 'MTP-SIGN .)) .
 endfm
 
+fmod COMMAND-SIGN is
+ pr META-LEVEL .
+
+ sort @Command@ @Token@ .
+
+ op load_. : @Token@ -> @Command@ [ctor] .
+endfm
 
 fmod COMMAND-PROCESSING is
+ pr PARSING-RESULT .
  pr META-MTP-SIGN .
  pr META-LEVEL .
  pr LEXICAL .
@@ -80,7 +88,9 @@ fmod COMMAND-PROCESSING is
  vars T T' T'' T1 T2 : Term .
  var  RP? : [ResultPair] .
  vars M M' M'' : Module .
+ var  PR : ParsingRes .
  var  TyL : TypeList .
+ var  DB : Database .
  var  TL : TermList .
  vars S S' : String .
  var  QIL : QidList .
@@ -88,13 +98,13 @@ fmod COMMAND-PROCESSING is
  var  Srt : Sort .
  var  H : Header .
 
- op parseModName : Term -> Qid .
- eq parseModName(T) = downQid(T) .
-
- op parseModule : Term -> Module .
- ceq parseModule('spec!_=_[T,T']) = parseModule2(M, T')
+ op parseModule : Term Database -> ParsingRes .
+ ceq parseModule('spec!_=_[T,T'], DB) = [ modName(H) -> [parseModule2(M, T'), parseModule2(M, T'), parseModule2(M, T')], ""]
   if H := parseHeader(T) /\
      M := emptyModule(H) .
+ ceq parseModule('spec*_=_[T,T'], DB) = [ modName(H) -> [parseModule2(M, T'), parseModule2(M, T'), parseModule2(M, T')], ""]
+  if H := parseHeader(T) /\
+     M := emptyTheory(H) .
 
  op parseModule2 : Module Term -> Module .
  ceq parseModule2(M, '__[T, T']) = M''
@@ -108,6 +118,10 @@ fmod COMMAND-PROCESSING is
  ceq parseHeader('_`{_`}['token[T], T']) = Q{PL}
   if Q := downQid(T) /\
      PL := parsePL(T') .
+
+ op modName : Header -> Qid .
+ eq modName(Q) = Q .
+ eq modName(Q{PL}) = Q .
 
  op parsePL : Term -> ParameterDeclList .
  ceq parsePL('_`,_[T, T']) = PL, PL'
@@ -140,10 +154,12 @@ fmod COMMAND-PROCESSING is
  eq parseTypeList*(M, empty) = nil .
  eq parseTypeList*(M, (T, TL)) = parseTypeList(M, T) parseTypeList*(M, TL) .
 
- op parseModule : String -> Module .
- ceq parseModule(S) = M
+ op myDB : -> Database .
+
+ op parseModule : String Database -> ParsingRes .
+ ceq parseModule(S, DB) = PR
   if {T, Srt} := metaParse(GRAMMAR, tokenize(S), anyType) /\
-     M := parseModule(T) [print T " - " Srt "\n" M] .
+     PR := parseModule(T, DB) [print T " - " Srt "\n" PR] .
 
  op isLoadComm : String -> Bool .
  ceq isLoadComm(S) = true
@@ -167,10 +183,20 @@ mod MTP is
  pr DATABASE .
  inc FILE .
 
- vars Text Original Read Source : String .
+ vars Text Original Read Source STR : String .
  var  Attrs : AttributeSet .
+ vars DB DB' : Database .
  vars FHIn FHOut : Oid .
- var  DB : Database .
+
+ sort State .
+ *** Waiting input from the user
+ op idle : -> State [ctor] .
+ *** Reading file
+ op readFile : -> State [ctor] .
+ *** Parsing Module
+ op parseMod : -> State [ctor] .
+ *** Waits for a wrote msg and returns to idle with getLine
+ op print&idle : -> State [ctor] .
 
  *** Object and class definition
  op MTP : -> Cid .
@@ -180,6 +206,7 @@ mod MTP is
  op file:_ : Maybe{Oid} -> Attribute [ctor] .
  op db:_ : Database -> Attribute [ctor] .
  op out:_ : String -> Attribute [ctor] .
+ op state:_ : State -> Attribute [ctor] .
 
  *** Run command
  op run : -> Configuration [ctor] .
@@ -189,30 +216,50 @@ mod MTP is
  ***                        ***
 
  crl [loadComm] : gotLine(mtp, stdin, Text)
-    < mtp : MTP | out: Read, db: DB, Attrs >
- => < mtp : MTP | out: Read, db: DB, Attrs >
+    < mtp : MTP | out: Read, db: DB, state: idle, Attrs >
+ => < mtp : MTP | out: Read, db: DB, state: readFile, Attrs >
     openFile(fileManager, mtp, Source, "r")
   if isLoadComm(Text) /\
      Source := parseLoadComm(Text) .
 
+ ***                            ***
+ ***          OPENFILE          ***
+ ***                            ***
+
  rl [openedFile] : openedFile(mtp, fileManager, FHIn)
-    < mtp : MTP | file: null, Attrs >
- => < mtp : MTP | file: FHIn, Attrs >
+    < mtp : MTP | file: null, state: readFile, Attrs >
+ => < mtp : MTP | file: FHIn, state: readFile, Attrs >
     getLine(FHIn, mtp) .
 
- rl [loadModule] : gotLine(mtp, FHIn, Text)
-    < mtp : MTP | file: FHIn, out: Read, db: DB, Attrs >
+ rl [readingModule] : gotLine(mtp, FHIn, Text)
+    < mtp : MTP | file: FHIn, out: Read, state: readFile, Attrs >
  => if Text == ""
-    then < mtp : MTP | file: FHIn, out: "", db: parseModule(Read), Attrs >
+    then < mtp : MTP | file: FHIn, out: Read, state: readFile, Attrs >
          closeFile(FHIn, mtp)
-    else < mtp : MTP | file: FHIn, out: (Read + Text), db: DB, Attrs >
+    else < mtp : MTP | file: FHIn, out: (Read + Text), state: readFile, Attrs >
          getLine(FHIn, mtp)
     fi .
 
- rl [closedFile] : closedFile(mtp, FHIn)
-    < mtp : MTP | file: FHIn, Attrs >
- => < mtp : MTP | file: null, Attrs >
+ crl [parseModuleOK] :
+     < mtp : MTP | out: Read, db: DB, state: parseMod, Attrs >
+  => < mtp : MTP | out: "", db: DB', state: print&idle, Attrs >
+     write(stdout, mtp, STR + "\n")
+  if [DB', STR] := parseModule(Read, DB) .
+
+ *** TODO: parse error
+
+ rl [print&idle] : wrote(mtp, stdout)
+    < mtp : MTP | state: print&idle, Attrs >
+ => < mtp : MTP | state: idle, Attrs >
     getLine(stdin, mtp, "MTP> ") .
+
+ ***                               ***
+ ***          CLOSE FILE           ***
+ ***                               ***
+
+ rl [closedFile] : closedFile(mtp, FHIn)
+    < mtp : MTP | file: FHIn, state: readFile, Attrs >
+ => < mtp : MTP | file: null, state: parseMod, Attrs > .
 
  ***                         ***
  ***          EXIT           ***
@@ -226,31 +273,22 @@ mod MTP is
  ***                        ***
  ***          ERROR         ***
  ***                        ***
+ *** TODO: Control state
 
  crl [no-command] :
      gotLine(mtp, stdin, Text)
-     < mtp : MTP | Attrs >
-  => < mtp : MTP | Attrs >
+     < mtp : MTP | state: idle, Attrs >
+  => < mtp : MTP | state: print&idle, Attrs >
      write(stdout, mtp, "The introduced command does not exit.\n")
   if not isExitComm(Text) /\
      not isLoadComm(Text) .
-
- ***                          ***
- ***          WROTE           ***
- ***                          ***
-
- rl [wrote] :
-    wrote(mtp, stdout)
-    < mtp : MTP | Attrs >
- => < mtp : MTP | Attrs >
-    getLine(stdin, mtp, "MTP> ") .
 
  ***                        ***
  ***          RUN           ***
  ***                        ***
 
  eq run =
-    <> < mtp : MTP | file: null, out: "", db: empty >
+    <> < mtp : MTP | file: null, out: "", state: idle, db: empty >
     getLine(stdin, mtp, "MTP> ") .
 endm
 
