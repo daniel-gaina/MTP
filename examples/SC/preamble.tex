@@ -1,0 +1,46 @@
+\documentclass[
+% draft,
+paper=A4,
+pagesize,
+fontsize=10pt,
+DIV=9
+]{scrartcl}
+
+\usepackage{amsmath}
+\usepackage{listings}
+\lstdefinelanguage{Maude}{%
+  morekeywords={%
+    sort, sorts,
+    rigid, flexible,
+    op, ops,
+    pred, preds,
+    var, vars,
+    nominal, nominals,
+    modality, modalities
+  },%
+  literate={%
+    {/=}{\(\boldsymbol \neq\)}1
+    {->}{\(\boldsymbol \to\)}2
+    {forall}{\(\boldsymbol \forall\)}1
+    {exists}{\(\boldsymbol \exists\)}1
+    {.}{\(\boldsymbol \cdot\)}1
+    {anot}{anot}4
+    {not}{\(\boldsymbol \lnot\)}1
+    {=>}{\(\boldsymbol \Rightarrow\)}2
+    {\\/}{\(\boldsymbol \vee\)}1
+    {/\\}{\(\boldsymbol \wedge\)}1
+    {<}{\(\boldsymbol \langle\)}1
+    {>}{\(\boldsymbol \rangle\)}1
+    {<=>}{\(\boldsymbol \Leftrightarrow\)}2
+  }%
+}
+
+\lstset{%
+  language=Maude,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\bfseries,
+  columns=flexible,
+  keepspaces=true
+}%
+
+\usepackage{enumitem}

@@ -1,0 +1,84 @@
+\input{preamble}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+\title{Blocks world  -- situation calculus}
+\maketitle
+
+\section{Modeling}
+
+\subsection{Rigid data types}
+
+\begin{lstlisting}
+  spec! OBJECTS =
+    sorts Object %% Blocks and Table
+
+    ops table, a, b, c : -> Object
+  end
+  
+  spec! ACTIONS =
+    protecting OBJECTS
+    sort Action
+
+    op move : Object Object -> Action
+  end
+\end{lstlisting}
+
+\subsection{Nominals}
+
+\begin{lstlisting}
+  spec! SITUATIONS =
+    protecting ACTIONS
+    sort Situation
+
+    op init : -> Situation
+    op do : Action Situation -> Situation
+  end
+\end{lstlisting}
+
+\subsection{Flexible data types}
+
+\begin{lstlisting}
+  spec BLOCKS-WORLD[SITUATIONS] =
+    pred _on_ : Object Object %% Object is `on top' of another Object
+    pred clear : Object %% something can be placed on top of Object
+
+    forall s : Situation; x : Object
+    . @s-clear(x) <=> (x = table \/ not exists y : Object . y @s-on x)
+    %% (axdef-clear)
+    
+    forall x, y : Object
+    . x @init-on y
+      <=> (x = b /\ y = c)
+          \/ (x = a /\ y = table)
+          \/ (x = c /\ y = table)
+    %% (init)
+
+    forall s : Situation; x, y : Object
+    . @s-clear(x) /\ @s-clear(y)
+      =>
+      x @do(move(x,y),s)-on y
+    %% (move-action-axiom)
+      
+    forall s, s' : Situation; a : Action; x, y : Object
+    . do(a, s) = s' /\ x @s'-on y
+      =>
+      x @s-on y /\ forall z : Object . a /= move(x, z)
+      \/
+      @s-clear(x) /\ @s-clear(y) /\ a = move(x, y)
+    %% (move-successor-state-axiom) 
+  end
+\end{lstlisting}
+
+\section{Proof goals}
+
+\begin{enumerate}[leftmargin=*]
+
+\item Simple: \lstinline!exists s : Situation . a @s-on b /\ b @s-on c!
+  
+\item A bit more complex: \lstinline!exists s : Situation . b @s-on a /\ a @s-on c!
+  
+\end{enumerate}
+
+\end{document}
