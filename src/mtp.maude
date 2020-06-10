@@ -273,7 +273,6 @@ mod MTP is
  ***                        ***
  ***          ERROR         ***
  ***                        ***
- *** TODO: Control state
 
  crl [no-command] :
      gotLine(mtp, stdin, Text)

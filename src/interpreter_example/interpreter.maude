@@ -1,0 +1,101 @@
+load metaInterpreter.maude
+load file.maude
+
+fmod TIMES is
+ pr NAT .
+
+ vars X Y : Nat .
+
+ op _times_ : Nat Nat -> Nat [assoc comm] .
+ eq X times Y = X * Y .
+endfm
+
+*** red in META-LEVEL : upModule('TIMES, false) .
+
+mod DEMO is
+ inc META-INTERPRETER .
+ inc STD-STREAM .
+ pr META-LEVEL .
+ inc LEXICAL .
+ inc FILE .
+
+ var  AtS : AttributeSet .
+ var  QIL : QidList .
+ var  S : String .
+ vars I O : Oid .
+ var  Ty : Type .
+ var  T : Term .
+ var  Q : Qid .
+ var  N : Nat .
+
+ sort State .
+ *** Initial state, interpreter is created
+ op init : -> State [ctor] .
+ *** Idle, waiting for instructions
+ op idle : -> State [ctor] .
+ *** Running a command
+ op running : -> State [ctor] .
+
+ *** Object and class definition
+ op DEMO : -> Cid .
+ op demo : -> Oid .
+
+ op module : -> FModule .
+ eq module = upModule('TIMES, true) .
+
+ *** Attributes
+ op current:_ : Qid -> Attribute [ctor] .
+ op interpreter:_ : Oid -> Attribute [ctor] .
+ op state:_ : State -> Attribute [ctor] .
+
+ rl [createdInterpreter] :
+    createdInterpreter(O, interpreterManager, I)
+    < O : DEMO | state: init, AtS >
+ => < O : DEMO | state: init, interpreter: I, AtS >
+    insertModule(I, O, module) .
+
+ rl [insertedModule] :
+    insertedModule(O, I)
+    < O : DEMO | current: Q, state: init, AtS >
+ => < O : DEMO | current: 'TIMES, state: idle, AtS >
+    getLine(stdin, O, "Introduce command> ") .
+
+
+ rl [parseCommand] :
+    gotLine(O, stdin, S)
+    < O : DEMO | current: Q, state: idle, interpreter: I, AtS >
+ => < O : DEMO | current: Q, state: idle, interpreter: I, AtS >
+    parseTerm(I, O, Q, none, tokenize(S), 'Nat) .
+
+ rl [parsedTerm] :
+    parsedTerm(O, I, {T, Ty})
+    < O : DEMO | current: Q, state: idle, interpreter: I, AtS >
+ => < O : DEMO | current: Q, state: idle, interpreter: I, AtS >
+    reduceTerm(I, O, Q, T) .
+
+ rl [reducedTerm] :
+    reducedTerm(O, I, N, T, Ty)
+    < O : DEMO | current: Q, state: idle, AtS >
+ => < O : DEMO | current: Q, state: idle, AtS >
+    printTerm(I, O, Q, none, T, mixfix flat format number rat) .
+
+ rl [printedTerm] :
+    printedTerm(O, I, QIL)
+    < O : DEMO | current: Q, state: idle, AtS >
+ => < O : DEMO | current: Q, state: idle, AtS >
+    write(stdout, O, "Result: " + string(QIL) + "\n") .
+
+ rl [wrote] :
+    wrote(O, stdout)
+    < O : DEMO | AtS >
+ => < O : DEMO | AtS >
+    getLine(stdin, O, "Introduce command> ") .
+
+ *** Run command
+ op run : -> Configuration [ctor] .
+ eq run =
+    <> < demo : DEMO | current: 'QID, state: init >
+    createInterpreter(interpreterManager, demo, none) .
+endm
+
+erew run .

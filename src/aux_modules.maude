@@ -61,6 +61,7 @@ fmod AUX-MODULE-OPS is
  vars EqS EqS' : EquationSet .
  vars ODS ODS' : OpDeclSet .
  vars IL IL' : ImportList .
+ var  PL : ParameterList .
  vars SS SS' : SortSet .
  vars RS RS' : RuleSet .
  var  MAS : MembAxSet .
@@ -158,6 +159,7 @@ fmod AUX-MODULE-OPS is
  eq emptyTheory(H) = th H is nil sorts none . none none none none none endth .
 
  op introduceParams : Module Database -> Module .
+ *** If no parameter list is used it does not change
  eq introduceParams(fmod Q is IL sorts SS . SSDS ODS MAS EqS endfm, DB) =
       fmod Q is IL sorts SS . SSDS ODS MAS EqS endfm .
  eq introduceParams(mod Q is IL sorts SS . SSDS ODS MAS EqS RS endm, DB) =
@@ -165,5 +167,14 @@ fmod AUX-MODULE-OPS is
  eq introduceParams(fth Q is IL sorts SS . SSDS ODS MAS EqS endfth, DB) =
       fth Q is IL sorts SS . SSDS ODS MAS EqS endfth .
  eq introduceParams(th Q is IL sorts SS . SSDS ODS MAS EqS RS endth, DB) =
+      th Q is IL sorts SS . SSDS ODS MAS EqS RS endth .
+ *** If a parameter list is given we traverse it
+ eq introduceParams(fmod Q{PL} is IL sorts SS . SSDS ODS MAS EqS endfm, DB) =
+      fmod Q is IL sorts SS . SSDS ODS MAS EqS endfm .
+ eq introduceParams(mod Q{PL} is IL sorts SS . SSDS ODS MAS EqS RS endm, DB) =
+      mod Q is IL sorts SS . SSDS ODS MAS EqS RS endm .
+ eq introduceParams(fth Q{PL} is IL sorts SS . SSDS ODS MAS EqS endfth, DB) =
+      fth Q is IL sorts SS . SSDS ODS MAS EqS endfth .
+ eq introduceParams(th Q{PL} is IL sorts SS . SSDS ODS MAS EqS RS endth, DB) =
       th Q is IL sorts SS . SSDS ODS MAS EqS RS endth .
 endfm
