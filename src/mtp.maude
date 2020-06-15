@@ -1,74 +1,7 @@
+load metaInterpreter.maude
 load aux_modules.maude
+load grammar.maude
 load file.maude
-
-fmod MTP-SIGN is
- pr META-LEVEL .
-
- sorts @Spec@ @Sen@ @SenList@ @Token@ @Bubble@ @Arity@ @Def@ @DefSet@
-       @NeTokenList@ @ModExp@ @ParameterDecl@ @ParameterDeclList@ .
- subsort @Sen@ < @SenList@ .
- subsort @Token@ < @Arity@ .
- subsort @Token@ < @ModExp@ .
- subsort @Def@ < @DefSet@ .
- subsort @ParameterDecl@ < @ParameterDeclList@ .
-
- op _,_ : @ParameterDeclList@ @ParameterDeclList@ -> @ParameterDeclList@ [ctor assoc] .
-
- op _{_} : @Token@ @ParameterDeclList@ -> @ModExp@ [ctor] .
-
- op _::_ : @Token@ @Token@ -> @ParameterDecl@ [ctor] .
-
- op __ : @SenList@ @SenList@ -> @SenList@ [ctor assoc] .
- op __ : @DefSet@ @DefSet@ -> @DefSet@ [ctor assoc comm] .
-
- op _*_ : @Arity@ @Arity@ -> @Arity@ [ctor assoc] .
-
- op spec!_=_ : @ModExp@ @DefSet@ -> @Spec@ [ctor] .
- op spec*_=_ : @ModExp@ @DefSet@ -> @Spec@ [ctor] .
-
- op rigid`sort_ : @Token@ -> @Def@ [ctor] .
- op nominal`pred_:__ : @Token@ @Arity@ @SenList@ -> @Def@ [ctor] .
-
- op ._ : @Token@ -> @Sen@ [ctor] .
-endfm
-
-fmod META-MTP-SIGN is
- including AUX-MODULE-OPS .
-
- op BUBBLES : -> FModule .
- op GRAMMAR : -> FModule [memo] .
-
- eq BUBBLES
-    = (fmod 'GRAMMAR is
-        including 'QID-LIST .
-        sorts none .
-        none
-        op 'token : 'Qid -> '@Token@
-             [special(
-               (id-hook('Bubble, '1 '1)
-                op-hook('qidSymbol, '<Qids>, nil, 'Qid)))] .
-        op 'bubble : 'QidList -> '@Bubble@
-             [special(
-               (id-hook('Bubble, '1 '-1 '`( '`))
-                op-hook('qidListSymbol, '__, 'QidList 'QidList, 'QidList)
-                op-hook('qidSymbol, '<Qids>, nil, 'Qid)
-                id-hook('Exclude, 'eq 'ceq 'rl 'crl 'mb 'cmb 'sd 'csd
-                                  'var 'vars 'strat 'endm
-                                  'endfm 'endsm 'sorts 'subsort 'subsorts
-                                  'subclass 'subclasses 'op 'ops
-                                  'protecting 'pr 'including 'inc 'extending
-                                  'ctor 'assoc 'comm '==)))] .
-        op 'neTokenList : 'QidList -> '@NeTokenList@
-             [special(
-               (id-hook('Bubble, '1 '-1 '`( '`))
-                op-hook('qidListSymbol, '__, 'QidList 'QidList, 'QidList)
-                op-hook('qidSymbol, '<Qids>, nil, 'Qid)
-                id-hook('Exclude, '. ':)))] .
-        none
-        none
-     endfm) .
- eq GRAMMAR = addImports(BUBBLES, (including 'MTP-SIGN .)) .
-endfm
 
 fmod COMMAND-SIGN is
  pr META-LEVEL .
@@ -154,8 +87,6 @@ fmod COMMAND-PROCESSING is
  eq parseTypeList*(M, empty) = nil .
  eq parseTypeList*(M, (T, TL)) = parseTypeList(M, T) parseTypeList*(M, TL) .
 
- op myDB : -> Database .
-
  op parseModule : String Database -> ParsingRes .
  ceq parseModule(S, DB) = PR
   if {T, Srt} := metaParse(GRAMMAR, tokenize(S), anyType) /\
@@ -179,16 +110,25 @@ endfm
 mod MTP is
  pr (MAYBE * (op maybe to null)){Oid} .
  pr COMMAND-PROCESSING .
+ inc META-INTERPRETER .
  inc STD-STREAM .
  pr DATABASE .
  inc FILE .
 
  vars Text Original Read Source STR : String .
- var  Attrs : AttributeSet .
+ var  AtS : AttributeSet .
+ vars FHIn FHOut MI : Oid .
  vars DB DB' : Database .
- vars FHIn FHOut : Oid .
+ var  QIL : QidList .
+ var  Q : Qid .
 
  sort State .
+ *** Initial state, metainterpreter is created
+ op init : -> State [ctor] .
+ *** Loading from standard database
+ op load-std-db : -> State [ctor] .
+ *** Loading grammar
+ op load-grammar : -> State [ctor] .
  *** Waiting input from the user
  op idle : -> State [ctor] .
  *** Reading file
@@ -204,9 +144,15 @@ mod MTP is
 
  *** Attributes
  op file:_ : Maybe{Oid} -> Attribute [ctor] .
+ op load:_ : QidList -> Attribute [ctor gather (&)] .
  op db:_ : Database -> Attribute [ctor] .
- op out:_ : String -> Attribute [ctor] .
  op state:_ : State -> Attribute [ctor] .
+ op out:_ : String -> Attribute [ctor] .
+ op mi:_ : Oid -> Attribute [ctor] .
+
+ *** Initial value for load
+ op modList : -> QidList .
+ eq modList = 'TRUTH-VALUE 'BOOL-OPS 'TRUTH 'BOOL 'NAT 'TRIV 'QID-LIST 'MTP-SIGN .
 
  *** Run command
  op run : -> Configuration [ctor] .
@@ -216,8 +162,8 @@ mod MTP is
  ***                        ***
 
  crl [loadComm] : gotLine(mtp, stdin, Text)
-    < mtp : MTP | out: Read, db: DB, state: idle, Attrs >
- => < mtp : MTP | out: Read, db: DB, state: readFile, Attrs >
+    < mtp : MTP | out: Read, db: DB, state: idle, AtS >
+ => < mtp : MTP | out: Read, db: DB, state: readFile, AtS >
     openFile(fileManager, mtp, Source, "r")
   if isLoadComm(Text) /\
      Source := parseLoadComm(Text) .
@@ -227,30 +173,30 @@ mod MTP is
  ***                            ***
 
  rl [openedFile] : openedFile(mtp, fileManager, FHIn)
-    < mtp : MTP | file: null, state: readFile, Attrs >
- => < mtp : MTP | file: FHIn, state: readFile, Attrs >
+    < mtp : MTP | file: null, state: readFile, AtS >
+ => < mtp : MTP | file: FHIn, state: readFile, AtS >
     getLine(FHIn, mtp) .
 
  rl [readingModule] : gotLine(mtp, FHIn, Text)
-    < mtp : MTP | file: FHIn, out: Read, state: readFile, Attrs >
+    < mtp : MTP | file: FHIn, out: Read, state: readFile, AtS >
  => if Text == ""
-    then < mtp : MTP | file: FHIn, out: Read, state: readFile, Attrs >
+    then < mtp : MTP | file: FHIn, out: Read, state: readFile, AtS >
          closeFile(FHIn, mtp)
-    else < mtp : MTP | file: FHIn, out: (Read + Text), state: readFile, Attrs >
+    else < mtp : MTP | file: FHIn, out: (Read + Text), state: readFile, AtS >
          getLine(FHIn, mtp)
     fi .
 
  crl [parseModuleOK] :
-     < mtp : MTP | out: Read, db: DB, state: parseMod, Attrs >
-  => < mtp : MTP | out: "", db: DB', state: print&idle, Attrs >
+     < mtp : MTP | out: Read, db: DB, state: parseMod, AtS >
+  => < mtp : MTP | out: "", db: DB', state: print&idle, AtS >
      write(stdout, mtp, STR + "\n")
   if [DB', STR] := parseModule(Read, DB) .
 
  *** TODO: parse error
 
  rl [print&idle] : wrote(mtp, stdout)
-    < mtp : MTP | state: print&idle, Attrs >
- => < mtp : MTP | state: idle, Attrs >
+    < mtp : MTP | state: print&idle, AtS >
+ => < mtp : MTP | state: idle, AtS >
     getLine(stdin, mtp, "MTP> ") .
 
  ***                               ***
@@ -258,15 +204,15 @@ mod MTP is
  ***                               ***
 
  rl [closedFile] : closedFile(mtp, FHIn)
-    < mtp : MTP | file: FHIn, state: readFile, Attrs >
- => < mtp : MTP | file: null, state: parseMod, Attrs > .
+    < mtp : MTP | file: FHIn, state: readFile, AtS >
+ => < mtp : MTP | file: null, state: parseMod, AtS > .
 
  ***                         ***
  ***          EXIT           ***
  ***                         ***
 
  crl [exit] : gotLine(mtp, stdin, Text)
-     < mtp : MTP | out: Read, db: DB, Attrs >
+     < mtp : MTP | AtS >
   => write(stdout, mtp, "Thanks for using MTP!\n")
   if isExitComm(Text) .
 
@@ -276,19 +222,51 @@ mod MTP is
 
  crl [no-command] :
      gotLine(mtp, stdin, Text)
-     < mtp : MTP | state: idle, Attrs >
-  => < mtp : MTP | state: print&idle, Attrs >
+     < mtp : MTP | state: idle, AtS >
+  => < mtp : MTP | state: print&idle, AtS >
      write(stdout, mtp, "The introduced command does not exit.\n")
   if not isExitComm(Text) /\
      not isLoadComm(Text) .
+
+ ***                          ***
+ ***          CREATE          ***
+ ***      METAINTERPRETER     ***
+ ***                          ***
+
+ rl [init] :
+    createdInterpreter(mtp, interpreterManager, MI)
+    < mtp : MTP | state: init, load: Q QIL, AtS >
+ => < mtp : MTP | state: load-std-db, mi: MI, load: QIL, AtS >
+    insertModule(MI, mtp, upModule(Q, true)) .
+
+ rl [load-predef] :
+    insertedModule(mtp, MI)
+    < mtp : MTP | state: load-std-db, load: Q QIL, AtS >
+ => < mtp : MTP | state: load-std-db, load: QIL, AtS >
+    insertModule(MI, mtp, upModule(Q, true)) .
+
+
+ rl [load-preder-finished] :
+    insertedModule(mtp, MI)
+    < mtp : MTP | state: load-std-db, load: nil, AtS >
+ => < mtp : MTP | state: load-grammar, AtS >
+    insertModule(MI, mtp, GRAMMAR) .
+
+
+ rl [load-grammar-finished] :
+    insertedModule(mtp, MI)
+    < mtp : MTP | state: load-grammar, AtS >
+ => < mtp : MTP | state: idle, AtS >
+    getLine(stdin, mtp, "Introduce command> ") .
 
  ***                        ***
  ***          RUN           ***
  ***                        ***
 
  eq run =
-    <> < mtp : MTP | file: null, out: "", state: idle, db: empty >
-    getLine(stdin, mtp, "MTP> ") .
+    <> < mtp : MTP | file: null, out: "", state: init, db: empty,
+                     load: modList >
+    createInterpreter(interpreterManager, mtp, none) .
 endm
 
 set print attribute on .

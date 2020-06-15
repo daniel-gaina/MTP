@@ -1,0 +1,70 @@
+set include BOOL off .
+
+fmod MTP-SIGN is
+ sorts @Spec@ @Sen@ @SenList@ @Token@ @Bubble@ @Arity@ @Def@ @DefSet@
+       @NeTokenList@ @ModExp@ @ParameterDecl@ @ParameterDeclList@ .
+ subsort @Sen@ < @SenList@ .
+ subsort @Token@ < @Arity@ .
+ subsort @Token@ < @ModExp@ .
+ subsort @Def@ < @DefSet@ .
+ subsort @ParameterDecl@ < @ParameterDeclList@ .
+
+ op _,_ : @ParameterDeclList@ @ParameterDeclList@ -> @ParameterDeclList@ [ctor assoc] .
+
+ op _{_} : @Token@ @ParameterDeclList@ -> @ModExp@ [ctor] .
+
+ op _::_ : @Token@ @Token@ -> @ParameterDecl@ [ctor] .
+
+ op __ : @SenList@ @SenList@ -> @SenList@ [ctor assoc] .
+ op __ : @DefSet@ @DefSet@ -> @DefSet@ [ctor assoc comm] .
+
+ op _*_ : @Arity@ @Arity@ -> @Arity@ [ctor assoc] .
+
+ op spec!_=_ : @ModExp@ @DefSet@ -> @Spec@ [ctor] .
+ op spec*_=_ : @ModExp@ @DefSet@ -> @Spec@ [ctor] .
+
+ op rigid`sort_ : @Token@ -> @Def@ [ctor] .
+ op nominal`pred_:__ : @Token@ @Arity@ @SenList@ -> @Def@ [ctor] .
+
+ op ._ : @Token@ -> @Sen@ [ctor] .
+endfm
+
+fmod META-MTP-SIGN is
+ including AUX-MODULE-OPS .
+
+ op BUBBLES : -> FModule .
+ op GRAMMAR : -> FModule [memo] .
+
+ eq BUBBLES
+    = (fmod 'GRAMMAR is
+        including 'QID-LIST .
+        sorts none .
+        none
+        op 'token : 'Qid -> '@Token@
+             [special(
+               (id-hook('Bubble, '1 '1)
+                op-hook('qidSymbol, '<Qids>, nil, 'Qid)))] .
+        op 'bubble : 'QidList -> '@Bubble@
+             [special(
+               (id-hook('Bubble, '1 '-1 '`( '`))
+                op-hook('qidListSymbol, '__, 'QidList 'QidList, 'QidList)
+                op-hook('qidSymbol, '<Qids>, nil, 'Qid)
+                id-hook('Exclude, 'eq 'ceq 'rl 'crl 'mb 'cmb 'sd 'csd
+                                  'var 'vars 'strat 'endm
+                                  'endfm 'endsm 'sorts 'subsort 'subsorts
+                                  'subclass 'subclasses 'op 'ops
+                                  'protecting 'pr 'including 'inc 'extending
+                                  'ctor 'assoc 'comm '==)))] .
+        op 'neTokenList : 'QidList -> '@NeTokenList@
+             [special(
+               (id-hook('Bubble, '1 '-1 '`( '`))
+                op-hook('qidListSymbol, '__, 'QidList 'QidList, 'QidList)
+                op-hook('qidSymbol, '<Qids>, nil, 'Qid)
+                id-hook('Exclude, '. ':)))] .
+        none
+        none
+     endfm) .
+ eq GRAMMAR = addImports(BUBBLES, (including 'MTP-SIGN .)) .
+endfm
+
+set include BOOL on .
