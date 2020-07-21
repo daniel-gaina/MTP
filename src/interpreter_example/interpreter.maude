@@ -98,4 +98,7 @@ mod DEMO is
     createInterpreter(interpreterManager, demo, none) .
 endm
 
+set print attribute on .
+
 erew run .
+

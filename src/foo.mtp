@@ -1,7 +1,23 @@
-spec! MyLogic{X :: Triv} =
+spec! LIST =
+ rigid sort List .
+end
 
-  rigid sort Sort1
-  rigid sort Sort2
+spec! MyLogic{X :: TRIV} =
+  pr LIST .
 
-  nominal pred myPred : Sort1 * Sort2
-  . Foo2
+  rigid sort Elt .
+  nominal sort Sort2 .
+
+  var  E : Elt .
+  vars L L' : List .
+
+  op empty : -> List [ctor] .
+  op _._ : Elt List -> List [ctor] .
+
+  op head : List -> Elt .
+  eq head(E . L) = E .
+  ceq head(E . L) = E
+   if L = empty /\
+      L = empty .
+
+end

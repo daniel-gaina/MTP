@@ -1,15 +1,8 @@
 load metaInterpreter.maude
+load predef_modules.maude
 load aux_modules.maude
 load grammar.maude
 load file.maude
-
-fmod COMMAND-SIGN is
- pr META-LEVEL .
-
- sort @Command@ @Token@ .
-
- op load_. : @Token@ -> @Command@ [ctor] .
-endfm
 
 fmod COMMAND-PROCESSING is
  pr PARSING-RESULT .
@@ -17,44 +10,203 @@ fmod COMMAND-PROCESSING is
  pr META-LEVEL .
  pr LEXICAL .
 
+ vars RIG RIG' NOM NOM' FLE FLE' SS : SortSet .
+ vars T T' T'' T1 T2 T3 T4 : Term .
+ vars QIL QIL' ERR ERR' : QidList .
+ vars M M' M'' TOP FLAT : Module .
  vars PL PL' : ParameterDeclList .
- vars T T' T'' T1 T2 : Term .
+ vars TL TL' ACC : TermList .
+ var  SSDS : SubsortDeclSet .
+ vars VS VS' : VariableSet .
  var  RP? : [ResultPair] .
- vars M M' M'' : Module .
+ var  COND : Condition .
  var  PR : ParsingRes .
  var  TyL : TypeList .
+ vars Ty Ty' : Type .
+ var  AtS : AttrSet .
  var  DB : Database .
- var  TL : TermList .
  vars S S' : String .
- var  QIL : QidList .
+ var  Eq : Equation .
+ var  V : Variable .
+ var  OP : OpDecl .
+ var  I : Import .
  vars Q Q' : Qid .
  var  Srt : Sort .
  var  H : Header .
 
- op parseModule : Term Database -> ParsingRes .
- ceq parseModule('spec!_=_[T,T'], DB) = [ modName(H) -> [parseModule2(M, T'), parseModule2(M, T'), parseModule2(M, T')], ""]
+
+
+ op parseModule : Term -> ParsingRes .
+ ceq parseModule('spec!_=_end[T,T']) = parseNoBubbles(M, T')
   if H := parseHeader(T) /\
      M := emptyModule(H) .
- ceq parseModule('spec*_=_[T,T'], DB) = [ modName(H) -> [parseModule2(M, T'), parseModule2(M, T'), parseModule2(M, T')], ""]
+ ceq parseModule('spec*_=_end[T,T']) = parseNoBubbles(M, T')
   if H := parseHeader(T) /\
      M := emptyTheory(H) .
 
- op parseModule2 : Module Term -> Module .
- ceq parseModule2(M, '__[T, T']) = M''
-  if M' := parseDef(M, T) /\
-     M'' := parseModule2(M', T') .
- eq parseModule2(M, T) = parseDef(M, T) [owise] .
+ op parseNoBubbles : Module Term -> ParsingRes .
+ ceq parseNoBubbles(M, '__[T, T']) = [M'', (TL, TL'),
+                                      < (RIG ; RIG'), (NOM ; NOM'), (FLE ; FLE') >, ERR ERR' ]
+  if [M', TL, < RIG, NOM, FLE >, ERR] := parseDefNoBubble(M, T) /\
+     [M'', TL', < RIG', NOM', FLE' >, ERR'] := parseNoBubbles(M', T') .
+ eq parseNoBubbles(M, T) = parseDefNoBubble(M, T) .
 
+ op parseDefNoBubble : Module Term -> ParsingRes .
+ ***(
+           PARSING IMPORTATION DECLARATIONS
+ )
+ ceq parseDefNoBubble(M, 'pr_.['token[T]]) = [M', empty, < none, none, none >, nil ]
+  if Q := downQid(T) /\
+     I := protecting Q . /\
+     M' := addImports(M, I) .
+ ceq parseDefNoBubble(M, 'ex_.['token[T]]) = [M', empty, < none, none, none >, nil ]
+  if Q := downQid(T) /\
+     I := extending Q . /\
+     M' := addImports(M, I) .
+ ceq parseDefNoBubble(M, 'inc_.['token[T]]) = [M', empty, < none, none, none >, nil ]
+  if Q := downQid(T) /\
+     I := including Q . /\
+     M' := addImports(M, I) .
+ ***(
+           PARSING SORT DECLARATIONS
+ )
+ ceq parseDefNoBubble(M, 'rigid`sort_.['neTokenList[T]]) = [M', empty, < SS, none, none >, nil ]
+  if SS := parseSortList(T) /\
+     M' := addSorts(M, SS) .
+ ceq parseDefNoBubble(M, 'rigid`sorts_.['neTokenList[T]]) = [M', empty, < SS, none, none >, nil ]
+  if SS := parseSortList(T) /\
+     M' := addSorts(M, SS) .
+ ceq parseDefNoBubble(M, 'nominal`sort_.['neTokenList[T]]) = [M'', empty, < none, SS, none >, nil ]
+  if SS := parseSortList(T) /\
+     M' := addSorts(M, SS) /\
+     SSDS := genSubsortNominal(SS) /\
+     M'' := addSubsorts(M', SSDS) .
+ ceq parseDefNoBubble(M, 'nominal`sorts_.['neTokenList[T]]) = [M'', empty, < none, SS, none >, nil ]
+  if SS := parseSortList(T) /\
+     M' := addSorts(M, SS) /\
+     SSDS := genSubsortNominal(SS) /\
+     M'' := addSubsorts(M', SSDS) .
+ ceq parseDefNoBubble(M, 'sort_.['neTokenList[T]]) = [M', empty, < none, none, SS >, nil ]
+  if SS := parseSortList(T) /\
+     M' := addSorts(M, SS) .
+ ceq parseDefNoBubble(M, 'sorts_.['neTokenList[T]]) = [M', empty, < none, none, SS >, nil ]
+  if SS := parseSortList(T) /\
+     M' := addSorts(M, SS) .
+ ***(
+           PARSING OP DECLARATIONS
+ )
+ ceq parseDefNoBubble(M, 'op_:`->_.['token[T],'token[T']]) = [M', empty, < none, none, none >, nil ]
+  if Q := downQid(T) /\
+     Q' := downQid(T') /\
+     OP := op Q : nil -> Q' [none] . /\
+     M' := addOps(M, OP) .
+ ceq parseDefNoBubble(M, 'op_:`->_`[_`].['token[T],'token[T'], T'']) = [M', empty, < none, none, none >, nil ]
+  if Q := downQid(T) /\
+     Q' := downQid(T') /\
+     AtS := parseAttr(M, T'') /\
+     OP := op Q : nil -> Q' [AtS] . /\
+     M' := addOps(M, OP) .
+ ceq parseDefNoBubble(M, 'op_:_->_.['token[T],'neTokenList[T'],'token[T'']]) = [M', empty, < none, none, none >, nil ]
+  if Q := downQid(T) /\
+     TyL := parseArity(T') /\
+     Q' := downQid(T'') /\
+     OP := op Q : TyL -> Q' [none] . /\
+     M' := addOps(M, OP) .
+ ceq parseDefNoBubble(M, 'op_:_->_`[_`].['token[T1],'neTokenList[T2],'token[T3], T4]) = [M', empty, < none, none, none >, nil ]
+  if Q := downQid(T1) /\
+     TyL := parseArity(T2) /\
+     Q' := downQid(T3) /\
+     AtS := parseAttr(M, T4) /\
+     OP := op Q : TyL -> Q' [AtS] . /\
+     M' := addOps(M, OP) .
+ ***(
+           PARSING FLEXIBLE OP DECLARATIONS
+ )
+ ceq parseDefNoBubble(M, 'flexible`op_:`->_.['token[T],'token[T']]) = [M', empty, < none, none, none >, nil ]
+  if Q := downQid(T) /\
+     Q' := downQid(T') /\
+     OP := op Q : nil -> Q' [none] . /\
+     M' := addOps(M, OP) .
+ ceq parseDefNoBubble(M, 'flexible`op_:`->_`[_`].['token[T],'token[T'], T'']) = [M', empty, < none, none, none >, nil ]
+  if Q := downQid(T) /\
+     Q' := downQid(T') /\
+     AtS := parseAttr(M, T'') /\
+     OP := op Q : nil -> Q' [AtS] . /\
+     M' := addOps(M, OP) .
+ ceq parseDefNoBubble(M, 'flexible`op_:_->_.['token[T],'neTokenList[T'],'token[T'']]) = [M', empty, < none, none, none >, nil ]
+  if Q := downQid(T) /\
+     TyL := parseArity(T') /\
+     Q' := downQid(T'') /\
+     OP := op Q : TyL -> Q' [none] . /\
+     M' := addOps(M, OP) .
+ ceq parseDefNoBubble(M, 'flexible`op_:_->_`[_`].['token[T1],'neTokenList[T2],'token[T3], T4]) = [M', empty, < none, none, none >, nil ]
+  if Q := downQid(T1) /\
+     TyL := parseArity(T2) /\
+     Q' := downQid(T3) /\
+     AtS := parseAttr(M, T4) /\
+     OP := op Q : TyL -> Q' [AtS] . /\
+     M' := addOps(M, OP) .
+ ***(
+          EQUATIONS AND VARIABLES ARE PARSED LATED.
+          It makes sense because they might need sorts and operators from imported modules
+          and parameters.
+ )
+ eq parseDefNoBubble(M, T) = [M, T, < none, none, none >, nil ] [owise] . *** TODO!!!
+
+ op parseArity : Term -> TypeList .
+ eq parseArity('__[TL]) = parseArity*(TL) .
+ eq parseArity(T) = downQid(T) [owise] .
+
+ op parseArity* : TermList -> TypeList .
+ eq parseArity*((T, TL)) = downQid(T) parseArity*(TL) .
+ eq parseArity*(empty) = nil .
+
+ op parseSortList : Term -> SortSet .
+ eq parseSortList('__[TL]) = parseSortList*(TL) .
+ eq parseSortList(T) = downQid(T) [owise] .
+
+ op parseSortList* : TermList -> SortSet .
+ eq parseSortList*((T, TL)) = downQid(T) ; parseSortList*(TL) .
+ eq parseSortList*(empty) = none .
+
+ op genSubsortNominal : SortSet -> SubsortDeclSet .
+ eq genSubsortNominal(none) = none .
+ eq genSubsortNominal(Srt ; SS) = subsort Srt < '@Nominal@ . genSubsortNominal(SS) .
+
+ op parseAttr : Module Term -> AttrSet .
+ eq parseAttr(M, '__[TL]) = parseAttr*(M, TL) .
+ eq parseAttr(M, 'ctor.@Attr@) = ctor .
+ eq parseAttr(M, 'iter.@Attr@) = iter .
+ eq parseAttr(M, 'assoc.@Attr@) = assoc .
+ eq parseAttr(M, 'comm.@Attr@) = comm .
+ eq parseAttr(M, 'idem.@Attr@) = idem .
+ eq parseAttr(M, 'memo.@Attr@) = memo .
+
+ op parseAttr* : Module TermList -> AttrSet .
+ eq parseAttr*(M, empty) = none .
+ eq parseAttr*(M, (T, TL)) = parseAttr(M, T) parseAttr*(M, TL) .
+
+ ***(
+ ops id:_ : @Bubble@ -> @Attr@ .
+ op left`id:_  : @Bubble@ -> @Attr@ .
+ op right`id:_ : @Bubble@ -> @Attr@ .
+ ops frozen`(_`) poly`(_`) strat`(_`) :
+       @NeTokenList@ -> @AttrList@ .
+ op prec_ : @Token@ -> @Attr@ .
+ op gather`(_`) : @NeTokenList@ -> @Attr@ .
+ ops format`(_`) : @NeTokenList@ -> @Attr@ .
+ op metadata_ : @Token@ -> @Attr@ .
+ )
+
+***(
+      Header
+)
  op parseHeader : Term -> Header .
  ceq parseHeader('token[T]) = Q
   if Q := downQid(T) .
  ceq parseHeader('_`{_`}['token[T], T']) = Q{PL}
   if Q := downQid(T) /\
      PL := parsePL(T') .
-
- op modName : Header -> Qid .
- eq modName(Q) = Q .
- eq modName(Q{PL}) = Q .
 
  op parsePL : Term -> ParameterDeclList .
  ceq parsePL('_`,_[T, T']) = PL, PL'
@@ -64,33 +216,81 @@ fmod COMMAND-PROCESSING is
   if Q := downQid(T) /\
      Q' := downQid(T') .
 
- op parseDef : Module Term -> Module .
- ceq parseDef(M, 'rigid`sort_['token[T]]) = M'
-  if Srt := downQid(T) /\
-     M' := addSorts(M, Srt) .
- ceq parseDef(M, 'nominal`pred_:__['token[T],T',T'']) = M''
-  if Q := downQid(T) /\
-     TyL := parseTypeList(M, T') /\
-     M' := addOps(M, op Q : TyL -> 'Bool [metadata("nominal")] .) /\
-     M'' := parseSen(M', T'') .
- eq parseDef(M, T) = M [owise print "owise"] . *** TODO!!!
+ *** Top module, Flat module, Vars and equations
+ op parseBubbles : Module Module TermList -> Module .
+ eq parseBubbles(TOP, FLAT, TL) = parseBubbles(TOP, FLAT, none, TL, empty) .
 
- op parseSen : Module Term -> Module .
- eq parseSen(M, T) = M .
+ ***(
+             PARSE VARIABLES
+ )
+ *** Top module, Flat module, VariableSet, Vars and equations, Acc
+ op parseBubbles : Module Module VariableSet TermList TermList -> Module .
+ eq parseBubbles(TOP, FLAT, VS, empty, ACC) = parseEqs(TOP, FLAT, VS, ACC) .
+ ceq parseBubbles(TOP, FLAT, VS, ('var_:_.['neTokenList[T],'token[T']], TL), ACC) =
+                             parseBubbles(TOP, FLAT, VS ; VS', TL, ACC)
+  if VS' := parseVars(T, T') .
+ ceq parseBubbles(TOP, FLAT, VS, ('vars_:_.['neTokenList[T],'token[T']], TL), ACC) =
+                             parseBubbles(TOP, FLAT, VS ; VS', TL, ACC)
+  if VS' := parseVars(T, T') .
+ eq parseBubbles(TOP, FLAT, VS, (T, TL), ACC) = parseBubbles(TOP, FLAT, VS, TL, (ACC, T)) [owise] .
 
- op parseTypeList : Module Term -> TypeList .
- ceq parseTypeList(M, 'token[T]) = Q
-  if Q := downQid(T) .
- eq parseTypeList(M, '_*_[TL]) = parseTypeList*(M, TL) .
+ ***(
+             PARSE EQUATIONS
+ )
+ op parseEqs : Module Module VariableSet TermList -> Module .
+ eq parseEqs(TOP, FLAT, VS, empty) = TOP .
+ ceq parseEqs(TOP, FLAT, VS, (T, TL)) = parseEqs(M, FLAT, VS, TL)
+  if Eq := parseEq(FLAT, VS, T) /\
+     M := addEqs(TOP, Eq) .
 
- op parseTypeList* : Module TermList -> TypeList .
- eq parseTypeList*(M, empty) = nil .
- eq parseTypeList*(M, (T, TL)) = parseTypeList(M, T) parseTypeList*(M, TL) .
+ op parseEq : Module VariableSet Term -> Equation .
+ ceq parseEq(M, VS, 'eq_=_.['bubble[T], 'bubble[T']]) = eq T1 = T2 [none] . *** TODO
+  if QIL := downQidList(T) /\
+     QIL' := downQidList(T') /\
+     {T1, Ty} := metaParse(M, VS, QIL, anyType) /\
+     {T2, Ty'} := metaParse(M, VS, QIL', anyType) .
+ ceq parseEq(M, VS, 'ceq_=_if_.['bubble[T], 'bubble[T'],T'']) = ceq T1 = T2 if COND [none] . *** TODO
+  if QIL := downQidList(T) /\
+     QIL' := downQidList(T') /\
+     {T1, Ty} := metaParse(M, VS, QIL, anyType) /\
+     {T2, Ty'} := metaParse(M, VS, QIL', anyType) /\
+     COND := parseCondition(M, T'', VS) .
 
- op parseModule : String Database -> ParsingRes .
- ceq parseModule(S, DB) = PR
-  if {T, Srt} := metaParse(GRAMMAR, tokenize(S), anyType) /\
-     PR := parseModule(T, DB) [print T " - " Srt "\n" PR] .
+ op downQidList : Term ~> QidList .
+ eq downQidList('nil.TypeList) = nil .
+ eq downQidList(('__[TL], TL')) = (downQidList(TL) downQidList(TL')) .
+ eq downQidList((Q, TL)) = (downQid(Q) downQidList(TL)) .
+ eq downQidList(empty) = nil .
+
+ op parseCondition : Module Term VariableSet -> Condition .
+ eq parseCondition(M, '_/\_[TL], VS) = parseCondition*(M, TL, VS) .
+ ceq parseCondition(M, '_=_['bubble[T], 'bubble[T']], VS) = (T1 = T2)
+  if QIL := downQidList(T) /\
+     QIL' := downQidList(T') /\
+     {T1, Ty} := metaParse(M, VS, QIL, anyType) /\
+     {T2, Ty'} := metaParse(M, VS, QIL', anyType) .
+
+ op parseCondition* : Module TermList VariableSet -> Condition .
+ eq parseCondition*(M, empty, VS) = nil .
+ eq parseCondition*(M, (T, TL), VS) = parseCondition(M, T, VS) /\ parseCondition*(M, TL, VS) .
+
+ op parseVars : Term Term -> VariableSet .
+ ceq parseVars(T, T') = createVars(QIL, Ty)
+  if QIL := parseVars(T) /\
+     Ty := downQid(T') .
+
+ op parseVars : Term -> QidList .
+ eq parseVars('__[TL]) = parseVars*(TL) .
+ eq parseVars(T) = downQid(T) [owise] .
+
+ op parseVars* : TermList -> QidList .
+ eq parseVars*(empty) = nil .
+ eq parseVars*((T, TL)) = downQid(T) parseVars*(TL) .
+
+ op createVars : QidList Type -> VariableSet .
+ eq createVars(nil, Ty) = none .
+ ceq createVars(Q QIL, Ty) = V ; createVars(QIL, Ty)
+  if V := qid(string(Q) + ":" + string(Ty)) .
 
  op isLoadComm : String -> Bool .
  ceq isLoadComm(S) = true
@@ -105,21 +305,37 @@ fmod COMMAND-PROCESSING is
  op parseLoadComm : String -> String .
  ceq parseLoadComm(S) = string(Q')
   if Q Q' QIL := tokenize(S) .
+
+ op extractModules : Term -> TermList .
+ eq extractModules('__[TL]) = TL .
+ eq extractModules(T) = T [owise] .
 endfm
 
 mod MTP is
+ pr (MAYBE * (op maybe to noMod)){Module} .
+ pr (MAYBE * (op maybe to noQid)){Qid} .
  pr (MAYBE * (op maybe to null)){Oid} .
  pr COMMAND-PROCESSING .
+ pr META-MTP-COMM-SIGN .
  inc META-INTERPRETER .
+ pr PRELOAD-LIST .
  inc STD-STREAM .
  pr DATABASE .
  inc FILE .
 
- vars Text Original Read Source STR : String .
- var  AtS : AttributeSet .
+ vars Text Original Read Source STR MSG : String .
+ vars TL BUBBS MODL : TermList .
  vars FHIn FHOut MI : Oid .
+ var  MM : Maybe{Module} .
+ var  AtS : AttributeSet .
+ var  LP : List{Preload} .
  vars DB DB' : Database .
- var  QIL : QidList .
+ vars QIL ERR : QidList .
+ vars M M' TOP : Module .
+ var  MQ : Maybe{Qid} .
+ var  SI : SortInfo .
+ var  Ty : Type .
+ var  T : Term .
  var  Q : Qid .
 
  sort State .
@@ -129,30 +345,51 @@ mod MTP is
  op load-std-db : -> State [ctor] .
  *** Loading grammar
  op load-grammar : -> State [ctor] .
+ *** Loading command grammar
+ op load-comm-grammar : -> State [ctor] .
  *** Waiting input from the user
  op idle : -> State [ctor] .
  *** Reading file
  op readFile : -> State [ctor] .
+ *** Parsing Module - metaparse
+ op parseModMetaparse : -> State [ctor] .
+ *** Parsing - create module list
+ op parseList : -> State [ctor] .
  *** Parsing Module
- op parseMod : -> State [ctor] .
+ op parseModNoBubbles : -> State [ctor] .
+ *** Parsing Module
+ op parseModBubbles : -> State [ctor] .
+ *** Parsing Module
+ op parseModule : -> State [ctor] .
  *** Waits for a wrote msg and returns to idle with getLine
  op print&idle : -> State [ctor] .
+ *** Waits for a wrote msg and tries to parse the next module
+ op print&noBubbles : -> State [ctor] .
 
  *** Object and class definition
  op MTP : -> Cid .
  op mtp : -> Oid .
 
  *** Attributes
+ op load:_ : List{Preload} -> Attribute [ctor gather (&)] .
+ op parsModName:_ : Maybe{Qid} -> Attribute [ctor] .
+ op parsedModules:_ : TermList -> Attribute [ctor] .
+ op current:_ : Maybe{Qid} -> Attribute [ctor] .
+ op top:_ : Maybe{Module} -> Attribute [ctor] .
+ op bubbles:_ : TermList -> Attribute [ctor] .
  op file:_ : Maybe{Oid} -> Attribute [ctor] .
- op load:_ : QidList -> Attribute [ctor gather (&)] .
  op db:_ : Database -> Attribute [ctor] .
  op state:_ : State -> Attribute [ctor] .
  op out:_ : String -> Attribute [ctor] .
  op mi:_ : Oid -> Attribute [ctor] .
 
  *** Initial value for load
- op modList : -> QidList .
- eq modList = 'TRUTH-VALUE 'BOOL-OPS 'TRUTH 'BOOL 'NAT 'TRIV 'QID-LIST 'MTP-SIGN .
+ op modList : -> List{Preload} .
+ eq modList = module('TRUTH-VALUE) module('BOOL-OPS) module('TRUTH) module('BOOL)
+              module('EXT-BOOL) module('NAT) module('INT) module('RAT) module('FLOAT)
+              module('STRING) module('CONVERSION) module('QID) module('TRIV)
+              view('Qid) module('LIST) module('QID-LIST) module('MTP-SIGN)
+              module('COMMAND-SIGN) module('NOMINAL) .
 
  *** Run command
  op run : -> Configuration [ctor] .
@@ -186,13 +423,65 @@ mod MTP is
          getLine(FHIn, mtp)
     fi .
 
- crl [parseModuleOK] :
-     < mtp : MTP | out: Read, db: DB, state: parseMod, AtS >
-  => < mtp : MTP | out: "", db: DB', state: print&idle, AtS >
-     write(stdout, mtp, STR + "\n")
-  if [DB', STR] := parseModule(Read, DB) .
+ ***                                ***
+ ***          PARSE MODULE          ***
+ ***                                ***
+
+ rl [parseModuleMetaparse] :
+    < mtp : MTP | out: Read, state: parseModMetaparse, mi: MI, AtS >
+ => < mtp : MTP | out: "", state: parseList, mi: MI, AtS >
+    parseTerm(MI, mtp, 'GRAMMAR, none, tokenize(Read), '@SpecList@) .
+
+ crl [parseModuleNoBubblesOK] :
+     parsedTerm(mtp, MI, {T, Ty})
+     < mtp : MTP | state: parseList, mi: MI, parsedModules: MODL, AtS >
+  => < mtp : MTP | state: parseModNoBubbles, mi: MI, parsedModules: TL, AtS >
+  if TL := extractModules(T) .
+
+ crl [parseNextModule] :
+     < mtp : MTP | db: DB, state: parseModNoBubbles, mi: MI,
+                   parsModName: MQ, bubbles: BUBBS, top: MM,
+                   parsedModules: (T, MODL), AtS >
+  => < mtp : MTP | db: DB', state: parseModBubbles, mi: MI,
+                   parsModName: getName(M), bubbles: TL, top: M,
+                   parsedModules: MODL, AtS >
+     insertModule(MI, mtp, M)
+  if [M, TL, SI, ERR] := parseModule(T) /\
+     DB' := DB[getName(M) |-> SI] .
+
+ rl [noMoreModules] :
+    < mtp : MTP | state: parseModNoBubbles, parsedModules: empty, AtS >
+ => < mtp : MTP | state: idle, parsedModules: empty, AtS >
+    getLine(stdin, mtp, "MTP> ") .
+
+ rl [parseModule_GetFlatModule] :
+    insertedModule(mtp, MI)
+    < mtp : MTP | state: parseModBubbles, mi: MI, parsModName: Q, AtS >
+ => < mtp : MTP | state: parseModBubbles, mi: MI, parsModName: Q, AtS >
+    showModule(MI, mtp, Q, true) .
+
+ crl [parseBubbles] :
+     showingModule(mtp, MI, M)
+     < mtp : MTP | state: parseModBubbles, mi: MI, bubbles: BUBBS,
+                   top: TOP, parsModName: Q, current: MQ, AtS >
+  => < mtp : MTP | state: parseModule, mi: MI, bubbles: empty,
+                   top: noMod, parsModName: noQid, current: Q, AtS >
+     insertModule(MI, mtp, M')
+  if M' := parseBubbles(TOP, M, BUBBS) [print M' "\ncurrent " Q] .
+
+ crl [parsingComplete] :
+     insertedModule(mtp, MI)
+     < mtp : MTP | state: parseModule, mi: MI, current: Q, AtS >
+  => < mtp : MTP | state: print&noBubbles, mi: MI, current: Q, AtS >
+     write(stdout, mtp, MSG)
+  if MSG := "\nModule " + string(Q) + " introduced.\n\n" .
+
 
  *** TODO: parse error
+
+ rl [print&noBubbles] : wrote(mtp, stdout)
+    < mtp : MTP | state: print&noBubbles, AtS >
+ => < mtp : MTP | state: parseModNoBubbles, AtS > .
 
  rl [print&idle] : wrote(mtp, stdout)
     < mtp : MTP | state: print&idle, AtS >
@@ -205,7 +494,7 @@ mod MTP is
 
  rl [closedFile] : closedFile(mtp, FHIn)
     < mtp : MTP | file: FHIn, state: readFile, AtS >
- => < mtp : MTP | file: null, state: parseMod, AtS > .
+ => < mtp : MTP | file: null, state: parseModMetaparse, AtS > .
 
  ***                         ***
  ***          EXIT           ***
@@ -214,7 +503,7 @@ mod MTP is
  crl [exit] : gotLine(mtp, stdin, Text)
      < mtp : MTP | AtS >
   => write(stdout, mtp, "Thanks for using MTP!\n")
-  if isExitComm(Text) .
+  if isExitComm(Text) [print AtS] .
 
  ***                        ***
  ***          ERROR         ***
@@ -233,31 +522,61 @@ mod MTP is
  ***      METAINTERPRETER     ***
  ***                          ***
 
- rl [init] :
+ rl [init-module] :
     createdInterpreter(mtp, interpreterManager, MI)
-    < mtp : MTP | state: init, load: Q QIL, AtS >
- => < mtp : MTP | state: load-std-db, mi: MI, load: QIL, AtS >
-    insertModule(MI, mtp, upModule(Q, true)) .
+    < mtp : MTP | state: init, load: module(Q) LP, AtS >
+ => < mtp : MTP | state: load-std-db, mi: MI, load: LP, AtS >
+    insertModule(MI, mtp, upModule(Q, false)) .
 
- rl [load-predef] :
+ rl [init-view] :
+    createdInterpreter(mtp, interpreterManager, MI)
+    < mtp : MTP | state: init, load: view(Q) LP, AtS >
+ => < mtp : MTP | state: load-std-db, mi: MI, load: LP, AtS >
+    insertView(MI, mtp, upView(Q)) .
+
+
+ rl [load-predef-module-from-module] :
     insertedModule(mtp, MI)
-    < mtp : MTP | state: load-std-db, load: Q QIL, AtS >
- => < mtp : MTP | state: load-std-db, load: QIL, AtS >
-    insertModule(MI, mtp, upModule(Q, true)) .
+    < mtp : MTP | state: load-std-db, load: module(Q) LP, AtS >
+ => < mtp : MTP | state: load-std-db, load: LP, AtS >
+    insertModule(MI, mtp, upModule(Q, false)) .
+
+ rl [load-predef-view-from-module] :
+    insertedModule(mtp, MI)
+    < mtp : MTP | state: load-std-db, load: view(Q) LP, AtS >
+ => < mtp : MTP | state: load-std-db, load: LP, AtS >
+    insertView(MI, mtp, upView(Q)) .
 
 
- rl [load-preder-finished] :
+ rl [load-predef-module-from-view] :
+    insertedView(mtp, MI)
+    < mtp : MTP | state: load-std-db, load: module(Q) LP, AtS >
+ => < mtp : MTP | state: load-std-db, load: LP, AtS >
+    insertModule(MI, mtp, upModule(Q, false)) .
+
+ rl [load-predef-view-from-view] :
+    insertedView(mtp, MI)
+    < mtp : MTP | state: load-std-db, load: view(Q) LP, AtS >
+ => < mtp : MTP | state: load-std-db, load: LP, AtS >
+    insertView(MI, mtp, upView(Q)) .
+
+ rl [load-predef-finished] :
     insertedModule(mtp, MI)
     < mtp : MTP | state: load-std-db, load: nil, AtS >
  => < mtp : MTP | state: load-grammar, AtS >
     insertModule(MI, mtp, GRAMMAR) .
 
-
  rl [load-grammar-finished] :
     insertedModule(mtp, MI)
     < mtp : MTP | state: load-grammar, AtS >
+ => < mtp : MTP | state: load-comm-grammar, AtS >
+    insertModule(MI, mtp, COMM-GRAMMAR) .
+
+ rl [load-comm-grammar-finished] :
+    insertedModule(mtp, MI)
+    < mtp : MTP | state: load-comm-grammar, AtS >
  => < mtp : MTP | state: idle, AtS >
-    getLine(stdin, mtp, "Introduce command> ") .
+    getLine(stdin, mtp, "MTP> ") .
 
  ***                        ***
  ***          RUN           ***
@@ -265,10 +584,12 @@ mod MTP is
 
  eq run =
     <> < mtp : MTP | file: null, out: "", state: init, db: empty,
-                     load: modList >
+                     load: modList, current: noQid, parsModName: noQid,
+                     bubbles: empty, top: noMod, parsedModules: empty >
     createInterpreter(interpreterManager, mtp, none) .
 endm
 
 set print attribute on .
+set show advisories off .
 
 erew run .

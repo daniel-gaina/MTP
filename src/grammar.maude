@@ -1,32 +1,93 @@
 set include BOOL off .
 
 fmod MTP-SIGN is
- sorts @Spec@ @Sen@ @SenList@ @Token@ @Bubble@ @Arity@ @Def@ @DefSet@
-       @NeTokenList@ @ModExp@ @ParameterDecl@ @ParameterDeclList@ .
- subsort @Sen@ < @SenList@ .
+ sorts @Spec@ @SpecList@ @Token@ @Bubble@ @Arity@ @Def@ @DefSet@
+       @NeTokenList@ @ModExp@ @ParameterDecl@ @ParameterDeclList@
+       @AttrList@ @Attr@ @Condition@ .
+ subsort @Spec@ < @SpecList@ .
+ subsort @Attr@ < @AttrList@ .
  subsort @Token@ < @Arity@ .
  subsort @Token@ < @ModExp@ .
  subsort @Def@ < @DefSet@ .
  subsort @ParameterDecl@ < @ParameterDeclList@ .
 
+ ***(
+            SPECIFICATIONS
+ )
+ op spec!_=_end : @ModExp@ @DefSet@ -> @Spec@ [ctor] .
+ op spec*_=_end : @ModExp@ @DefSet@ -> @Spec@ [ctor] .
+ op __ : @SpecList@ @SpecList@ -> @SpecList@ [ctor assoc] .
+
+ ***(
+            PARAMETERS
+ )
+ op _{_} : @Token@ @ParameterDeclList@ -> @ModExp@ [ctor] .
+ op _::_ : @Token@ @Token@ -> @ParameterDecl@ [ctor] .
  op _,_ : @ParameterDeclList@ @ParameterDeclList@ -> @ParameterDeclList@ [ctor assoc] .
 
- op _{_} : @Token@ @ParameterDeclList@ -> @ModExp@ [ctor] .
-
- op _::_ : @Token@ @Token@ -> @ParameterDecl@ [ctor] .
-
- op __ : @SenList@ @SenList@ -> @SenList@ [ctor assoc] .
  op __ : @DefSet@ @DefSet@ -> @DefSet@ [ctor assoc comm] .
 
- op _*_ : @Arity@ @Arity@ -> @Arity@ [ctor assoc] .
+ ***(
+             IMPORTATIONS
+ )
+ op pr_. : @Token@ -> @Def@ [ctor] .
+ op ex_. : @Token@ -> @Def@ [ctor] .
+ op inc_. : @Token@ -> @Def@ [ctor] .
 
- op spec!_=_ : @ModExp@ @DefSet@ -> @Spec@ [ctor] .
- op spec*_=_ : @ModExp@ @DefSet@ -> @Spec@ [ctor] .
+ ***(
+                SORTS
+ )
+ op rigid`sort_. : @NeTokenList@ -> @Def@ [ctor] .
+ op rigid`sorts_. : @NeTokenList@ -> @Def@ [ctor] .
+ op nominal`sort_. : @NeTokenList@ -> @Def@ [ctor] .
+ op sort_. : @NeTokenList@ -> @Def@ [ctor] .
 
- op rigid`sort_ : @Token@ -> @Def@ [ctor] .
- op nominal`pred_:__ : @Token@ @Arity@ @SenList@ -> @Def@ [ctor] .
+ ***(
+              OPERATORS
+ )
+ op op_:`->_. : @Token@ @Token@ -> @Def@ [ctor] .
+ op op_:`->_[_]. : @Token@ @Token@ @AttrList@ -> @Def@ [ctor] .
+ op op_:_->_. : @Token@ @NeTokenList@ @Token@ -> @Def@ [ctor] .
+ op op_:_->_[_]. : @Token@ @NeTokenList@ @Token@ @AttrList@ -> @Def@ [ctor] .
+ op flexible`op_:`->_. : @Token@ @Token@ -> @Def@ [ctor] .
+ op flexible`op_:`->_[_]. : @Token@ @Token@ @AttrList@ -> @Def@ [ctor] .
+ op flexible`op_:_->_. : @Token@ @NeTokenList@ @Token@ -> @Def@ [ctor] .
+ op flexible`op_:_->_[_]. : @Token@ @NeTokenList@ @Token@ @AttrList@ -> @Def@ [ctor] .
 
- op ._ : @Token@ -> @Sen@ [ctor] .
+ ***(
+               VARS
+ )
+ op var_:_. : @NeTokenList@ @Token@ -> @Def@ [ctor] .
+ op vars_:_. : @NeTokenList@ @Token@ -> @Def@ [ctor] .
+
+ ***(
+             EQUATIONS
+ )
+ op eq_=_. : @Bubble@ @Bubble@ -> @Def@ [ctor] .
+ op ceq_=_if_. : @Bubble@ @Bubble@ @Condition@ -> @Def@ [ctor] .
+
+ ***(
+             CONDITIONS
+ )
+ op _/\_ : @Condition@ @Condition@ -> @Condition@ [ctor assoc prec 20] .
+ op _=_ : @Bubble@ @Bubble@ -> @Condition@ [ctor prec 15] .
+
+ ***(
+             ATTRIBUTES
+ )
+ op __ : @AttrList@ @AttrList@ -> @AttrList@ [ctor assoc] .
+ ops idem comm assoc : -> @Attr@ [ctor].
+ op  id:_ : @Bubble@ -> @Attr@ .
+ op  left`id:_ : @Bubble@ -> @Attr@ .
+ op  right`id:_ : @Bubble@ -> @Attr@ .
+ ops frozen`(_`) poly`(_`) strat`(_`) : @NeTokenList@ -> @AttrList@ .
+ op  memo : -> @Attr@ [ctor] .
+ op  prec_ : @Token@ -> @Attr@ .
+ op  gather`(_`) : @NeTokenList@ -> @Attr@ .
+ op  format`(_`) : @NeTokenList@ -> @Attr@ .
+ ops ctor frozen ditto iter : -> @Attr@ [ctor] .
+ op  metadata_ : @Token@ -> @Attr@ .
+
 endfm
 
 fmod META-MTP-SIGN is
@@ -54,7 +115,7 @@ fmod META-MTP-SIGN is
                                   'endfm 'endsm 'sorts 'subsort 'subsorts
                                   'subclass 'subclasses 'op 'ops
                                   'protecting 'pr 'including 'inc 'extending
-                                  'ctor 'assoc 'comm '==)))] .
+                                  'ctor 'assoc 'comm '== '/\)))] .
         op 'neTokenList : 'QidList -> '@NeTokenList@
              [special(
                (id-hook('Bubble, '1 '-1 '`( '`))
@@ -65,6 +126,52 @@ fmod META-MTP-SIGN is
         none
      endfm) .
  eq GRAMMAR = addImports(BUBBLES, (including 'MTP-SIGN .)) .
+endfm
+
+fmod COMMAND-SIGN is
+ sort @Command@ @Token@ @Bubble@ @NeTokenList@ .
+
+ op load_ : @Token@ -> @Command@ [ctor] .
+ op exit : -> @Command@ [ctor] .
+ op q : -> @Command@ [ctor] .
+endfm
+
+fmod META-MTP-COMM-SIGN is
+ including AUX-MODULE-OPS .
+
+ op COMM-BUBBLES : -> FModule .
+ op COMM-GRAMMAR : -> FModule [memo] .
+
+ eq COMM-BUBBLES
+    = (fmod 'COMM-GRAMMAR is
+        including 'QID-LIST .
+        sorts none .
+        none
+        op 'token : 'Qid -> '@Token@
+             [special(
+               (id-hook('Bubble, '1 '1)
+                op-hook('qidSymbol, '<Qids>, nil, 'Qid)))] .
+        op 'bubble : 'QidList -> '@Bubble@
+             [special(
+               (id-hook('Bubble, '1 '-1 '`( '`))
+                op-hook('qidListSymbol, '__, 'QidList 'QidList, 'QidList)
+                op-hook('qidSymbol, '<Qids>, nil, 'Qid)
+                id-hook('Exclude, 'eq 'ceq 'rl 'crl 'mb 'cmb 'sd 'csd
+                                  'var 'vars 'strat 'endm
+                                  'endfm 'endsm 'sorts 'subsort 'subsorts
+                                  'subclass 'subclasses 'op 'ops
+                                  'protecting 'pr 'including 'inc 'extending
+                                  'ctor 'assoc 'comm '== '/\)))] .
+        op 'neTokenList : 'QidList -> '@NeTokenList@
+             [special(
+               (id-hook('Bubble, '1 '-1 '`( '`))
+                op-hook('qidListSymbol, '__, 'QidList 'QidList, 'QidList)
+                op-hook('qidSymbol, '<Qids>, nil, 'Qid)
+                id-hook('Exclude, '. ':)))] .
+        none
+        none
+     endfm) .
+ eq COMM-GRAMMAR = addImports(COMM-BUBBLES, (including 'COMMAND-SIGN .)) .
 endfm
 
 set include BOOL on .
