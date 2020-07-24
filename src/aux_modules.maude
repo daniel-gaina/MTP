@@ -79,13 +79,17 @@ fmod AUX-MODULE-OPS is
  vars ODS ODS' : OpDeclSet .
  vars IL IL' : ImportList .
  var  PL : ParameterList .
+ vars TL TL' : TermList .
  vars SS SS' : SortSet .
  vars RS RS' : RuleSet .
  var  MAS : MembAxSet .
+ var  TyL : TypeList .
  var  DB : Database .
  var  Ct : Constant .
  var  M : Module .
  var  H : Header .
+ var  Ty : Type .
+ var  T : Term .
  var  Q : Qid .
 
  op setImports : Module ImportList -> Module .
@@ -168,6 +172,22 @@ fmod AUX-MODULE-OPS is
 
  op downQid : Term -> [Qid] [memo] .
  eq downQid(Ct) = qid(substr(string(getName(Ct)), 1, length(string(getName(Ct))))) .
+
+ op downQidList : Term ~> QidList .
+ eq downQidList('nil.TypeList) = nil .
+ eq downQidList(('__[TL], TL')) = (downQidList(TL) downQidList(TL')) .
+ eq downQidList((Q, TL)) = (downQid(Q) downQidList(TL)) .
+ eq downQidList(empty) = nil .
+
+ op printOptions : -> PrintOptionSet .
+ eq printOptions = mixfix number rat format .
+
+ op metaPrettyPrint : Module Term -> QidList .
+ eq metaPrettyPrint(M, T) = metaPrettyPrint(M, T, printOptions) .
+
+ op toKind : Module TypeList -> TypeList .
+ eq toKind(M, nil) = nil .
+ eq toKind(M, Ty TyL) = getKind(M, Ty) toKind(M, TyL) .
 
  op emptyModule : Header -> SModule .
  eq emptyModule(H) = mod H is

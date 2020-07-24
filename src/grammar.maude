@@ -45,10 +45,17 @@ fmod MTP-SIGN is
  ***(
               OPERATORS
  )
+ *** Total
  op op_:`->_. : @Token@ @Token@ -> @Def@ [ctor] .
  op op_:`->_[_]. : @Token@ @Token@ @AttrList@ -> @Def@ [ctor] .
  op op_:_->_. : @Token@ @NeTokenList@ @Token@ -> @Def@ [ctor] .
  op op_:_->_[_]. : @Token@ @NeTokenList@ @Token@ @AttrList@ -> @Def@ [ctor] .
+ *** Partial
+ op op_:`~>_. : @Token@ @Token@ -> @Def@ [ctor] .
+ op op_:`~>_[_]. : @Token@ @Token@ @AttrList@ -> @Def@ [ctor] .
+ op op_:_~>_. : @Token@ @NeTokenList@ @Token@ -> @Def@ [ctor] .
+ op op_:_>_[_]. : @Token@ @NeTokenList@ @Token@ @AttrList@ -> @Def@ [ctor] .
+ *** Total, flexible
  op flexible`op_:`->_. : @Token@ @Token@ -> @Def@ [ctor] .
  op flexible`op_:`->_[_]. : @Token@ @Token@ @AttrList@ -> @Def@ [ctor] .
  op flexible`op_:_->_. : @Token@ @NeTokenList@ @Token@ -> @Def@ [ctor] .
@@ -132,6 +139,7 @@ fmod COMMAND-SIGN is
  sort @Command@ @Token@ @Bubble@ @NeTokenList@ .
 
  op load_ : @Token@ -> @Command@ [ctor] .
+ op red_ : @Bubble@ -> @Command@ [ctor] .
  op exit : -> @Command@ [ctor] .
  op q : -> @Command@ [ctor] .
 endfm

@@ -11,9 +11,9 @@ fmod COMMAND-PROCESSING is
  pr LEXICAL .
 
  vars RIG RIG' NOM NOM' FLE FLE' SS : SortSet .
+ vars M M' M'' TOP TOP' FLAT FLAT' : Module .
  vars T T' T'' T1 T2 T3 T4 : Term .
  vars QIL QIL' ERR ERR' : QidList .
- vars M M' M'' TOP FLAT : Module .
  vars PL PL' : ParameterDeclList .
  vars TL TL' ACC : TermList .
  var  SSDS : SubsortDeclSet .
@@ -93,62 +93,8 @@ fmod COMMAND-PROCESSING is
   if SS := parseSortList(T) /\
      M' := addSorts(M, SS) .
  ***(
-           PARSING OP DECLARATIONS
- )
- ceq parseDefNoBubble(M, 'op_:`->_.['token[T],'token[T']]) = [M', empty, < none, none, none >, nil ]
-  if Q := downQid(T) /\
-     Q' := downQid(T') /\
-     OP := op Q : nil -> Q' [none] . /\
-     M' := addOps(M, OP) .
- ceq parseDefNoBubble(M, 'op_:`->_`[_`].['token[T],'token[T'], T'']) = [M', empty, < none, none, none >, nil ]
-  if Q := downQid(T) /\
-     Q' := downQid(T') /\
-     AtS := parseAttr(M, T'') /\
-     OP := op Q : nil -> Q' [AtS] . /\
-     M' := addOps(M, OP) .
- ceq parseDefNoBubble(M, 'op_:_->_.['token[T],'neTokenList[T'],'token[T'']]) = [M', empty, < none, none, none >, nil ]
-  if Q := downQid(T) /\
-     TyL := parseArity(T') /\
-     Q' := downQid(T'') /\
-     OP := op Q : TyL -> Q' [none] . /\
-     M' := addOps(M, OP) .
- ceq parseDefNoBubble(M, 'op_:_->_`[_`].['token[T1],'neTokenList[T2],'token[T3], T4]) = [M', empty, < none, none, none >, nil ]
-  if Q := downQid(T1) /\
-     TyL := parseArity(T2) /\
-     Q' := downQid(T3) /\
-     AtS := parseAttr(M, T4) /\
-     OP := op Q : TyL -> Q' [AtS] . /\
-     M' := addOps(M, OP) .
- ***(
-           PARSING FLEXIBLE OP DECLARATIONS
- )
- ceq parseDefNoBubble(M, 'flexible`op_:`->_.['token[T],'token[T']]) = [M', empty, < none, none, none >, nil ]
-  if Q := downQid(T) /\
-     Q' := downQid(T') /\
-     OP := op Q : nil -> Q' [none] . /\
-     M' := addOps(M, OP) .
- ceq parseDefNoBubble(M, 'flexible`op_:`->_`[_`].['token[T],'token[T'], T'']) = [M', empty, < none, none, none >, nil ]
-  if Q := downQid(T) /\
-     Q' := downQid(T') /\
-     AtS := parseAttr(M, T'') /\
-     OP := op Q : nil -> Q' [AtS] . /\
-     M' := addOps(M, OP) .
- ceq parseDefNoBubble(M, 'flexible`op_:_->_.['token[T],'neTokenList[T'],'token[T'']]) = [M', empty, < none, none, none >, nil ]
-  if Q := downQid(T) /\
-     TyL := parseArity(T') /\
-     Q' := downQid(T'') /\
-     OP := op Q : TyL -> Q' [none] . /\
-     M' := addOps(M, OP) .
- ceq parseDefNoBubble(M, 'flexible`op_:_->_`[_`].['token[T1],'neTokenList[T2],'token[T3], T4]) = [M', empty, < none, none, none >, nil ]
-  if Q := downQid(T1) /\
-     TyL := parseArity(T2) /\
-     Q' := downQid(T3) /\
-     AtS := parseAttr(M, T4) /\
-     OP := op Q : TyL -> Q' [AtS] . /\
-     M' := addOps(M, OP) .
- ***(
-          EQUATIONS AND VARIABLES ARE PARSED LATED.
-          It makes sense because they might need sorts and operators from imported modules
+          OPERATORS, EQUATIONS, AND VARIABLES ARE PARSED LATED.
+          It makes sense because they might need sorts, kinds, and operators from imported modules
           and parameters.
  )
  eq parseDefNoBubble(M, T) = [M, T, < none, none, none >, nil ] [owise] . *** TODO!!!
@@ -232,6 +178,111 @@ fmod COMMAND-PROCESSING is
  ceq parseBubbles(TOP, FLAT, VS, ('vars_:_.['neTokenList[T],'token[T']], TL), ACC) =
                              parseBubbles(TOP, FLAT, VS ; VS', TL, ACC)
   if VS' := parseVars(T, T') .
+ ***(
+           PARSING OP DECLARATIONS
+ )
+ ceq parseBubbles(TOP, FLAT, VS, ('op_:`->_.['token[T],'token[T']], TL), ACC) = parseBubbles(TOP', FLAT', VS, TL, ACC)
+  if Q := downQid(T) /\
+     Q' := downQid(T') /\
+     OP := op Q : nil -> Q' [none] . /\
+     TOP' := addOps(TOP, OP) /\
+     FLAT' := addOps(FLAT, OP) .
+ ceq parseBubbles(TOP, FLAT, VS, ('op_:`->_`[_`].['token[T],'token[T'], T''], TL), ACC) =
+                                                                                parseBubbles(TOP', FLAT', VS, TL, ACC)
+  if Q := downQid(T) /\
+     Q' := downQid(T') /\
+     AtS := parseAttr(FLAT, T'') /\
+     OP := op Q : nil -> Q' [AtS] . /\
+     TOP' := addOps(TOP, OP) /\
+     FLAT' := addOps(FLAT, OP) .
+ ceq parseBubbles(TOP, FLAT, VS, ('op_:_->_.['token[T],'neTokenList[T'],'token[T'']], TL), ACC) =
+                                                                                parseBubbles(TOP', FLAT', VS, TL, ACC)
+  if Q := downQid(T) /\
+     TyL := parseArity(T') /\
+     Q' := downQid(T'') /\
+     OP := op Q : TyL -> Q' [none] . /\
+     TOP' := addOps(TOP, OP) /\
+     FLAT' := addOps(FLAT, OP) .
+ ceq parseBubbles(TOP, FLAT, VS, ('op_:_->_`[_`].['token[T1],'neTokenList[T2],'token[T3], T4], TL), ACC) =
+                                                                                parseBubbles(TOP', FLAT', VS, TL, ACC)
+  if Q := downQid(T1) /\
+     TyL := parseArity(T2) /\
+     Q' := downQid(T3) /\
+     AtS := parseAttr(FLAT, T4) /\
+     OP := op Q : TyL -> Q' [AtS] . /\
+     TOP' := addOps(TOP, OP) /\
+     FLAT' := addOps(FLAT, OP) .
+ ***(
+           PARSING PARTIAL OP DECLARATIONS
+ )
+ ceq parseBubbles(TOP, FLAT, VS, ('op_:`~>_.['token[T],'token[T']], TL), ACC) = parseBubbles(TOP', FLAT', VS, TL, ACC)
+  if Q := downQid(T) /\
+     Q' := downQid(T') /\
+     OP := op Q : nil -> Q' [none] . /\
+     TOP' := addOps(TOP, OP) /\
+     FLAT' := addOps(FLAT, OP) .
+ ceq parseBubbles(TOP, FLAT, VS, ('op_:`~>_`[_`].['token[T],'token[T'], T''], TL), ACC) =
+                                                                      parseBubbles(TOP', FLAT', VS, TL, ACC)
+  if Q := downQid(T) /\
+     Q' := downQid(T') /\
+     AtS := parseAttr(FLAT, T'') /\
+     OP := op Q : nil -> Q' [AtS] . /\
+     TOP' := addOps(TOP, OP) /\
+     FLAT' := addOps(FLAT, OP) .
+ ceq parseBubbles(TOP, FLAT, VS, ('op_:_~>_.['token[T],'neTokenList[T'],'token[T'']], TL), ACC) =
+                                                                      parseBubbles(TOP', FLAT', VS, TL, ACC)
+  if Q := downQid(T) /\
+     TyL := parseArity(T') /\
+     Q' := downQid(T'') /\
+     OP := op Q : toKind(FLAT, TyL) -> toKind(FLAT, Q') [none] . /\
+     TOP' := addOps(TOP, OP) /\
+     FLAT' := addOps(FLAT, OP) .
+ ceq parseBubbles(TOP, FLAT, VS, ('op_:_~>_`[_`].['token[T1],'neTokenList[T2],'token[T3], T4], TL), ACC) =
+                                                                      parseBubbles(TOP', FLAT', VS, TL, ACC)
+  if Q := downQid(T1) /\
+     TyL := parseArity(T2) /\
+     Q' := downQid(T3) /\
+     AtS := parseAttr(FLAT, T4) /\
+     OP := op Q : toKind(FLAT, TyL) -> toKind(FLAT, Q') [AtS] . /\
+     TOP' := addOps(TOP, OP) /\
+     FLAT' := addOps(FLAT, OP) .
+ ***(
+           PARSING FLEXIBLE OP DECLARATIONS
+ )
+ ceq parseBubbles(TOP, FLAT, VS, ('flexible`op_:`->_.['token[T],'token[T']], TL), ACC) = parseBubbles(TOP', FLAT', VS, TL, ACC)
+  if Q := qid("@_" + string(downQid(T))) /\
+     Q' := downQid(T') /\
+     OP := op Q : '@Nominal@ -> Q' [none] . /\
+     TOP' := addOps(TOP, OP) /\
+     FLAT' := addOps(FLAT, OP) .
+ ceq parseBubbles(TOP, FLAT, VS, ('flexible`op_:`->_`[_`].['token[T],'token[T'], T''], TL), ACC) =
+                                                                               parseBubbles(TOP', FLAT', VS, TL, ACC)
+  if Q := qid("@_" + string(downQid(T))) /\
+     Q' := downQid(T') /\
+     AtS := parseAttr(FLAT, T'') /\
+     OP := op Q : '@Nominal@ -> Q' [AtS] . /\
+     TOP' := addOps(TOP, OP) /\
+     FLAT' := addOps(FLAT, OP) .
+ ceq parseBubbles(TOP, FLAT, VS, ('flexible`op_:_->_.['token[T],'neTokenList[T'],'token[T'']], TL), ACC) =
+                                                                               parseBubbles(TOP', FLAT', VS, TL, ACC)
+  if Q := qid("@_" + string(downQid(T))) /\
+     TyL := parseArity(T') /\
+     Q' := downQid(T'') /\
+     OP := op Q : '@Nominal@ TyL -> Q' [none] . /\
+     TOP' := addOps(TOP, OP) /\
+     FLAT' := addOps(FLAT, OP) .
+ ceq parseBubbles(TOP, FLAT, VS, ('flexible`op_:_->_`[_`].['token[T1],'neTokenList[T2],'token[T3], T4], TL), ACC) =
+                                                                               parseBubbles(TOP', FLAT', VS, TL, ACC)
+  if Q := qid("@_" + string(downQid(T1))) /\
+     TyL := parseArity(T2) /\
+     Q' := downQid(T3) /\
+     AtS := parseAttr(FLAT, T4) /\
+     OP := op Q : '@Nominal@ TyL -> Q' [AtS] . /\
+     TOP' := addOps(TOP, OP) /\
+     FLAT' := addOps(FLAT, OP) .
+ ***(
+             OWISE
+ )
  eq parseBubbles(TOP, FLAT, VS, (T, TL), ACC) = parseBubbles(TOP, FLAT, VS, TL, (ACC, T)) [owise] .
 
  ***(
@@ -255,12 +306,6 @@ fmod COMMAND-PROCESSING is
      {T1, Ty} := metaParse(M, VS, QIL, anyType) /\
      {T2, Ty'} := metaParse(M, VS, QIL', anyType) /\
      COND := parseCondition(M, T'', VS) .
-
- op downQidList : Term ~> QidList .
- eq downQidList('nil.TypeList) = nil .
- eq downQidList(('__[TL], TL')) = (downQidList(TL) downQidList(TL')) .
- eq downQidList((Q, TL)) = (downQid(Q) downQidList(TL)) .
- eq downQidList(empty) = nil .
 
  op parseCondition : Module Term VariableSet -> Condition .
  eq parseCondition(M, '_/\_[TL], VS) = parseCondition*(M, TL, VS) .
@@ -292,19 +337,10 @@ fmod COMMAND-PROCESSING is
  ceq createVars(Q QIL, Ty) = V ; createVars(QIL, Ty)
   if V := qid(string(Q) + ":" + string(Ty)) .
 
- op isLoadComm : String -> Bool .
- ceq isLoadComm(S) = true
-  if 'load QIL := tokenize(S) .
- eq isLoadComm(S) = false [owise] .
-
  op isExitComm : String -> Bool .
  ceq isExitComm(S) = true
   if 'exit := tokenize(S) .
  eq isExitComm(S) = false [owise] .
-
- op parseLoadComm : String -> String .
- ceq parseLoadComm(S) = string(Q')
-  if Q Q' QIL := tokenize(S) .
 
  op extractModules : Term -> TermList .
  eq extractModules('__[TL]) = TL .
@@ -324,7 +360,7 @@ mod MTP is
  inc FILE .
 
  vars Text Original Read Source STR MSG : String .
- vars TL BUBBS MODL : TermList .
+ vars TL BUBBS MODL IN : TermList .
  vars FHIn FHOut MI : Oid .
  var  MM : Maybe{Module} .
  var  AtS : AttributeSet .
@@ -333,10 +369,11 @@ mod MTP is
  vars QIL ERR : QidList .
  vars M M' TOP : Module .
  var  MQ : Maybe{Qid} .
+ vars T T' T'' : Term .
  var  SI : SortInfo .
- var  Ty : Type .
- var  T : Term .
+ vars Ty Ty' : Type .
  var  Q : Qid .
+ var  N : Nat .
 
  sort State .
  *** Initial state, metainterpreter is created
@@ -361,10 +398,18 @@ mod MTP is
  op parseModBubbles : -> State [ctor] .
  *** Parsing Module
  op parseModule : -> State [ctor] .
+ *** Get parsed module
+ op getModule : -> State [ctor] .
+ *** Parsing command
+ op parseComm : -> State [ctor] .
+ *** Execute command
+ op executeComm : -> State [ctor] .
  *** Waits for a wrote msg and returns to idle with getLine
  op print&idle : -> State [ctor] .
  *** Waits for a wrote msg and tries to parse the next module
  op print&noBubbles : -> State [ctor] .
+
+ op foo : -> State [ctor] .
 
  *** Object and class definition
  op MTP : -> Cid .
@@ -374,10 +419,12 @@ mod MTP is
  op load:_ : List{Preload} -> Attribute [ctor gather (&)] .
  op parsModName:_ : Maybe{Qid} -> Attribute [ctor] .
  op parsedModules:_ : TermList -> Attribute [ctor] .
+ op module:_ : Maybe{Module} -> Attribute [ctor] .
  op current:_ : Maybe{Qid} -> Attribute [ctor] .
  op top:_ : Maybe{Module} -> Attribute [ctor] .
  op bubbles:_ : TermList -> Attribute [ctor] .
  op file:_ : Maybe{Oid} -> Attribute [ctor] .
+ op input:_ : TermList -> Attribute [ctor] .
  op db:_ : Database -> Attribute [ctor] .
  op state:_ : State -> Attribute [ctor] .
  op out:_ : String -> Attribute [ctor] .
@@ -394,16 +441,42 @@ mod MTP is
  *** Run command
  op run : -> Configuration [ctor] .
 
+ ***                                 ***
+ ***          PARSE COMMAND          ***
+ ***                                 ***
+
+ rl [parseComm] : gotLine(mtp, stdin, Text)
+    < mtp : MTP | mi: MI, state: idle, AtS >
+ => < mtp : MTP | mi: MI, state: parseComm, AtS >
+    parseTerm(MI, mtp, 'COMM-GRAMMAR, none, tokenize(Text), '@Command@) .
+
+ rl [parseComm] :
+    parsedTerm(mtp, MI, {T, Ty})
+    < mtp : MTP | mi: MI, state: parseComm, input: IN, AtS >
+ => < mtp : MTP | mi: MI, state: executeComm, input: T, AtS > .
+
  ***                        ***
  ***          LOAD          ***
  ***                        ***
 
- crl [loadComm] : gotLine(mtp, stdin, Text)
-    < mtp : MTP | out: Read, db: DB, state: idle, AtS >
- => < mtp : MTP | out: Read, db: DB, state: readFile, AtS >
-    openFile(fileManager, mtp, Source, "r")
-  if isLoadComm(Text) /\
-     Source := parseLoadComm(Text) .
+ crl [loadComm] :
+    < mtp : MTP | state: executeComm, input: ('load_['token[T]]), AtS >
+ => < mtp : MTP | state: readFile, input: empty, AtS >
+    openFile(fileManager, mtp, STR, "r")
+  if STR := string(downQid(T)) .
+
+ ***                          ***
+ ***          REDUCE          ***
+ ***                          ***
+
+ crl [redComm] :
+     < mtp : MTP | state: executeComm, input: ('red_['bubble[T]]), module: M, AtS >
+  => < mtp : MTP | state: foo, input: empty, module: M, AtS >
+     write(stdout, mtp, STR)
+  if {T', Ty} := metaParse(M, downQidList(T), anyType) /\
+     {T'', Ty'} := metaReduce(M, T') /\
+     QIL := metaPrettyPrint(M, T'') /\
+     STR := "\nResult: " + printTokens(QIL) + "\n" .
 
  ***                            ***
  ***          OPENFILE          ***
@@ -469,10 +542,16 @@ mod MTP is
      insertModule(MI, mtp, M')
   if M' := parseBubbles(TOP, M, BUBBS) [print M' "\ncurrent " Q] .
 
- crl [parsingComplete] :
-     insertedModule(mtp, MI)
-     < mtp : MTP | state: parseModule, mi: MI, current: Q, AtS >
-  => < mtp : MTP | state: print&noBubbles, mi: MI, current: Q, AtS >
+ rl [parsingComplete] :
+    insertedModule(mtp, MI)
+    < mtp : MTP | state: parseModule, mi: MI, current: Q, AtS >
+ => < mtp : MTP | state: getModule, mi: MI, current: Q, AtS >
+    showModule(MI, mtp, Q, true).
+
+ crl [updateNewModule] :
+     showingModule(mtp, MI, M)
+     < mtp : MTP | state: getModule, mi: MI, current: Q, module: MM, AtS >
+  => < mtp : MTP | state: print&noBubbles, mi: MI, current: Q, module: M, AtS >
      write(stdout, mtp, MSG)
   if MSG := "\nModule " + string(Q) + " introduced.\n\n" .
 
@@ -500,22 +579,23 @@ mod MTP is
  ***          EXIT           ***
  ***                         ***
 
- crl [exit] : gotLine(mtp, stdin, Text)
-     < mtp : MTP | AtS >
-  => write(stdout, mtp, "Thanks for using MTP!\n")
-  if isExitComm(Text) [print AtS] .
+ rl [exit] :
+    < mtp : MTP | state: executeComm, input: ('exit.@Command@), AtS >
+ => write(stdout, mtp, "Thanks for using MTP!\n") [print AtS] .
+
+ rl [quit] :
+    < mtp : MTP | state: executeComm, input: ('q.@Command@), AtS >
+ => write(stdout, mtp, "Thanks for using MTP!\n") .
 
  ***                        ***
  ***          ERROR         ***
  ***                        ***
 
- crl [no-command] :
-     gotLine(mtp, stdin, Text)
-     < mtp : MTP | state: idle, AtS >
-  => < mtp : MTP | state: print&idle, AtS >
-     write(stdout, mtp, "The introduced command does not exit.\n")
-  if not isExitComm(Text) /\
-     not isLoadComm(Text) .
+ rl [parseCommError] :
+    parsedTerm(mtp, MI, noParse(N))
+    < mtp : MTP | mi: MI, state: parseComm, AtS >
+ => < mtp : MTP | mi: MI, state: print&idle, AtS >
+    write(stdout, mtp, "The introduced command does not exit.\n") .
 
  ***                          ***
  ***          CREATE          ***
@@ -534,7 +614,6 @@ mod MTP is
  => < mtp : MTP | state: load-std-db, mi: MI, load: LP, AtS >
     insertView(MI, mtp, upView(Q)) .
 
-
  rl [load-predef-module-from-module] :
     insertedModule(mtp, MI)
     < mtp : MTP | state: load-std-db, load: module(Q) LP, AtS >
@@ -546,7 +625,6 @@ mod MTP is
     < mtp : MTP | state: load-std-db, load: view(Q) LP, AtS >
  => < mtp : MTP | state: load-std-db, load: LP, AtS >
     insertView(MI, mtp, upView(Q)) .
-
 
  rl [load-predef-module-from-view] :
     insertedView(mtp, MI)
@@ -585,11 +663,15 @@ mod MTP is
  eq run =
     <> < mtp : MTP | file: null, out: "", state: init, db: empty,
                      load: modList, current: noQid, parsModName: noQid,
-                     bubbles: empty, top: noMod, parsedModules: empty >
+                     bubbles: empty, top: noMod, parsedModules: empty,
+                     input: empty, module: noMod >
     createInterpreter(interpreterManager, mtp, none) .
 endm
 
+set print conceal on .
+print conceal module:_ .
+
 set print attribute on .
-set show advisories off .
+set show advisories on .
 
 erew run .
