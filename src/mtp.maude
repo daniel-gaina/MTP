@@ -1,10 +1,12 @@
 load metaInterpreter.maude
 load predef_modules.maude
 load aux_modules.maude
+load proof_tactics.maude
 load grammar.maude
 load file.maude
 
 fmod COMMAND-PROCESSING is
+ pr QUANTIFICATION-OPS .
  pr PARSING-RESULT .
  pr META-MTP-SIGN .
  pr META-LEVEL .
@@ -12,28 +14,29 @@ fmod COMMAND-PROCESSING is
 
  vars RIG RIG' NOM NOM' FLE FLE' SS : SortSet .
  vars M M' M'' TOP TOP' FLAT FLAT' : Module .
- vars T T' T'' T1 T2 T3 T4 : Term .
+ vars VS VS' UV UV' EV EV' : VariableSet .
+ vars T T' T'' T1 T2 T3 T4 TQ : Term .
  vars QIL QIL' ERR ERR' : QidList .
  vars PL PL' : ParameterDeclList .
  vars TL TL' ACC : TermList .
  var  SSDS : SubsortDeclSet .
- vars VS VS' : VariableSet .
  var  RP? : [ResultPair] .
  var  COND : Condition .
  var  PR : ParsingRes .
+ var  ODS : OpDeclSet .
  var  TyL : TypeList .
  vars Ty Ty' : Type .
  var  AtS : AttrSet .
  var  DB : Database .
  vars S S' : String .
  var  Eq : Equation .
+ vars Q Q' FQ : Qid .
  var  V : Variable .
  var  OP : OpDecl .
  var  I : Import .
- vars Q Q' : Qid .
  var  Srt : Sort .
  var  H : Header .
-
+ var  N : Nat .
 
 
  op parseModule : Term -> ParsingRes .
@@ -92,6 +95,14 @@ fmod COMMAND-PROCESSING is
  ceq parseDefNoBubble(M, 'sorts_.['neTokenList[T]]) = [M', empty, < none, none, SS >, nil ]
   if SS := parseSortList(T) /\
      M' := addSorts(M, SS) .
+ ***(
+           PARSING SUBSORT DECLARATIONS
+ )
+ ceq parseDefNoBubble(M, 'subsort_<_.['neTokenList[T],'token[T']]) = [M', empty, < none, none, none >, nil ]
+  if SS := parseSortList(T) /\
+     Ty := downQid(T') /\
+     SSDS := createSubsortDecls(SS, Ty) /\
+     M' := addSubsorts(M, SSDS) .
  ***(
           OPERATORS, EQUATIONS, AND VARIABLES ARE PARSED LATED.
           It makes sense because they might need sorts, kinds, and operators from imported modules
@@ -163,14 +174,14 @@ fmod COMMAND-PROCESSING is
      Q' := downQid(T') .
 
  *** Top module, Flat module, Vars and equations
- op parseBubbles : Module Module TermList -> Module .
+ op parseBubbles : Module Module TermList -> ParsingRes .
  eq parseBubbles(TOP, FLAT, TL) = parseBubbles(TOP, FLAT, none, TL, empty) .
 
  ***(
              PARSE VARIABLES
  )
  *** Top module, Flat module, VariableSet, Vars and equations, Acc
- op parseBubbles : Module Module VariableSet TermList TermList -> Module .
+ op parseBubbles : Module Module VariableSet TermList TermList -> ParsingRes .
  eq parseBubbles(TOP, FLAT, VS, empty, ACC) = parseEqs(TOP, FLAT, VS, ACC) .
  ceq parseBubbles(TOP, FLAT, VS, ('var_:_.['neTokenList[T],'token[T']], TL), ACC) =
                              parseBubbles(TOP, FLAT, VS ; VS', TL, ACC)
@@ -250,36 +261,56 @@ fmod COMMAND-PROCESSING is
            PARSING FLEXIBLE OP DECLARATIONS
  )
  ceq parseBubbles(TOP, FLAT, VS, ('flexible`op_:`->_.['token[T],'token[T']], TL), ACC) = parseBubbles(TOP', FLAT', VS, TL, ACC)
-  if Q := qid("@_" + string(downQid(T))) /\
+  if Q := downQid(T) /\
+     FQ := createFlexOpName(Q, nil) /\
      Q' := downQid(T') /\
-     OP := op Q : '@Nominal@ -> Q' [none] . /\
-     TOP' := addOps(TOP, OP) /\
-     FLAT' := addOps(FLAT, OP) .
+     ODS := (op FQ : '@Nominal@ -> Q' [none] .
+             op Q : nil -> Q' [none] .) /\
+     TOP' := addOps(TOP, ODS) /\
+     FLAT' := addOps(FLAT, ODS) .
  ceq parseBubbles(TOP, FLAT, VS, ('flexible`op_:`->_`[_`].['token[T],'token[T'], T''], TL), ACC) =
                                                                                parseBubbles(TOP', FLAT', VS, TL, ACC)
-  if Q := qid("@_" + string(downQid(T))) /\
+  if Q := downQid(T) /\
+     FQ := createFlexOpName(Q, nil) /\
      Q' := downQid(T') /\
      AtS := parseAttr(FLAT, T'') /\
-     OP := op Q : '@Nominal@ -> Q' [AtS] . /\
-     TOP' := addOps(TOP, OP) /\
-     FLAT' := addOps(FLAT, OP) .
+     ODS := (op FQ : '@Nominal@ -> Q' [AtS] .
+             op Q : nil -> Q' [AtS] .) /\
+     TOP' := addOps(TOP, ODS) /\
+     FLAT' := addOps(FLAT, ODS) .
  ceq parseBubbles(TOP, FLAT, VS, ('flexible`op_:_->_.['token[T],'neTokenList[T'],'token[T'']], TL), ACC) =
                                                                                parseBubbles(TOP', FLAT', VS, TL, ACC)
-  if Q := qid("@_" + string(downQid(T))) /\
-     TyL := parseArity(T') /\
+  if TyL := parseArity(T') /\
+     Q := downQid(T) /\
+     FQ := createFlexOpName(Q, TyL) /\
      Q' := downQid(T'') /\
-     OP := op Q : '@Nominal@ TyL -> Q' [none] . /\
-     TOP' := addOps(TOP, OP) /\
-     FLAT' := addOps(FLAT, OP) .
+     ODS := (op FQ : '@Nominal@ TyL -> Q' [none] .
+             op Q : TyL -> Q' [none] .) /\
+     TOP' := addOps(TOP, ODS) /\
+     FLAT' := addOps(FLAT, ODS) .
  ceq parseBubbles(TOP, FLAT, VS, ('flexible`op_:_->_`[_`].['token[T1],'neTokenList[T2],'token[T3], T4], TL), ACC) =
                                                                                parseBubbles(TOP', FLAT', VS, TL, ACC)
-  if Q := qid("@_" + string(downQid(T1))) /\
-     TyL := parseArity(T2) /\
+  if TyL := parseArity(T2) /\
+     Q := downQid(T1) /\
+     FQ := createFlexOpName(Q, TyL) /\
      Q' := downQid(T3) /\
      AtS := parseAttr(FLAT, T4) /\
-     OP := op Q : '@Nominal@ TyL -> Q' [AtS] . /\
-     TOP' := addOps(TOP, OP) /\
-     FLAT' := addOps(FLAT, OP) .
+     ODS := (op FQ : '@Nominal@ TyL -> Q' [AtS] .
+             op Q : TyL -> Q' [AtS] .) /\
+     TOP' := addOps(TOP, ODS) /\
+     FLAT' := addOps(FLAT, ODS) .
+ ***(
+           PARSING PREDICATES
+ )
+ eq parseBubbles(TOP, FLAT, VS, ('pred_.[T], TL), ACC) =
+              parseBubbles(TOP, FLAT, VS, ('op_:`->_.[T,'token[''Bool.Qid]], TL), ACC) .
+
+ eq parseBubbles(TOP, FLAT, VS, ('pred_`[_`].['token[T],T''], TL), ACC) =
+              parseBubbles(TOP, FLAT, VS, ('op_:`->_`[_`].['token[T],'token[''Bool.Qid], T''], TL), ACC) .
+ eq parseBubbles(TOP, FLAT, VS, ('pred_:_.['token[T],'neTokenList[T']], TL), ACC) =
+              parseBubbles(TOP, FLAT, VS, ('op_:_->_.['token[T],'neTokenList[T'],'token[''Bool.Qid]], TL), ACC) .
+ eq parseBubbles(TOP, FLAT, VS, ('pred_:_`[_`].['token[T1],'neTokenList[T2],T4], TL), ACC) =
+              parseBubbles(TOP, FLAT, VS, ('op_:_->_`[_`].['token[T1],'neTokenList[T2],'token[''Bool.Qid], T4], TL), ACC) .
  ***(
              OWISE
  )
@@ -288,24 +319,40 @@ fmod COMMAND-PROCESSING is
  ***(
              PARSE EQUATIONS
  )
- op parseEqs : Module Module VariableSet TermList -> Module .
- eq parseEqs(TOP, FLAT, VS, empty) = TOP .
+ op parseEqs : Module Module VariableSet TermList -> ParsingRes .
+ eq parseEqs(TOP, FLAT, VS, empty) = [TOP, VS, nil] .
  ceq parseEqs(TOP, FLAT, VS, (T, TL)) = parseEqs(M, FLAT, VS, TL)
   if Eq := parseEq(FLAT, VS, T) /\
      M := addEqs(TOP, Eq) .
 
  op parseEq : Module VariableSet Term -> Equation .
- ceq parseEq(M, VS, 'eq_=_.['bubble[T], 'bubble[T']]) = eq T1 = T2 [none] . *** TODO
+ ceq parseEq(M, VS, 'eq_=_.['bubble[T], 'bubble[T']]) = eq T1 = T2 [none] .
   if QIL := downQidList(T) /\
      QIL' := downQidList(T') /\
      {T1, Ty} := metaParse(M, VS, QIL, anyType) /\
      {T2, Ty'} := metaParse(M, VS, QIL', anyType) .
- ceq parseEq(M, VS, 'ceq_=_if_.['bubble[T], 'bubble[T'],T'']) = ceq T1 = T2 if COND [none] . *** TODO
+ op parseEq : Module VariableSet Term -> Equation .
+ ceq parseEq(M, VS, 'eq_._=_.[TQ, 'bubble[T], 'bubble[T']]) = eq T1 = T2 [AtS] .
+  if QIL := downQidList(T) /\
+     QIL' := downQidList(T') /\
+     {T1, Ty} := metaParse(M, VS, QIL, anyType) /\
+     {T2, Ty'} := metaParse(M, VS, QIL', anyType) /\
+     < UV, EV > := extractQuantVars(TQ, VS) /\
+     AtS := generateQuantificationAtts(UV, EV) .
+ ceq parseEq(M, VS, 'ceq_=_if_.['bubble[T], 'bubble[T'],T'']) = ceq T1 = T2 if COND [none] .
   if QIL := downQidList(T) /\
      QIL' := downQidList(T') /\
      {T1, Ty} := metaParse(M, VS, QIL, anyType) /\
      {T2, Ty'} := metaParse(M, VS, QIL', anyType) /\
      COND := parseCondition(M, T'', VS) .
+ ceq parseEq(M, VS, 'ceq_._=_if_.[TQ, 'bubble[T], 'bubble[T'],T'']) = ceq T1 = T2 if COND [AtS] .
+  if QIL := downQidList(T) /\
+     QIL' := downQidList(T') /\
+     {T1, Ty} := metaParse(M, VS, QIL, anyType) /\
+     {T2, Ty'} := metaParse(M, VS, QIL', anyType) /\
+     COND := parseCondition(M, T'', VS) /\
+     < UV, EV > := extractQuantVars(TQ, VS) /\
+     AtS := generateQuantificationAtts(UV, EV) .
 
  op parseCondition : Module Term VariableSet -> Condition .
  eq parseCondition(M, '_/\_[TL], VS) = parseCondition*(M, TL, VS) .
@@ -337,14 +384,47 @@ fmod COMMAND-PROCESSING is
  ceq createVars(Q QIL, Ty) = V ; createVars(QIL, Ty)
   if V := qid(string(Q) + ":" + string(Ty)) .
 
- op isExitComm : String -> Bool .
- ceq isExitComm(S) = true
-  if 'exit := tokenize(S) .
- eq isExitComm(S) = false [owise] .
-
  op extractModules : Term -> TermList .
  eq extractModules('__[TL]) = TL .
  eq extractModules(T) = T [owise] .
+
+ op createSubsortDecls : SortSet Type -> SubsortDeclSet .
+ eq createSubsortDecls(none, Ty) = none .
+ eq createSubsortDecls(Ty ; SS, Ty') = subsort Ty < Ty' .
+                                       createSubsortDecls(SS, Ty') .
+
+ op createFlexOpName : Qid TypeList -> Qid .
+ eq createFlexOpName(Q, nil) = qid("@_" + string(Q)) .
+ eq createFlexOpName(Q, TyL) = $createFlexOpName(Q, | TyL |) [owise] .
+
+ op $createFlexOpName : Qid NzNat -> Qid .
+ ceq $createFlexOpName(Q, N) = qid("@_" + string(Q))
+  if S := string(Q) /\
+     find(S, "_", 0) =/= notFound .
+ ceq $createFlexOpName(Q, N) = Q'
+  if S := string(Q) /\
+     find(S, "_", 0) == notFound /\
+     Q' := qid("@_" + string(Q) + addUnderscores(N)) .
+
+ op |_| : TypeList -> Nat .
+ eq | nil | = 0 .
+ eq | Ty TyL | = s(| TyL |) .
+
+ op addUnderscores : NzNat -> String .
+ eq addUnderscores(N) = "(" + $addUnderscores(N) + ")" .
+
+ op $addUnderscores : NzNat -> String .
+ eq $addUnderscores(1) = "_" .
+ eq $addUnderscores(s(N)) = "_," + $addUnderscores(N) [owise] .
+
+ op vars2str : VariableSet -> String .
+ eq vars2str(none) = "" .
+ eq vars2str(V) = string(V) .
+ eq vars2str(V ; VS) = string(V) + " ; " + vars2str(VS) [owise] .
+
+ op generateQuantificationAtts : VariableSet VariableSet -> AttrSet .
+ eq generateQuantificationAtts(UV, none) = none .
+ eq generateQuantificationAtts(UV, EV) = nonexec metadata(vars2str(EV)) .
 endfm
 
 mod MTP is
@@ -357,10 +437,12 @@ mod MTP is
  pr PRELOAD-LIST .
  inc STD-STREAM .
  pr DATABASE .
+ pr TACTICS .
  inc FILE .
 
  vars Text Original Read Source STR MSG : String .
  vars TL BUBBS MODL IN : TermList .
+ vars T T' T'' T1 T2 T3 T4 : Term .
  vars FHIn FHOut MI : Oid .
  var  MM : Maybe{Module} .
  var  AtS : AttributeSet .
@@ -368,10 +450,12 @@ mod MTP is
  vars DB DB' : Database .
  vars QIL ERR : QidList .
  vars M M' TOP : Module .
+ var  VS : VariableSet .
  var  MQ : Maybe{Qid} .
- vars T T' T'' : Term .
  var  SI : SortInfo .
  vars Ty Ty' : Type .
+ var  GL : GoalList .
+ var  G : Goal .
  var  Q : Qid .
  var  N : Nat .
 
@@ -384,6 +468,10 @@ mod MTP is
  op load-grammar : -> State [ctor] .
  *** Loading command grammar
  op load-comm-grammar : -> State [ctor] .
+ *** Create user metainterpreter
+ op load-user-mi : -> State [ctor] .
+ *** Load modules into user metainterpreter
+ op load-user-mods : -> State [ctor] .
  *** Waiting input from the user
  op idle : -> State [ctor] .
  *** Reading file
@@ -408,6 +496,10 @@ mod MTP is
  op print&idle : -> State [ctor] .
  *** Waits for a wrote msg and tries to parse the next module
  op print&noBubbles : -> State [ctor] .
+ *** Extracts the goal module from the metainterpreter
+ op processGoal : -> State [ctor] .
+
+
 
  op foo : -> State [ctor] .
 
@@ -416,6 +508,7 @@ mod MTP is
  op mtp : -> Oid .
 
  *** Attributes
+ op uload:_ : List{Preload} -> Attribute [ctor gather (&)] .
  op load:_ : List{Preload} -> Attribute [ctor gather (&)] .
  op parsModName:_ : Maybe{Qid} -> Attribute [ctor] .
  op parsedModules:_ : TermList -> Attribute [ctor] .
@@ -425,18 +518,25 @@ mod MTP is
  op bubbles:_ : TermList -> Attribute [ctor] .
  op file:_ : Maybe{Oid} -> Attribute [ctor] .
  op input:_ : TermList -> Attribute [ctor] .
+ op goal:_ : GoalList -> Attribute [ctor] .
  op db:_ : Database -> Attribute [ctor] .
  op state:_ : State -> Attribute [ctor] .
  op out:_ : String -> Attribute [ctor] .
+ op umi:_ : Oid -> Attribute [ctor] .
  op mi:_ : Oid -> Attribute [ctor] .
 
- *** Initial value for load
+ *** Initial value for loading into the parsing metainterpreter
  op modList : -> List{Preload} .
  eq modList = module('TRUTH-VALUE) module('BOOL-OPS) module('TRUTH) module('BOOL)
               module('EXT-BOOL) module('NAT) module('INT) module('RAT) module('FLOAT)
               module('STRING) module('CONVERSION) module('QID) module('TRIV)
               view('Qid) module('LIST) module('QID-LIST) module('MTP-SIGN)
-              module('COMMAND-SIGN) module('NOMINAL) .
+              module('COMMAND-SIGN) .
+
+ *** Initial value for loading into the user metainterpreter
+ op umodList : -> List{Preload} .
+ eq umodList = module('TRUTH-VALUE) module('BOOL-OPS) module('TRUTH) module('BOOL)
+               module('NAT) module('TRIV) module('@NOMINAL@) .
 
  *** Run command
  op run : -> Configuration [ctor] .
@@ -471,7 +571,7 @@ mod MTP is
 
  crl [redComm] :
      < mtp : MTP | state: executeComm, input: ('red_['bubble[T]]), module: M, AtS >
-  => < mtp : MTP | state: foo, input: empty, module: M, AtS >
+  => < mtp : MTP | state: print&idle, input: empty, module: M, AtS >
      write(stdout, mtp, STR)
   if {T', Ty} := metaParse(M, downQidList(T), anyType) /\
      {T'', Ty'} := metaReduce(M, T') /\
@@ -512,10 +612,10 @@ mod MTP is
   if TL := extractModules(T) .
 
  crl [parseNextModule] :
-     < mtp : MTP | db: DB, state: parseModNoBubbles, mi: MI,
+     < mtp : MTP | db: DB, state: parseModNoBubbles, umi: MI,
                    parsModName: MQ, bubbles: BUBBS, top: MM,
                    parsedModules: (T, MODL), AtS >
-  => < mtp : MTP | db: DB', state: parseModBubbles, mi: MI,
+  => < mtp : MTP | db: DB', state: parseModBubbles, umi: MI,
                    parsModName: getName(M), bubbles: TL, top: M,
                    parsedModules: MODL, AtS >
      insertModule(MI, mtp, M)
@@ -529,29 +629,29 @@ mod MTP is
 
  rl [parseModule_GetFlatModule] :
     insertedModule(mtp, MI)
-    < mtp : MTP | state: parseModBubbles, mi: MI, parsModName: Q, AtS >
- => < mtp : MTP | state: parseModBubbles, mi: MI, parsModName: Q, AtS >
+    < mtp : MTP | state: parseModBubbles, umi: MI, parsModName: Q, AtS >
+ => < mtp : MTP | state: parseModBubbles, umi: MI, parsModName: Q, AtS >
     showModule(MI, mtp, Q, true) .
 
  crl [parseBubbles] :
      showingModule(mtp, MI, M)
-     < mtp : MTP | state: parseModBubbles, mi: MI, bubbles: BUBBS,
-                   top: TOP, parsModName: Q, current: MQ, AtS >
-  => < mtp : MTP | state: parseModule, mi: MI, bubbles: empty,
-                   top: noMod, parsModName: noQid, current: Q, AtS >
+     < mtp : MTP | state: parseModBubbles, umi: MI, bubbles: BUBBS,
+                   top: TOP, parsModName: Q, current: MQ, db: DB, AtS >
+  => < mtp : MTP | state: parseModule, umi: MI, bubbles: empty,
+                   top: noMod, parsModName: noQid, current: Q, db: (DB[Q |-> VS]), AtS >
      insertModule(MI, mtp, M')
-  if M' := parseBubbles(TOP, M, BUBBS) [print M' "\ncurrent " Q] .
+  if [M', VS, QIL] := parseBubbles(TOP, M, BUBBS) [print M' "\ncurrent " Q] .
 
  rl [parsingComplete] :
     insertedModule(mtp, MI)
-    < mtp : MTP | state: parseModule, mi: MI, current: Q, AtS >
- => < mtp : MTP | state: getModule, mi: MI, current: Q, AtS >
+    < mtp : MTP | state: parseModule, umi: MI, current: Q, AtS >
+ => < mtp : MTP | state: getModule, umi: MI, current: Q, AtS >
     showModule(MI, mtp, Q, true).
 
  crl [updateNewModule] :
      showingModule(mtp, MI, M)
-     < mtp : MTP | state: getModule, mi: MI, current: Q, module: MM, AtS >
-  => < mtp : MTP | state: print&noBubbles, mi: MI, current: Q, module: M, AtS >
+     < mtp : MTP | state: getModule, umi: MI, current: Q, module: MM, AtS >
+  => < mtp : MTP | state: print&noBubbles, umi: MI, current: Q, module: M, AtS >
      write(stdout, mtp, MSG)
   if MSG := "\nModule " + string(Q) + " introduced.\n\n" .
 
@@ -574,6 +674,27 @@ mod MTP is
  rl [closedFile] : closedFile(mtp, FHIn)
     < mtp : MTP | file: FHIn, state: readFile, AtS >
  => < mtp : MTP | file: null, state: parseModMetaparse, AtS > .
+
+ ***                         ***
+ ***          GOAL           ***
+ ***                         ***
+
+ crl [moduleGoal] :
+     < mtp : MTP | state: executeComm, input: ('goal_|-`eq_._=_['token[T1],T2,T3,T4]),
+                   umi: MI, AtS >
+  => < mtp : MTP | state: processGoal, input: ('goal_|-`eq_._=_['token[T1],T2,T3,T4]),
+                   umi: MI, AtS >
+     showModule(MI, mtp, Q, true)
+  if Q := downQid(T1) .
+
+ crl [processGoal] :
+     showingModule(mtp, MI, M)
+     < mtp : MTP | state: processGoal, input: ('goal_|-`eq_._=_['token[T1],T2,T3,T4]),
+                   umi: MI, goal: GL, db: DB, AtS >
+  => < mtp : MTP | state: print&idle, input: empty, umi: MI, goal: G, db: DB, AtS >
+     write(stdout, mtp, "\nGoal introduced.\n")
+  if Q := downQid(T1) /\
+     G := processGoal(M, T2, T3, T4, getVS(DB[Q])) .
 
  ***                         ***
  ***          EXIT           ***
@@ -653,6 +774,24 @@ mod MTP is
  rl [load-comm-grammar-finished] :
     insertedModule(mtp, MI)
     < mtp : MTP | state: load-comm-grammar, AtS >
+ => < mtp : MTP | state: load-user-mi, AtS >
+    createInterpreter(interpreterManager, mtp, none) .
+
+ rl [user-metainterpreter-created] :
+    createdInterpreter(mtp, interpreterManager, MI)
+    < mtp : MTP | state: load-user-mi, uload: module(Q) LP, AtS >
+ => < mtp : MTP | state: load-user-mods, umi: MI, uload: LP, AtS >
+    insertModule(MI, mtp, upModule(Q, false)) .
+
+ rl [load-user-predef-module-metainterpreter] :
+    insertedModule(mtp, MI)
+    < mtp : MTP | state: load-user-mods, uload: module(Q) LP, AtS >
+ => < mtp : MTP | state: load-user-mods, uload: LP, AtS >
+    insertModule(MI, mtp, upModule(Q, false)) .
+
+ rl [user-predef-module-metainterpreter-finished] :
+    insertedModule(mtp, MI)
+    < mtp : MTP | state: load-user-mods, uload: nil, AtS >
  => < mtp : MTP | state: idle, AtS >
     getLine(stdin, mtp, "MTP> ") .
 
@@ -662,9 +801,10 @@ mod MTP is
 
  eq run =
     <> < mtp : MTP | file: null, out: "", state: init, db: empty,
-                     load: modList, current: noQid, parsModName: noQid,
-                     bubbles: empty, top: noMod, parsedModules: empty,
-                     input: empty, module: noMod >
+                     load: modList, uload: umodList, current: noQid,
+                     parsModName: noQid, bubbles: empty, top: noMod,
+                     parsedModules: empty, input: empty, module: noMod,
+                     goal: noGoal >
     createInterpreter(interpreterManager, mtp, none) .
 endm
 
@@ -675,3 +815,5 @@ set print attribute on .
 set show advisories on .
 
 erew run .
+
+*** goal MyLogic |- eq forall L . empty = empty

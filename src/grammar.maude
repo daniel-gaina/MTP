@@ -1,15 +1,16 @@
 set include BOOL off .
 
 fmod MTP-SIGN is
- sorts @Spec@ @SpecList@ @Token@ @Bubble@ @Arity@ @Def@ @DefSet@
+ sorts @Spec@ @SpecList@ @Subsort@ @Token@ @Bubble@ @Arity@ @Def@ @DefSet@
        @NeTokenList@ @ModExp@ @ParameterDecl@ @ParameterDeclList@
-       @AttrList@ @Attr@ @Condition@ .
+       @AttrList@ @Attr@ @Condition@ @QuantList@ @Quant@ .
+ subsort @ParameterDecl@ < @ParameterDeclList@ .
+ subsort @Quant@ < @QuantList@ .
  subsort @Spec@ < @SpecList@ .
  subsort @Attr@ < @AttrList@ .
- subsort @Token@ < @Arity@ .
  subsort @Token@ < @ModExp@ .
+ subsort @Token@ < @Arity@ .
  subsort @Def@ < @DefSet@ .
- subsort @ParameterDecl@ < @ParameterDeclList@ .
 
  ***(
             SPECIFICATIONS
@@ -43,6 +44,11 @@ fmod MTP-SIGN is
  op sort_. : @NeTokenList@ -> @Def@ [ctor] .
 
  ***(
+                SORTS
+ )
+ op subsort_<_. : @NeTokenList@ @Token@ -> @Def@ [ctor] .
+
+ ***(
               OPERATORS
  )
  *** Total
@@ -60,18 +66,31 @@ fmod MTP-SIGN is
  op flexible`op_:`->_[_]. : @Token@ @Token@ @AttrList@ -> @Def@ [ctor] .
  op flexible`op_:_->_. : @Token@ @NeTokenList@ @Token@ -> @Def@ [ctor] .
  op flexible`op_:_->_[_]. : @Token@ @NeTokenList@ @Token@ @AttrList@ -> @Def@ [ctor] .
+ *** Predicates
+ op pred_. : @Token@ -> @Def@ [ctor] .
+ op pred_[_]. : @Token@ @AttrList@ -> @Def@ [ctor] .
+ op pred_:_. : @Token@ @NeTokenList@ -> @Def@ [ctor] .
+ op pred_:_[_]. : @Token@ @NeTokenList@ @AttrList@ -> @Def@ [ctor] .
 
  ***(
                VARS
  )
  op var_:_. : @NeTokenList@ @Token@ -> @Def@ [ctor] .
  op vars_:_. : @NeTokenList@ @Token@ -> @Def@ [ctor] .
+ ***(
+             QUANTIFICATIONS
+ )
+ op forall_ : @NeTokenList@ -> @Quant@ [ctor] .
+ op exists_ : @NeTokenList@ -> @Quant@ [ctor] .
+ op __ : @QuantList@ @QuantList@ -> @QuantList@ [ctor assoc] .
 
  ***(
              EQUATIONS
  )
  op eq_=_. : @Bubble@ @Bubble@ -> @Def@ [ctor] .
+ op eq_._=_. : @QuantList@ @Bubble@ @Bubble@ -> @Def@ [ctor] .
  op ceq_=_if_. : @Bubble@ @Bubble@ @Condition@ -> @Def@ [ctor] .
+ op ceq_._=_if_. : @QuantList@ @Bubble@ @Bubble@ @Condition@ -> @Def@ [ctor] .
 
  ***(
              CONDITIONS
@@ -118,17 +137,16 @@ fmod META-MTP-SIGN is
                 op-hook('qidListSymbol, '__, 'QidList 'QidList, 'QidList)
                 op-hook('qidSymbol, '<Qids>, nil, 'Qid)
                 id-hook('Exclude, 'eq 'ceq 'rl 'crl 'mb 'cmb 'sd 'csd
-                                  'var 'vars 'strat 'endm
-                                  'endfm 'endsm 'sorts 'subsort 'subsorts
-                                  'subclass 'subclasses 'op 'ops
+                                  'var 'vars 'forall 'exists
+                                  'sorts 'subsort 'subsorts 'op 'ops
                                   'protecting 'pr 'including 'inc 'extending
-                                  'ctor 'assoc 'comm '== '/\)))] .
+                                  'ctor 'assoc 'comm '== '/\ 'spec* 'spec!)))] .
         op 'neTokenList : 'QidList -> '@NeTokenList@
              [special(
                (id-hook('Bubble, '1 '-1 '`( '`))
                 op-hook('qidListSymbol, '__, 'QidList 'QidList, 'QidList)
                 op-hook('qidSymbol, '<Qids>, nil, 'Qid)
-                id-hook('Exclude, '. ':)))] .
+                id-hook('Exclude, '. ': '`[ 'forall 'exists)))] .
         none
         none
      endfm) .
@@ -136,12 +154,21 @@ fmod META-MTP-SIGN is
 endfm
 
 fmod COMMAND-SIGN is
- sort @Command@ @Token@ @Bubble@ @NeTokenList@ .
+ sort @Command@ @Token@ @Bubble@ @NeTokenList@ @QuantList@ @Quant@ .
+ subsort @Quant@ < @QuantList@ .
+
+ ***(
+             QUANTIFICATIONS
+ )
+ op forall_ : @NeTokenList@ -> @Quant@ [ctor] .
+ op exists_ : @NeTokenList@ -> @Quant@ [ctor] .
+ op __ : @QuantList@ @QuantList@ -> @QuantList@ [ctor assoc] .
 
  op load_ : @Token@ -> @Command@ [ctor] .
  op red_ : @Bubble@ -> @Command@ [ctor] .
  op exit : -> @Command@ [ctor] .
  op q : -> @Command@ [ctor] .
+ op goal_|-`eq_._=_ : @Token@ @QuantList@ @Bubble@ @Bubble@ -> @Command@ [ctor] .
 endfm
 
 fmod META-MTP-COMM-SIGN is

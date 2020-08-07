@@ -1,0 +1,40 @@
+fmod GOAL is
+ pr QUANTIFICATION-OPS .
+
+ vars UV EV VS : VariableSet .
+ vars QIL QIL' : QidList .
+ vars Q L R T1 T2 : Term .
+ vars Ty Ty' : Type .
+ var  M : Module .
+
+ sorts Goal GoalList .
+ subsort Goal < GoalList .
+
+ op noGoal : -> GoalList [ctor] .
+ op __ : GoalList GoalList -> GoalList [ctor assoc] .
+
+ op _|-_,_ceq_=_if_ : Module VariableSet VariableSet Term Term Condition -> Goal [ctor] .
+
+ op processGoal : Module Term Term Term VariableSet -> Goal .
+ ceq processGoal(M, Q, 'bubble[L], 'bubble[R], VS) = M |- UV, EV ceq T1 = T2 if nil
+  if < UV, EV > := extractQuantVars(Q, VS) /\
+     QIL := downQidList(L) /\
+     QIL' := downQidList(R) /\
+     {T1, Ty} := metaParse(M, VS, QIL, anyType) /\
+     {T2, Ty'} := metaParse(M, VS, QIL', anyType) . *** TODO
+endfm
+
+fmod TACTIC1 is
+ pr GOAL .
+
+endfm
+
+fmod TACTIC2 is
+ pr GOAL .
+
+endfm
+
+fmod TACTICS is
+ pr TACTIC1 .
+ pr TACTIC2 .
+endfm

@@ -13,14 +13,21 @@ fmod MAYBE{X :: TRIV} is
 endfm
 
 fmod MODULE-ENTRY is
-  pr META-MODULE .
+  pr META-LEVEL .
 
-  sorts Entry SortInfo .
+  vars SS SS' SS'' : SortSet .
+  var  VS : VariableSet .
+
+  sorts Entry ModuleInfo SortInfo .
 
  ***(          Rigid  Nominal Flexible             )
- op <_,_,_> : SortSet SortSet SortSet -> SortInfo .
+ op <_,_,_> : SortSet SortSet SortSet -> SortInfo [ctor] .
+ op <_,_,_|_> : SortSet SortSet SortSet VariableSet -> ModuleInfo [ctor] .
 
- op _->_ : Qid SortInfo -> Entry [ctor] .
+ op getVS : ModuleInfo -> VariableSet .
+ eq getVS(< SS, SS', SS'' | VS >) = VS .
+
+ op _->_ : Qid ModuleInfo -> Entry [ctor] .
 endfm
 
 view Entry from TRIV to MODULE-ENTRY is
@@ -30,16 +37,25 @@ endv
 fmod DATABASE is
  pr SET{Entry} * (sort Set{Entry} to Database) .
 
- vars SI SI' : SortInfo .
+ vars SS SS' SS'' : SortSet .
+ vars VS VS' : VariableSet .
+ vars SI SI' : ModuleInfo .
  var  DB : Database .
  var  Q : Qid .
 
- op _[_] : Database Qid ~> SortInfo .
+ op _[_] : Database Qid ~> ModuleInfo .
  eq (DB, Q -> SI)[Q] = SI .
 
  op _[_|->_] : Database Qid SortInfo -> Database .
+ eq DB [ Q |-> < SS, SS', SS'' > ] = DB [ Q |-> < SS, SS', SS'' | none > ] .
+
+ op _[_|->_] : Database Qid ModuleInfo -> Database .
  eq (DB, Q -> SI)[Q |-> SI'] = (DB, Q -> SI') .
  eq DB[Q |-> SI'] = (DB, Q -> SI') [owise] .
+
+ op _[_|->_] : Database Qid VariableSet -> Database .
+ eq (DB, Q -> < SS, SS', SS'' | VS >)[Q |-> VS'] = (DB, Q -> < SS, SS', SS'' | VS' >) .
+ eq DB[Q |-> VS] = (DB, Q -> < none, none, none | VS >) [owise] .
 endfm
 
 fmod PARSING-RESULT is
@@ -51,6 +67,7 @@ fmod PARSING-RESULT is
  op parsingError : -> Database? [ctor] .
 
  op [_,_,_,_] : Module TermList SortInfo QidList -> ParsingRes [ctor] .
+ op [_,_,_] : Module VariableSet QidList -> ParsingRes [ctor] .
 endfm
 
 fmod PRELOAD is
@@ -191,7 +208,8 @@ fmod AUX-MODULE-OPS is
 
  op emptyModule : Header -> SModule .
  eq emptyModule(H) = mod H is
-                      (protecting 'NOMINAL .)
+                      (protecting '@NOMINAL@ .
+                       including 'TRUTH-VALUE .)
                       sorts none .
                       none
                       none
@@ -202,7 +220,8 @@ fmod AUX-MODULE-OPS is
 
  op emptyTheory : Header -> STheory .
  eq emptyTheory(H) = th H is
-                      (protecting 'NOMINAL .)
+                      (protecting '@NOMINAL@ .
+                       including 'TRUTH-VALUE .)
                       sorts none .
                       none
                       none
@@ -210,4 +229,38 @@ fmod AUX-MODULE-OPS is
                       none
                       none
                      endth .
+endfm
+
+fmod QUANTIFICATION-OPS is
+ pr AUX-MODULE-OPS .
+
+ vars VS UV UV' EV EV' : VariableSet .
+ var  TL : TermList .
+ var  V : Variable .
+ var  T : Term .
+ var  Q : Qid .
+
+ sort QuantificationPair .
+ *** Universal Existencial
+ op <_,_> : VariableSet VariableSet -> QuantificationPair [ctor] .
+
+ op extractQuantVars : Term VariableSet ~> QuantificationPair .
+ eq extractQuantVars('__[TL], VS) = extractQuantVars*(TL, VS) .
+ ceq extractQuantVars('forall_['neTokenList[TL]], VS) = < UV, none >
+  if UV := getVars(TL, VS) .
+ ceq extractQuantVars('exists_['neTokenList[TL]], VS) = < none, EV >
+  if EV := getVars(TL, VS) .
+
+ op extractQuantVars* : TermList VariableSet ~> QuantificationPair .
+ eq extractQuantVars*(empty, VS) = < none, none > .
+ ceq extractQuantVars*((T, TL), VS) = < UV ; UV', EV ; EV' >
+  if < UV, EV > := extractQuantVars(T, VS) /\
+     < UV', EV' > := extractQuantVars*(TL, VS) .
+
+ op getVars : TermList VariableSet ~> VariableSet .
+ eq getVars('__[TL], VS) = getVars(TL, VS) .
+ ceq getVars((T, TL), V ; VS) = V ; getVars(TL, V ; VS)
+  if Q := downQid(T) /\
+     Q := getName(V) [owise] .
+ eq getVars(empty, VS) = none .
 endfm
