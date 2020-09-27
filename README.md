@@ -10,7 +10,7 @@ The code of 'MTP' is contained in a GIT repository on GitHub, whose URL is
 https://github.com/daniel-gaina/MTP. To get a copy of the repository you only
 have to write in your Linux/MacOS console:
 
-    $ git clone https://github.com/XXX
+    $ git clone https://github.com/daniel-gaina/MTP
 
 This will create an MTP folder containing the source code of the tool as well as
 several examples.
