@@ -1,0 +1,134 @@
+Logical system L
+----------------
+1. a countable set E of ‘expressions’
+2. a subset S <= E of ‘sentences’
+3. a subset P <= S of ‘provable sentences’
+4. a subset R <= S of ‘refutable sentences’
+5. a subset T <= S of ‘true sentences’
+6. a subset H <= E of ‘predicates’
+7. a function Q : E x N -> E such that
+   for every predicate h and number n
+   Q(h, n) is a sentence.
+
+Notation: we denote Q(h, n) by h(n)
+
+...........................................................................
+
+Def.
+– L is SOUND iff P <= T and R <= S \ T.
+– L is COMPLETE iff T <= P and S \ T <= R.
+– L is CONSISTENT iff P /\ R = 0
+– L is DECIDABLE if S <= P \/ R
+
+Prop.
+1. soundness => consistency
+2. consistency & completeness => soundness
+3. soundness & decidability => completeness
+4. soundness & completeness => decidability
+
+...........................................................................
+
+We know that E is countable. So there is a bijection g : E -> N.
+
+Def. Fix g : E -> N. We call g(e) the Gödel number of e.
+Given a number n, let en = g^-1(n) be the expression with Gödel number n.
+
+Def. The diagonalization of e is e(g(e)), i.e. Q(e, g(e)).
+
+Def. The diagonal function d : N -> N of L is given by d(n) = g(en(n)).
+
+  N --( g^-1, id )--> E x N    --( Q )--> E      --( g )--> N
+  n |---------------> (en, n) |---------> en(n) |---------> g(en(n))
+
+Def. Given A <= N, we let A* = d^-1(A).
+
+  n \in A*  iff  d(n) \in A
+            iff  g(en(n)) \in A
+
+Def. An expression en is said to be a GÖDEL SENTENCE for A <= N if
+– en is a sentences (en \in S)
+– en is true (en \in T) iff n \in A
+
+That is, if en if a Gödel sentence for A, then we have two options:
+1. en is true and n \in A
+2. en is false and n \notin A
+
+Def. A <= N is EXPRESSIBLE iff there exists a predicate h such that
+for all n \in N, n \in A iff h(n) is true.
+
+Prop. If A* is expressible, then there is a Gödel sentence for A.
+
+Proof. Suppose A* is expressible.
+This means that there if a predicate h expressing A*.
+
+(1)  n \in A*  iff  h(n) is true
+
+Take k = g(h). Then what is d(k)?
+
+d(k) = g(Q(h, g(h))) = g(h(k))
+
+So d(k) is the Gödel number of h(k).
+
+Applying (1) to k we get
+
+(2)  k \in A*  iff  h(k) is true
+
+Now what does it mean k \in A*? [ A* = d^-1(A) ]
+
+(3)  k \in A*  iff  d(k) \in A
+
+So from (2) and (3) we get
+
+h(k) is true  iff  d(k) = g(h(k)) \in A
+
+Therefore, h(k) is a Gödel sentence for A.
+
+...........................................................................
+
+Th. If L is sound and ~(g(P)*) is expressible, then L has a sentence that is it not provable.
+
+Proof. Suppose ~(g(P)*) is expressible, and note that ~(g(P)*) = (~g(P))*.
+Then, applying the property above to A = ~g(P), there is a Gödel sentence en for the set ~g(P).
+This means that
+
+en is true  iff  n \in ~g(P)
+            iff  n \notin g(P)
+            iff  en is not provable
+
+Now we have two options:
+– en is true but not provable
+– en is false and provable
+
+Because L is sound, en cannot be provable. So we are left with en true but not provable.
+
+...........................................................................
+
+Cor. There is no logic L satisfying the following three properties:
+1. soundness
+2. expressibility of ~(g(P)*)
+3. completeness/decidability
+
+...........................................................................
+
+Q : E x N -> E
+
+Q(e, n) =
+1. if e parses as a monadic formula p(x) [ with one free var of sort Nat ]
+   = p(s^n 0)
+2. otherwise
+   = ‘’
+
+Take V = {0, s, +, *, ^, =, ¬, /\, \forall, v, '}
+and E = V^* [ set of strings over V ]
+
+Peano [ incomplete ]
+Take V = {0, s, +, *, =, ¬, /\, \forall, v, '}
+and E = V^* [ set of strings over V ]
+
+Presburger [ complete ]
+Take V = {0, s, +, =, ¬, /\, \forall, v, '}
+and E = V^* [ set of strings over V ]
+
+Propositional [ complete ]
+Take V = {0, s, +, *, =, ¬, /\}
+and E = V^* [ set of strings over V ]
