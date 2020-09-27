@@ -28,7 +28,7 @@ with tight semantics.
 
 or
 
-* **spec* SPEC-NAME[{PARAMS}] = DEFS end** This syntax defines a specification
+* __spec* SPEC-NAME[{PARAMS}] = DEFS end__ This syntax defines a specification
 with loose semantics.
 
 In both cases parameters are optional and defined as follows:
