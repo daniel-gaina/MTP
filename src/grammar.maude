@@ -41,7 +41,9 @@ fmod MTP-SIGN is
  op rigid`sort_. : @NeTokenList@ -> @Def@ [ctor] .
  op rigid`sorts_. : @NeTokenList@ -> @Def@ [ctor] .
  op nominal`sort_. : @NeTokenList@ -> @Def@ [ctor] .
+ op nominal`sorts_. : @NeTokenList@ -> @Def@ [ctor] .
  op sort_. : @NeTokenList@ -> @Def@ [ctor] .
+ op sorts_. : @NeTokenList@ -> @Def@ [ctor] .
 
  ***(
                 SORTS

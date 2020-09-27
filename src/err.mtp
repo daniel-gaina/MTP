@@ -1,0 +1,43 @@
+spec! LIST =
+ rrigid sort List .
+end
+
+spec! MyLogic{X :: TRIV} =
+  pr LIST .
+  inc BOOL .
+
+  rigid sort Elt .
+  subsort Elt < List .
+  nominal sort Mode .
+
+  vars E E1 : Elt .
+  var  M : Mode .
+  vars L L' : List .
+
+  op init : -> Mode [ctor] .
+  op next : Mode -> Mode [ctor] .
+
+  op empty : -> List [ctor] .
+  op _._ : Elt List -> List [ctor] .
+
+  pred open .
+  pred equal : Elt Elt [comm] .
+
+  flexible op read_ : List -> Elt .
+  flexible op read2 : List -> Elt .
+
+  op head : List -> Elt .
+  eq head(E . L) = E .
+  ceq head(E . L) = E
+   if L = empty /\
+      L = empty .
+
+  eq @ init read (E . L) = E .
+  eq @ init read2 (E . L) = E .
+
+  eq @ next(M) read (E . L) = E .
+  eq forall L L' exists E E1 . @ next(M) read (E . L') = E .
+  eq forall L L' . @ next(M) read (E . L') = E .
+
+end
+
