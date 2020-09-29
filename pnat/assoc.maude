@@ -1,0 +1,7 @@
+
+*** 1 ***
+goal PNAT |- eq (X:PNat + Y:PNat)+ Z:PNat = X:PNat + (Y:PNat + Z:PNat);
+*** 2 ***
+ind on X:PNat tc
+*** 3 ***
+red

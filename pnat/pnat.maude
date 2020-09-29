@@ -1,0 +1,18 @@
+fmod PNAT is 
+ sorts PNat PNzNat .
+ subsorts PNzNat < PNat .
+ op 0 : -> PNat [ctor] .
+ op s_ : PNat -> PNzNat [ctor].
+ op _+_ : PNat PNat -> PNat [prec 33].
+ vars M N P : PNat .
+---
+ eq 0 + N = N             [metadata "1"].
+ eq s M + N = s(M + N)    [metadata "2"].
+endfm
+
+fmod PNAT-L is
+ inc PNAT .
+ vars M N : PNat .
+ eq N + 0   = N        [metadata "lemma-1"].
+ eq M + s N = s(M + N) [metadata "lemma-2"]. 
+endfm

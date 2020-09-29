@@ -1,0 +1,3 @@
+goal PNAT-L |- eq M:PNat + N:PNat = N:PNat + M:PNat ;
+
+ind on M:PNat
