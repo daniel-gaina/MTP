@@ -264,3 +264,76 @@ fmod QUANTIFICATION-OPS is
      Q := getName(V) [owise] .
  eq getVars(empty, VS) = none .
 endfm
+
+fmod ERROR-MSGS is
+ pr QID-LIST .
+
+ sort ErrorPrintTuple .
+
+ op [_,_,_] : QidList Qid QidList -> ErrorPrintTuple [ctor] .
+
+ vars QIL PRE PRE' POST POST' : QidList .
+ vars Q NAME : Qid .
+ var  N : Nat .
+
+ op showMsg : QidList Nat -> QidList .
+ ceq showMsg(QIL, N) = 'Parsing 'error 'in 'module NAME '. 'Unexpected 'term: '\n
+                       PRE' Q '<---- 'HERE POST' '\n
+  if [ PRE, Q, POST ] := divide(QIL, N) /\
+     NAME := moduleName(PRE) /\
+     PRE' := backwardsPick(PRE) /\
+     POST' := forwardPick(POST) .
+ ceq showMsg(QIL, N) = 'Parsing 'error. 'Unexpected 'term: '\n
+                       PRE' Q '<---- 'HERE POST' '\n
+  if [ PRE, Q, POST ] := divide(QIL, N) /\
+     not (moduleName(PRE) :: Qid) /\
+     PRE' := backwardsPick(PRE) /\
+     POST' := forwardPick(POST) .
+
+ op backwardsPick : QidList -> QidList .
+ eq backwardsPick(nil) = nil .
+ eq backwardsPick(QIL Q) =
+     if initialQid(Q)
+     then Q
+     else backwardsPick(QIL) Q
+     fi .
+
+ op forwardPick : QidList -> QidList .
+ eq forwardPick(nil) = nil .
+ eq forwardPick(Q QIL) =
+     if initialQid(Q)
+     then nil
+     else Q forwardPick(QIL)
+     fi .
+
+ op initialQid : Qid -> Bool .
+ eq initialQid('spec!) = true .
+ eq initialQid('spec*) = true .
+ eq initialQid('pr) = true .
+ eq initialQid('ex) = true .
+ eq initialQid('inc) = true .
+ eq initialQid('rigid) = true .
+ eq initialQid('nominal) = true .
+ eq initialQid('sort) = true .
+ eq initialQid('subsort) = true .
+ eq initialQid('op) = true .
+ eq initialQid('flexible) = true .
+ eq initialQid('pred) = true .
+ eq initialQid('var) = true .
+ eq initialQid('vars) = true .
+ eq initialQid('eq) = true .
+ eq initialQid('ceq) = true .
+ eq initialQid(Q) = false [owise] .
+
+ op divide : QidList Nat -> ErrorPrintTuple .
+ eq divide(QIL, N) = $divide(QIL, N, nil) .
+
+ op $divide : QidList Nat QidList ~> ErrorPrintTuple .
+ eq $divide(Q QIL, 0, PRE) = [ PRE, Q, QIL ] .
+ eq $divide(Q QIL, s(N), PRE) = $divide(QIL, N, PRE Q) .
+
+ op moduleName : QidList ~> Qid .
+ eq moduleName(QIL 'spec! NAME) = NAME .
+ eq moduleName(QIL 'spec* NAME) = NAME .
+ eq moduleName(QIL Q) = moduleName(QIL) [owise] .
+endfm

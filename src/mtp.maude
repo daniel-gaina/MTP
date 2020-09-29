@@ -96,15 +96,7 @@ fmod COMMAND-PROCESSING is
   if SS := parseSortList(T) /\
      M' := addSorts(M, SS) .
  ***(
-           PARSING SUBSORT DECLARATIONS
- )
- ceq parseDefNoBubble(M, 'subsort_<_.['neTokenList[T],'token[T']]) = [M', empty, < none, none, none >, nil ]
-  if SS := parseSortList(T) /\
-     Ty := downQid(T') /\
-     SSDS := createSubsortDecls(SS, Ty) /\
-     M' := addSubsorts(M, SSDS) .
- ***(
-          OPERATORS, EQUATIONS, AND VARIABLES ARE PARSED LATED.
+          SUBSORTS, OPERATORS, EQUATIONS, AND VARIABLES ARE PARSED LATED.
           It makes sense because they might need sorts, kinds, and operators from imported modules
           and parameters.
  )
@@ -138,6 +130,7 @@ fmod COMMAND-PROCESSING is
  eq parseAttr(M, 'comm.@Attr@) = comm .
  eq parseAttr(M, 'idem.@Attr@) = idem .
  eq parseAttr(M, 'memo.@Attr@) = memo .
+ eq parseAttr(M, 'id:_['bubble[T]]) = memo . *** TODO
 
  op parseAttr* : Module TermList -> AttrSet .
  eq parseAttr*(M, empty) = none .
@@ -145,13 +138,7 @@ fmod COMMAND-PROCESSING is
 
  ***(
  ops id:_ : @Bubble@ -> @Attr@ .
- op left`id:_  : @Bubble@ -> @Attr@ .
- op right`id:_ : @Bubble@ -> @Attr@ .
- ops frozen`(_`) poly`(_`) strat`(_`) :
-       @NeTokenList@ -> @AttrList@ .
  op prec_ : @Token@ -> @Attr@ .
- op gather`(_`) : @NeTokenList@ -> @Attr@ .
- ops format`(_`) : @NeTokenList@ -> @Attr@ .
  op metadata_ : @Token@ -> @Attr@ .
  )
 
@@ -189,6 +176,15 @@ fmod COMMAND-PROCESSING is
  ceq parseBubbles(TOP, FLAT, VS, ('vars_:_.['neTokenList[T],'token[T']], TL), ACC) =
                              parseBubbles(TOP, FLAT, VS ; VS', TL, ACC)
   if VS' := parseVars(T, T') .
+ ***(
+           PARSING SUBSORT DECLARATIONS
+ )
+ ceq parseBubbles(TOP, FLAT, VS, ('subsort_<_.['neTokenList[T],'token[T']], TL), ACC) = parseBubbles(TOP', FLAT', VS, TL, ACC)
+  if SS := parseSortList(T) /\
+     Ty := downQid(T') /\
+     SSDS := createSubsortDecls(SS, Ty) /\
+     TOP' := addSubsorts(TOP, SSDS) /\
+     FLAT' := addSubsorts(FLAT, SSDS) .
  ***(
            PARSING OP DECLARATIONS
  )
@@ -436,6 +432,7 @@ mod MTP is
  inc META-INTERPRETER .
  pr PRELOAD-LIST .
  inc STD-STREAM .
+ pr ERROR-MSGS .
  pr DATABASE .
  pr TACTICS .
  inc FILE .
@@ -602,14 +599,21 @@ mod MTP is
 
  rl [parseModuleMetaparse] :
     < mtp : MTP | out: Read, state: parseModMetaparse, mi: MI, AtS >
- => < mtp : MTP | out: "", state: parseList, mi: MI, AtS >
+ => < mtp : MTP | out: Read, state: parseList, mi: MI, AtS >
     parseTerm(MI, mtp, 'GRAMMAR, none, tokenize(Read), '@SpecList@) .
 
  crl [parseModuleNoBubblesOK] :
      parsedTerm(mtp, MI, {T, Ty})
-     < mtp : MTP | state: parseList, mi: MI, parsedModules: MODL, AtS >
-  => < mtp : MTP | state: parseModNoBubbles, mi: MI, parsedModules: TL, AtS >
+     < mtp : MTP | out: Read, state: parseList, mi: MI, parsedModules: MODL, AtS >
+  => < mtp : MTP | out: "", state: parseModNoBubbles, mi: MI, parsedModules: TL, AtS >
   if TL := extractModules(T) .
+
+ crl [parseModuleNoBubblesError] :
+     parsedTerm(mtp, MI, noParse(N))
+     < mtp : MTP | out: Read, state: parseList, mi: MI, AtS >
+  => < mtp : MTP | out: "", state: print&idle, mi: MI, AtS >
+     write(stdout, mtp, printTokens(QIL))
+  if QIL := showMsg(tokenize(Read), N) .
 
  crl [parseNextModule] :
      < mtp : MTP | db: DB, state: parseModNoBubbles, umi: MI,
