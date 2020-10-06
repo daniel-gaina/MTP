@@ -1,16 +1,38 @@
 set include BOOL off .
 
-fmod MTP-SIGN is
- sorts @Spec@ @SpecList@ @Subsort@ @Token@ @Bubble@ @Arity@ @Def@ @DefSet@
-       @NeTokenList@ @ModExp@ @ParameterDecl@ @ParameterDeclList@
-       @AttrList@ @Attr@ @Condition@ @QuantList@ @Quant@ .
- subsort @ParameterDecl@ < @ParameterDeclList@ .
+fmod COMMON-SIGN is
+ sorts @Def@ @DefSet@ @Condition@ @QuantList@ @Quant@
+       @Token@ @Bubble@ @NeTokenList@ .
+ subsort @Def@ < @DefSet@ .
  subsort @Quant@ < @QuantList@ .
+
+ ***(
+            Definition Set
+ )
+ op __ : @DefSet@ @DefSet@ -> @DefSet@ [ctor assoc comm] .
+ ***(
+             QUANTIFICATIONS
+ )
+ op forall_ : @NeTokenList@ -> @Quant@ [ctor] .
+ op exists_ : @NeTokenList@ -> @Quant@ [ctor] .
+ op __ : @QuantList@ @QuantList@ -> @QuantList@ [ctor assoc] .
+ ***(
+             EQUATIONS
+ )
+ op eq_._=_. : @QuantList@ @Bubble@ @Bubble@ -> @Def@ [ctor] .
+ op ceq_._=_if_. : @QuantList@ @Bubble@ @Bubble@ @Condition@ -> @Def@ [ctor] .
+endfm
+
+fmod MTP-SIGN is
+ ex COMMON-SIGN .
+
+ sorts @Spec@ @SpecList@ @Subsort@ @Arity@ @ModExp@
+       @ParameterDecl@ @ParameterDeclList@ @Attr@ @AttrList@ .
+ subsort @ParameterDecl@ < @ParameterDeclList@ .
  subsort @Spec@ < @SpecList@ .
  subsort @Attr@ < @AttrList@ .
  subsort @Token@ < @ModExp@ .
  subsort @Token@ < @Arity@ .
- subsort @Def@ < @DefSet@ .
 
  ***(
             SPECIFICATIONS
@@ -25,8 +47,6 @@ fmod MTP-SIGN is
  op _{_} : @Token@ @ParameterDeclList@ -> @ModExp@ [ctor] .
  op _::_ : @Token@ @Token@ -> @ParameterDecl@ [ctor] .
  op _,_ : @ParameterDeclList@ @ParameterDeclList@ -> @ParameterDeclList@ [ctor assoc] .
-
- op __ : @DefSet@ @DefSet@ -> @DefSet@ [ctor assoc comm] .
 
  ***(
              IMPORTATIONS
@@ -80,19 +100,10 @@ fmod MTP-SIGN is
  op var_:_. : @NeTokenList@ @Token@ -> @Def@ [ctor] .
  op vars_:_. : @NeTokenList@ @Token@ -> @Def@ [ctor] .
  ***(
-             QUANTIFICATIONS
- )
- op forall_ : @NeTokenList@ -> @Quant@ [ctor] .
- op exists_ : @NeTokenList@ -> @Quant@ [ctor] .
- op __ : @QuantList@ @QuantList@ -> @QuantList@ [ctor assoc] .
-
- ***(
              EQUATIONS
  )
  op eq_=_. : @Bubble@ @Bubble@ -> @Def@ [ctor] .
- op eq_._=_. : @QuantList@ @Bubble@ @Bubble@ -> @Def@ [ctor] .
  op ceq_=_if_. : @Bubble@ @Bubble@ @Condition@ -> @Def@ [ctor] .
- op ceq_._=_if_. : @QuantList@ @Bubble@ @Bubble@ @Condition@ -> @Def@ [ctor] .
 
  ***(
              CONDITIONS
@@ -156,21 +167,15 @@ fmod META-MTP-SIGN is
 endfm
 
 fmod COMMAND-SIGN is
- sort @Command@ @Token@ @Bubble@ @NeTokenList@ @QuantList@ @Quant@ .
- subsort @Quant@ < @QuantList@ .
+ ex COMMON-SIGN .
 
- ***(
-             QUANTIFICATIONS
- )
- op forall_ : @NeTokenList@ -> @Quant@ [ctor] .
- op exists_ : @NeTokenList@ -> @Quant@ [ctor] .
- op __ : @QuantList@ @QuantList@ -> @QuantList@ [ctor assoc] .
+ sort @Command@ .
 
  op load_ : @Token@ -> @Command@ [ctor] .
  op red_ : @Bubble@ -> @Command@ [ctor] .
  op exit : -> @Command@ [ctor] .
  op q : -> @Command@ [ctor] .
- op goal_|-`eq_._=_ : @Token@ @QuantList@ @Bubble@ @Bubble@ -> @Command@ [ctor] .
+ op goal_|-_ : @Token@ @DefSet@ -> @Command@ [ctor] .
 endfm
 
 fmod META-MTP-COMM-SIGN is

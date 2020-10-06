@@ -527,8 +527,8 @@ mod MTP is
  eq modList = module('TRUTH-VALUE) module('BOOL-OPS) module('TRUTH) module('BOOL)
               module('EXT-BOOL) module('NAT) module('INT) module('RAT) module('FLOAT)
               module('STRING) module('CONVERSION) module('QID) module('TRIV)
-              view('Qid) module('LIST) module('QID-LIST) module('MTP-SIGN)
-              module('COMMAND-SIGN) .
+              view('Qid) module('LIST) module('QID-LIST) module('COMMON-SIGN)
+              module('MTP-SIGN) module('COMMAND-SIGN) .
 
  *** Initial value for loading into the user metainterpreter
  op umodList : -> List{Preload} .
@@ -684,21 +684,21 @@ mod MTP is
  ***                         ***
 
  crl [moduleGoal] :
-     < mtp : MTP | state: executeComm, input: ('goal_|-`eq_._=_['token[T1],T2,T3,T4]),
+     < mtp : MTP | state: executeComm, input: ('goal_|-_['token[T1],T2]),
                    umi: MI, AtS >
-  => < mtp : MTP | state: processGoal, input: ('goal_|-`eq_._=_['token[T1],T2,T3,T4]),
+  => < mtp : MTP | state: processGoal, input: ('goal_|-_['token[T1],T2]),
                    umi: MI, AtS >
      showModule(MI, mtp, Q, true)
   if Q := downQid(T1) .
 
  crl [processGoal] :
      showingModule(mtp, MI, M)
-     < mtp : MTP | state: processGoal, input: ('goal_|-`eq_._=_['token[T1],T2,T3,T4]),
+     < mtp : MTP | state: processGoal, input: ('goal_|-_['token[T1],T2]),
                    umi: MI, goal: GL, db: DB, AtS >
-  => < mtp : MTP | state: print&idle, input: empty, umi: MI, goal: G, db: DB, AtS >
+  => < mtp : MTP | state: print&idle, input: empty, umi: MI, goal: GL, db: DB, AtS > *** TODO: Update GL
      write(stdout, mtp, "\nGoal introduced.\n")
   if Q := downQid(T1) /\
-     G := processGoal(M, T2, T3, T4, getVS(DB[Q])) .
+     true [print T2] . *** G := processGoal(M, T2, T3, T4, getVS(DB[Q])) .
 
  ***                         ***
  ***          EXIT           ***

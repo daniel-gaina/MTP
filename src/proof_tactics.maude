@@ -7,26 +7,48 @@ fmod GOAL is
  vars Ty Ty' : Type .
  var  M : Module .
 
- sorts Goal GoalList .
+ sorts Goal GoalList Sentence SentenceList .
+ subsort Sentence < SentenceList .
  subsort Goal < GoalList .
 
+ ***(
+              Goal
+ )
+ op _|-_ : Module SentenceList -> Goal [ctor] .
+
+ ***(
+              Goal list
+ )
  op noGoal : -> GoalList [ctor] .
  op __ : GoalList GoalList -> GoalList [ctor assoc] .
 
- op _|-_,_ceq_=_if_ : Module VariableSet VariableSet Term Term Condition -> Goal [ctor] .
+ ***(
+              Sentence
+ )
+ op ceq_,_._=_if_. : VariableSet VariableSet Term Term Condition -> Sentence [ctor] .
 
- op processGoal : Module Term Term Term VariableSet -> Goal .
- ceq processGoal(M, Q, 'bubble[L], 'bubble[R], VS) = M |- UV, EV ceq T1 = T2 if nil
+ ***(
+              Sentence list
+ )
+ op mtSL : -> SentenceList [ctor] .
+ op __ : SentenceList SentenceList -> SentenceList [ctor assoc id: mtSL] .
+
+ op processGoal : Module Term VariableSet -> Goal .
+ ***(
+ ceq processGoal(M, T, VS) = M |- UV, EV ceq T1 = T2 if nil
   if < UV, EV > := extractQuantVars(Q, VS) /\
      QIL := downQidList(L) /\
      QIL' := downQidList(R) /\
      {T1, Ty} := metaParse(M, VS, QIL, anyType) /\
      {T2, Ty'} := metaParse(M, VS, QIL', anyType) . *** TODO
+ )
+ op processSentences : Module Term VariableSet -> SentenceList .
+
+ op processSentence : Module Term VariableSet -> Sentence .
 endfm
 
 fmod TACTIC1 is
  pr GOAL .
-
 endfm
 
 fmod TACTIC2 is
