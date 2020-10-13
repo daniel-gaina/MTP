@@ -1,0 +1,40 @@
+fmod GOAL is
+ pr QUANTIFICATION-OPS .
+
+ vars UV EV VS : VariableSet .
+ vars QIL QIL' : QidList .
+ vars Q L R T1 T2 : Term .
+ vars Ty Ty' : Type .
+ var  M : Module .
+
+ sorts Goal GoalList Sentence SentenceList .
+ subsort Sentence < SentenceList .
+ subsort Goal < GoalList .
+
+ ***(
+              Goal
+ )
+ op _|-_ : Module SentenceList -> Goal [ctor] .
+
+ ***(
+              Goal list
+ )
+ op noGoal : -> GoalList [ctor] .
+ op __ : GoalList GoalList -> GoalList [ctor assoc] .
+
+ ***(
+              Sentence: ceq UV, EV . L = R if C .
+              @param UV, universally quantified variables.
+              @param EV, existentially quantified variables.
+              @param L, lefthand side.
+              @param R, righthand side.
+              @param C, condition (possibly nil).
+ )
+ op ceq_,_._=_if_. : VariableSet VariableSet Term Term Condition -> Sentence [ctor] .
+
+ ***(
+              Sentence list
+ )
+ op mtSL : -> SentenceList [ctor] .
+ op __ : SentenceList SentenceList -> SentenceList [ctor assoc id: mtSL] .
+endfm

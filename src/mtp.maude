@@ -1,8 +1,10 @@
 load metaInterpreter.maude
 load predef_modules.maude
 load aux_modules.maude
+load goal.maude
 load proof_tactics.maude
 load grammar.maude
+load parsing.maude
 load file.maude
 
 fmod COMMAND-PROCESSING is
@@ -434,6 +436,7 @@ mod MTP is
  inc STD-STREAM .
  pr ERROR-MSGS .
  pr DATABASE .
+ pr PARSING .
  pr TACTICS .
  inc FILE .
 
@@ -695,10 +698,10 @@ mod MTP is
      showingModule(mtp, MI, M)
      < mtp : MTP | state: processGoal, input: ('goal_|-_['token[T1],T2]),
                    umi: MI, goal: GL, db: DB, AtS >
-  => < mtp : MTP | state: print&idle, input: empty, umi: MI, goal: GL, db: DB, AtS > *** TODO: Update GL
+  => < mtp : MTP | state: print&idle, input: empty, umi: MI, goal: G, db: DB, AtS >
      write(stdout, mtp, "\nGoal introduced.\n")
   if Q := downQid(T1) /\
-     true [print T2] . *** G := processGoal(M, T2, T3, T4, getVS(DB[Q])) .
+     G := processGoal(M, T2, getVS(DB[Q])) [print "Goal: " G] .
 
  ***                         ***
  ***          EXIT           ***

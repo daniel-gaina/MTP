@@ -209,7 +209,7 @@ fmod META-MTP-COMM-SIGN is
                (id-hook('Bubble, '1 '-1 '`( '`))
                 op-hook('qidListSymbol, '__, 'QidList 'QidList, 'QidList)
                 op-hook('qidSymbol, '<Qids>, nil, 'Qid)
-                id-hook('Exclude, '. ':)))] .
+                id-hook('Exclude, '. ': 'forall 'exists)))] .
         none
         none
      endfm) .

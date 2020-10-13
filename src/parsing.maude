@@ -1,0 +1,47 @@
+fmod GOAL-PARSING is
+ pr GOAL .
+
+ vars UV EV VS : VariableSet .
+ vars T T1 T2 TQ L R : Term .
+ vars QIL QIL' : QidList .
+ var  SL : SentenceList .
+ vars Ty Ty' : Type .
+ var  TL : TermList .
+ var  M : Module .
+
+ op processGoal : Module Term VariableSet -> Goal .
+ ceq processGoal(M, T, VS) = M |- SL
+  if SL := processSentences(M, T, VS) [print T] .
+ ***(
+ ceq processGoal(M, T, VS) = M |- UV, EV ceq T1 = T2 if nil
+  if < UV, EV > := extractQuantVars(Q, VS) /\
+     QIL := downQidList(L) /\
+     QIL' := downQidList(R) /\
+     {T1, Ty} := metaParse(M, VS, QIL, anyType) /\
+     {T2, Ty'} := metaParse(M, VS, QIL', anyType) . *** TODO
+ )
+ op processSentences : Module Term VariableSet -> SentenceList .
+ eq processSentences(M, '__[TL], VS) = processSentences*(M, TL, VS) .
+ eq processSentences(M, T, VS) = processSentence(M, T, VS) [owise] .
+
+ op processSentences* : Module TermList VariableSet -> SentenceList .
+ eq processSentences*(M, empty, VS) = mtSL .
+ eq processSentences*(M, (T, TL), VS) = processSentence(M, T, VS)
+                                        processSentences*(M, TL, VS) .
+
+ op processSentence : Module Term VariableSet -> Sentence .
+ ceq processSentence(M, 'eq_._=_.[TQ,'bubble[L],'bubble[R]], VS) = ceq UV, EV . T1 = T2 if nil .
+  if < UV, EV > := extractQuantVars(TQ, VS) /\
+     QIL := downQidList(L) /\
+     QIL' := downQidList(R) /\
+     {T1, Ty} := metaParse(M, VS, QIL, anyType) /\
+     {T2, Ty'} := metaParse(M, VS, QIL', anyType) [print T2] .
+endfm
+
+fmod PARSING is
+ pr GOAL-PARSING .
+endfm
+
+*** goal MyLogic |- eq forall E exists E1 . read (E . L) = E .
+
+

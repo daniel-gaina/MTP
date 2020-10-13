@@ -18,10 +18,10 @@ several examples.
 MTP syntax
 ----------
 
-MTP follows sevaral syntax elements from Maude (XXX) but it also provides
-particular elements to closely represent hybrid specifications. In particular,
-MTP modules are defined with the following syntax, where elements in square
-brackets are optional:
+MTP follows sevaral syntax elements from Maude (http://maude.cs.illinois.edu/)
+but it also provides particular elements to closely represent hybrid specifications.
+In particular, MTP modules are defined with the following syntax, where elements
+in square brackets are optional:
 
 * **spec! SPEC-NAME[{PARAMS}] = DEFS end** This syntax defines a specification
 with tight semantics.
