@@ -19,8 +19,8 @@ fmod COMMON-SIGN is
  ***(
              EQUATIONS
  )
- op eq_._=_. : @QuantList@ @Bubble@ @Bubble@ -> @Def@ [ctor] .
- op ceq_._=_if_. : @QuantList@ @Bubble@ @Bubble@ @Condition@ -> @Def@ [ctor] .
+ op eq_._=_. : @QuantList@ @Bubble@ @Bubble@ -> @Def@ [ctor] . *** sen
+ op ceq_._=_if_. : @QuantList@ @Bubble@ @Bubble@ @Condition@ -> @Def@ [ctor] . *** csn
 endfm
 
 fmod MTP-SIGN is
@@ -39,6 +39,7 @@ fmod MTP-SIGN is
  )
  op spec!_=_end : @ModExp@ @DefSet@ -> @Spec@ [ctor] .
  op spec*_=_end : @ModExp@ @DefSet@ -> @Spec@ [ctor] .
+ *** op spec_=_end : @ModExp@ @DefSet@ -> @Spec@ [ctor] .
  op __ : @SpecList@ @SpecList@ -> @SpecList@ [ctor assoc] .
 
  ***(
@@ -82,7 +83,7 @@ fmod MTP-SIGN is
  op op_:`~>_. : @Token@ @Token@ -> @Def@ [ctor] .
  op op_:`~>_[_]. : @Token@ @Token@ @AttrList@ -> @Def@ [ctor] .
  op op_:_~>_. : @Token@ @NeTokenList@ @Token@ -> @Def@ [ctor] .
- op op_:_>_[_]. : @Token@ @NeTokenList@ @Token@ @AttrList@ -> @Def@ [ctor] .
+ op op_:_~>_[_]. : @Token@ @NeTokenList@ @Token@ @AttrList@ -> @Def@ [ctor] .
  *** Total, flexible
  op flexible`op_:`->_. : @Token@ @Token@ -> @Def@ [ctor] .
  op flexible`op_:`->_[_]. : @Token@ @Token@ @AttrList@ -> @Def@ [ctor] .
