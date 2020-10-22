@@ -10,7 +10,6 @@ load file.maude
 fmod COMMAND-PROCESSING is
  pr QUANTIFICATION-OPS .
  pr PARSING-RESULT .
- pr META-MTP-SIGN .
  pr META-LEVEL .
  pr LEXICAL .
 
@@ -382,9 +381,9 @@ fmod COMMAND-PROCESSING is
  ceq createVars(Q QIL, Ty) = V ; createVars(QIL, Ty)
   if V := qid(string(Q) + ":" + string(Ty)) .
 
- op extractModules : Term -> TermList .
- eq extractModules('__[TL]) = TL .
- eq extractModules(T) = T [owise] .
+ op extractTerms : Term -> TermList .
+ eq extractTerms('__[TL]) = TL .
+ eq extractTerms(T) = T [owise] .
 
  op createSubsortDecls : SortSet Type -> SubsortDeclSet .
  eq createSubsortDecls(none, Ty) = none .
@@ -430,8 +429,8 @@ mod MTP is
  pr (MAYBE * (op maybe to noQid)){Qid} .
  pr (MAYBE * (op maybe to null)){Oid} .
  pr COMMAND-PROCESSING .
- pr META-MTP-COMM-SIGN .
  inc META-INTERPRETER .
+ pr META-MTP-SIGN .
  pr PRELOAD-LIST .
  inc STD-STREAM .
  pr ERROR-MSGS .
@@ -466,8 +465,6 @@ mod MTP is
  op load-std-db : -> State [ctor] .
  *** Loading grammar
  op load-grammar : -> State [ctor] .
- *** Loading command grammar
- op load-comm-grammar : -> State [ctor] .
  *** Create user metainterpreter
  op load-user-mi : -> State [ctor] .
  *** Load modules into user metainterpreter
@@ -531,7 +528,7 @@ mod MTP is
               module('EXT-BOOL) module('NAT) module('INT) module('RAT) module('FLOAT)
               module('STRING) module('CONVERSION) module('QID) module('TRIV)
               view('Qid) module('LIST) module('QID-LIST) module('COMMON-SIGN)
-              module('MTP-SIGN) module('COMMAND-SIGN) .
+              module('SPEC-SIGN) module('COMMAND-SIGN) module('MTP-SIGN) .
 
  *** Initial value for loading into the user metainterpreter
  op umodList : -> List{Preload} .
@@ -548,7 +545,7 @@ mod MTP is
  rl [parseComm] : gotLine(mtp, stdin, Text)
     < mtp : MTP | mi: MI, state: idle, AtS >
  => < mtp : MTP | mi: MI, state: parseComm, AtS >
-    parseTerm(MI, mtp, 'COMM-GRAMMAR, none, tokenize(Text), '@Command@) .
+    parseTerm(MI, mtp, 'GRAMMAR, none, tokenize(Text), '@Input@) .
 
  rl [parseComm] :
     parsedTerm(mtp, MI, {T, Ty})
@@ -603,13 +600,13 @@ mod MTP is
  rl [parseModuleMetaparse] :
     < mtp : MTP | out: Read, state: parseModMetaparse, mi: MI, AtS >
  => < mtp : MTP | out: Read, state: parseList, mi: MI, AtS >
-    parseTerm(MI, mtp, 'GRAMMAR, none, tokenize(Read), '@SpecList@) .
+    parseTerm(MI, mtp, 'GRAMMAR, none, tokenize(Read), '@Input@) .
 
  crl [parseModuleNoBubblesOK] :
      parsedTerm(mtp, MI, {T, Ty})
      < mtp : MTP | out: Read, state: parseList, mi: MI, parsedModules: MODL, AtS >
   => < mtp : MTP | out: "", state: parseModNoBubbles, mi: MI, parsedModules: TL, AtS >
-  if TL := extractModules(T) .
+  if TL := extractTerms(T) .
 
  crl [parseModuleNoBubblesError] :
      parsedTerm(mtp, MI, noParse(N))
@@ -775,12 +772,6 @@ mod MTP is
  rl [load-grammar-finished] :
     insertedModule(mtp, MI)
     < mtp : MTP | state: load-grammar, AtS >
- => < mtp : MTP | state: load-comm-grammar, AtS >
-    insertModule(MI, mtp, COMM-GRAMMAR) .
-
- rl [load-comm-grammar-finished] :
-    insertedModule(mtp, MI)
-    < mtp : MTP | state: load-comm-grammar, AtS >
  => < mtp : MTP | state: load-user-mi, AtS >
     createInterpreter(interpreterManager, mtp, none) .
 

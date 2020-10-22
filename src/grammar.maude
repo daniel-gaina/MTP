@@ -23,13 +23,11 @@ fmod COMMON-SIGN is
  op ceq_._=_if_. : @QuantList@ @Bubble@ @Bubble@ @Condition@ -> @Def@ [ctor] . *** csn
 endfm
 
-fmod MTP-SIGN is
+fmod SPEC-SIGN is
  ex COMMON-SIGN .
 
- sorts @Spec@ @SpecList@ @Subsort@ @Arity@ @ModExp@
-       @ParameterDecl@ @ParameterDeclList@ @Attr@ @AttrList@ .
+ sorts @Spec@ @Subsort@ @Arity@ @ModExp@ @ParameterDecl@ @ParameterDeclList@ @Attr@ @AttrList@ .
  subsort @ParameterDecl@ < @ParameterDeclList@ .
- subsort @Spec@ < @SpecList@ .
  subsort @Attr@ < @AttrList@ .
  subsort @Token@ < @ModExp@ .
  subsort @Token@ < @Arity@ .
@@ -39,8 +37,6 @@ fmod MTP-SIGN is
  )
  op spec!_=_end : @ModExp@ @DefSet@ -> @Spec@ [ctor] .
  op spec*_=_end : @ModExp@ @DefSet@ -> @Spec@ [ctor] .
- *** op spec_=_end : @ModExp@ @DefSet@ -> @Spec@ [ctor] .
- op __ : @SpecList@ @SpecList@ -> @SpecList@ [ctor assoc] .
 
  ***(
             PARAMETERS
@@ -130,6 +126,29 @@ fmod MTP-SIGN is
 
 endfm
 
+fmod COMMAND-SIGN is
+ ex COMMON-SIGN .
+
+ sort @Command@ .
+
+ op load_ : @Token@ -> @Command@ [ctor] .
+ op red_ : @Bubble@ -> @Command@ [ctor] .
+ op exit : -> @Command@ [ctor] .
+ op q : -> @Command@ [ctor] .
+ op goal_|-_ : @Token@ @DefSet@ -> @Command@ [ctor] .
+endfm
+
+fmod MTP-SIGN is
+ pr COMMAND-SIGN .
+ pr SPEC-SIGN .
+
+ sort @Input@ .
+
+ subsort @Command@ @Spec@ < @Input@ .
+
+ op __ : @Input@ @Input@ -> @Input@ [ctor assoc] .
+endfm
+
 fmod META-MTP-SIGN is
  including AUX-MODULE-OPS .
 
@@ -165,56 +184,6 @@ fmod META-MTP-SIGN is
         none
      endfm) .
  eq GRAMMAR = addImports(BUBBLES, (including 'MTP-SIGN .)) .
-endfm
-
-fmod COMMAND-SIGN is
- ex COMMON-SIGN .
-
- sort @Command@ .
-
- op load_ : @Token@ -> @Command@ [ctor] .
- op red_ : @Bubble@ -> @Command@ [ctor] .
- op exit : -> @Command@ [ctor] .
- op q : -> @Command@ [ctor] .
- op goal_|-_ : @Token@ @DefSet@ -> @Command@ [ctor] .
-endfm
-
-fmod META-MTP-COMM-SIGN is
- including AUX-MODULE-OPS .
-
- op COMM-BUBBLES : -> FModule .
- op COMM-GRAMMAR : -> FModule [memo] .
-
- eq COMM-BUBBLES
-    = (fmod 'COMM-GRAMMAR is
-        including 'QID-LIST .
-        sorts none .
-        none
-        op 'token : 'Qid -> '@Token@
-             [special(
-               (id-hook('Bubble, '1 '1)
-                op-hook('qidSymbol, '<Qids>, nil, 'Qid)))] .
-        op 'bubble : 'QidList -> '@Bubble@
-             [special(
-               (id-hook('Bubble, '1 '-1 '`( '`))
-                op-hook('qidListSymbol, '__, 'QidList 'QidList, 'QidList)
-                op-hook('qidSymbol, '<Qids>, nil, 'Qid)
-                id-hook('Exclude, 'eq 'ceq 'rl 'crl 'mb 'cmb 'sd 'csd
-                                  'var 'vars 'strat 'endm
-                                  'endfm 'endsm 'sorts 'subsort 'subsorts
-                                  'subclass 'subclasses 'op 'ops
-                                  'protecting 'pr 'including 'inc 'extending
-                                  'ctor 'assoc 'comm '== '/\)))] .
-        op 'neTokenList : 'QidList -> '@NeTokenList@
-             [special(
-               (id-hook('Bubble, '1 '-1 '`( '`))
-                op-hook('qidListSymbol, '__, 'QidList 'QidList, 'QidList)
-                op-hook('qidSymbol, '<Qids>, nil, 'Qid)
-                id-hook('Exclude, '. ': 'forall 'exists)))] .
-        none
-        none
-     endfm) .
- eq COMM-GRAMMAR = addImports(COMM-BUBBLES, (including 'COMMAND-SIGN .)) .
 endfm
 
 set include BOOL on .
