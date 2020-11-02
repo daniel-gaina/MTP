@@ -11,7 +11,7 @@ fmod GOAL-PARSING is
 
  op processGoal : Module Term VariableSet -> Goal .
  ceq processGoal(M, T, VS) = M |- SL
-  if SL := processSentences(M, T, VS) [print T] .
+  if SL := processSentences(M, T, VS) .
  ***(
  ceq processGoal(M, T, VS) = M |- UV, EV ceq T1 = T2 if nil
   if < UV, EV > := extractQuantVars(Q, VS) /\
@@ -35,7 +35,7 @@ fmod GOAL-PARSING is
      QIL := downQidList(L) /\
      QIL' := downQidList(R) /\
      {T1, Ty} := metaParse(M, VS, QIL, anyType) /\
-     {T2, Ty'} := metaParse(M, VS, QIL', anyType) [print T2] .
+     {T2, Ty'} := metaParse(M, VS, QIL', anyType) .
 endfm
 
 fmod PARSING is
