@@ -382,8 +382,12 @@ fmod COMMAND-PROCESSING is
   if V := qid(string(Q) + ":" + string(Ty)) .
 
  op extractTerms : Term -> TermList .
- eq extractTerms('__[TL]) = TL .
+ eq extractTerms('__[TL]) = extractTerms*(TL) .
  eq extractTerms(T) = T [owise] .
+
+ op extractTerms* : TermList -> TermList .
+ eq extractTerms*(empty) = empty .
+ eq extractTerms*((T, TL)) = extractTerms(T), extractTerms*(TL) .
 
  op createSubsortDecls : SortSet Type -> SubsortDeclSet .
  eq createSubsortDecls(none, Ty) = none .
@@ -440,7 +444,7 @@ mod MTP is
  inc FILE .
 
  vars Text Original Read Source STR MSG : String .
- vars TL BUBBS MODL IN : TermList .
+ vars TL TL' BUBBS MODL IN INPLST : TermList .
  vars T T' T'' T1 T2 T3 T4 : Term .
  vars FHIn FHOut MI : Oid .
  var  MM : Maybe{Module} .
@@ -478,8 +482,6 @@ mod MTP is
  *** Parsing - create module list
  op parseList : -> State [ctor] .
  *** Parsing Module
- op parseModNoBubbles : -> State [ctor] .
- *** Parsing Module
  op parseModBubbles : -> State [ctor] .
  *** Parsing Module
  op parseModule : -> State [ctor] .
@@ -491,8 +493,8 @@ mod MTP is
  op executeComm : -> State [ctor] .
  *** Waits for a wrote msg and returns to idle with getLine
  op print&idle : -> State [ctor] .
- *** Waits for a wrote msg and tries to parse the next module
- op print&noBubbles : -> State [ctor] .
+ *** Waits for a wrote msg and keeps executing commands.
+ op print&executeComm : -> State [ctor] .
  *** Extracts the goal module from the metainterpreter
  op processGoal : -> State [ctor] .
 
@@ -508,7 +510,6 @@ mod MTP is
  op uload:_ : List{Preload} -> Attribute [ctor gather (&)] .
  op load:_ : List{Preload} -> Attribute [ctor gather (&)] .
  op parsModName:_ : Maybe{Qid} -> Attribute [ctor] .
- op parsedModules:_ : TermList -> Attribute [ctor] .
  op module:_ : Maybe{Module} -> Attribute [ctor] .
  op current:_ : Maybe{Qid} -> Attribute [ctor] .
  op top:_ : Maybe{Module} -> Attribute [ctor] .
@@ -547,18 +548,28 @@ mod MTP is
  => < mtp : MTP | mi: MI, state: parseComm, AtS >
     parseTerm(MI, mtp, 'GRAMMAR, none, tokenize(Text), '@Input@) .
 
- rl [parseComm] :
-    parsedTerm(mtp, MI, {T, Ty})
-    < mtp : MTP | mi: MI, state: parseComm, input: IN, AtS >
- => < mtp : MTP | mi: MI, state: executeComm, input: T, AtS > .
+ crl [parseComm] :
+     parsedTerm(mtp, MI, {T, Ty})
+     < mtp : MTP | mi: MI, state: parseComm, input: IN, AtS >
+  => < mtp : MTP | mi: MI, state: executeComm, input: TL, AtS >
+  if TL := extractTerms(T) .
+
+ ***                         ***
+ ***          EMPTY          ***
+ ***                         ***
+
+ rl [emptyCommList] :
+    < mtp : MTP | state: executeComm, input: empty, AtS >
+ => < mtp : MTP | state: idle, input: empty, AtS >
+    getLine(stdin, mtp, "MTP> ") .
 
  ***                        ***
  ***          LOAD          ***
  ***                        ***
 
  crl [loadComm] :
-    < mtp : MTP | state: executeComm, input: ('load_['token[T]]), AtS >
- => < mtp : MTP | state: readFile, input: empty, AtS >
+    < mtp : MTP | state: executeComm, input: ('load_['token[T]], INPLST), AtS >
+ => < mtp : MTP | state: readFile, input: INPLST, AtS >
     openFile(fileManager, mtp, STR, "r")
   if STR := string(downQid(T)) .
 
@@ -567,8 +578,8 @@ mod MTP is
  ***                          ***
 
  crl [redComm] :
-     < mtp : MTP | state: executeComm, input: ('red_['bubble[T]]), module: M, AtS >
-  => < mtp : MTP | state: print&idle, input: empty, module: M, AtS >
+     < mtp : MTP | state: executeComm, input: ('red_['bubble[T]], INPLST), module: M, AtS >
+  => < mtp : MTP | state: print&executeComm, input: INPLST, module: M, AtS >
      write(stdout, mtp, STR)
   if {T', Ty} := metaParse(M, downQidList(T), anyType) /\
      {T'', Ty'} := metaReduce(M, T') /\
@@ -593,43 +604,51 @@ mod MTP is
          getLine(FHIn, mtp)
     fi .
 
- ***                                ***
- ***          PARSE MODULE          ***
- ***                                ***
+ ***                               ***
+ ***          FILE PARSED          ***
+ ***                               ***
 
  rl [parseModuleMetaparse] :
     < mtp : MTP | out: Read, state: parseModMetaparse, mi: MI, AtS >
  => < mtp : MTP | out: Read, state: parseList, mi: MI, AtS >
     parseTerm(MI, mtp, 'GRAMMAR, none, tokenize(Read), '@Input@) .
 
+ ***                               ***
+ ***          FILE PARSED          ***
+ ***                               ***
+
  crl [parseModuleNoBubblesOK] :
      parsedTerm(mtp, MI, {T, Ty})
-     < mtp : MTP | out: Read, state: parseList, mi: MI, parsedModules: MODL, AtS >
-  => < mtp : MTP | out: "", state: parseModNoBubbles, mi: MI, parsedModules: TL, AtS >
+     < mtp : MTP | out: Read, state: parseList, mi: MI, input: INPLST, AtS >
+  => < mtp : MTP | out: "", state: executeComm, mi: MI, input: (TL, INPLST), AtS >
   if TL := extractTerms(T) .
+
+ ***                                    ***
+ ***          FILE PARSE ERROR          ***
+ ***                                    ***
 
  crl [parseModuleNoBubblesError] :
      parsedTerm(mtp, MI, noParse(N))
      < mtp : MTP | out: Read, state: parseList, mi: MI, AtS >
-  => < mtp : MTP | out: "", state: print&idle, mi: MI, AtS >
+  => < mtp : MTP | out: "", state: print&executeComm, mi: MI, AtS >
      write(stdout, mtp, printTokens(QIL))
   if QIL := showMsg(tokenize(Read), N) .
 
- crl [parseNextModule] :
-     < mtp : MTP | db: DB, state: parseModNoBubbles, umi: MI,
-                   parsModName: MQ, bubbles: BUBBS, top: MM,
-                   parsedModules: (T, MODL), AtS >
-  => < mtp : MTP | db: DB', state: parseModBubbles, umi: MI,
-                   parsModName: getName(M), bubbles: TL, top: M,
-                   parsedModules: MODL, AtS >
-     insertModule(MI, mtp, M)
-  if [M, TL, SI, ERR] := parseModule(T) /\
-     DB' := DB[getName(M) |-> SI] .
+ ***                               ***
+ ***          MODULE COMM          ***
+ ***                               ***
 
- rl [noMoreModules] :
-    < mtp : MTP | state: parseModNoBubbles, parsedModules: empty, AtS >
- => < mtp : MTP | state: idle, parsedModules: empty, AtS >
-    getLine(stdin, mtp, "MTP> ") .
+ crl [moduleComm] :
+     < mtp : MTP | db: DB, state: executeComm, umi: MI,
+                   parsModName: MQ, bubbles: BUBBS, top: MM,
+                   input: (Q[TL], INPLST), AtS >
+  => < mtp : MTP | db: DB', state: parseModBubbles, umi: MI,
+                   parsModName: getName(M), bubbles: TL', top: M,
+                   input: INPLST, AtS >
+     insertModule(MI, mtp, M)
+  if (Q ==  'spec!_=_end or Q == 'spec*_=_end) /\
+     [M, TL', SI, ERR] := parseModule(Q[TL]) /\
+     DB' := DB[getName(M) |-> SI] .
 
  rl [parseModule_GetFlatModule] :
     insertedModule(mtp, MI)
@@ -644,7 +663,7 @@ mod MTP is
   => < mtp : MTP | state: parseModule, umi: MI, bubbles: empty,
                    top: noMod, parsModName: noQid, current: Q, db: (DB[Q |-> VS]), AtS >
      insertModule(MI, mtp, M')
-  if [M', VS, QIL] := parseBubbles(TOP, M, BUBBS) [print M' "\ncurrent " Q] .
+  if [M', VS, QIL] := parseBubbles(TOP, M, BUBBS) .
 
  rl [parsingComplete] :
     insertedModule(mtp, MI)
@@ -655,21 +674,25 @@ mod MTP is
  crl [updateNewModule] :
      showingModule(mtp, MI, M)
      < mtp : MTP | state: getModule, umi: MI, current: Q, module: MM, AtS >
-  => < mtp : MTP | state: print&noBubbles, umi: MI, current: Q, module: M, AtS >
+  => < mtp : MTP | state: print&executeComm, umi: MI, current: Q, module: M, AtS >
      write(stdout, mtp, MSG)
   if MSG := "\nModule " + string(Q) + " introduced.\n\n" .
 
 
  *** TODO: parse error
 
- rl [print&noBubbles] : wrote(mtp, stdout)
-    < mtp : MTP | state: print&noBubbles, AtS >
- => < mtp : MTP | state: parseModNoBubbles, AtS > .
+ ***                                    ***
+ ***          PRINT & CONTINUE          ***
+ ***                                    ***
 
  rl [print&idle] : wrote(mtp, stdout)
     < mtp : MTP | state: print&idle, AtS >
  => < mtp : MTP | state: idle, AtS >
     getLine(stdin, mtp, "MTP> ") .
+
+ rl [print&executeComm] : wrote(mtp, stdout)
+    < mtp : MTP | state: print&executeComm, AtS >
+ => < mtp : MTP | state: executeComm, AtS > .
 
  ***                               ***
  ***          CLOSE FILE           ***
@@ -695,10 +718,10 @@ mod MTP is
      showingModule(mtp, MI, M)
      < mtp : MTP | state: processGoal, input: ('goal_|-_['token[T1],T2]),
                    umi: MI, goal: GL, db: DB, AtS >
-  => < mtp : MTP | state: print&idle, input: empty, umi: MI, goal: G, db: DB, AtS >
+  => < mtp : MTP | state: print&executeComm, input: empty, umi: MI, goal: G, db: DB, AtS >
      write(stdout, mtp, "\nGoal introduced.\n")
   if Q := downQid(T1) /\
-     G := processGoal(M, T2, getVS(DB[Q])) [print "Goal: " G] .
+     G := processGoal(M, T2, getVS(DB[Q])) .
 
  ***                         ***
  ***          EXIT           ***
@@ -801,8 +824,7 @@ mod MTP is
     <> < mtp : MTP | file: null, out: "", state: init, db: empty,
                      load: modList, uload: umodList, current: noQid,
                      parsModName: noQid, bubbles: empty, top: noMod,
-                     parsedModules: empty, input: empty, module: noMod,
-                     goal: noGoal >
+                     input: empty, module: noMod, goal: noGoal >
     createInterpreter(interpreterManager, mtp, none) .
 endm
 

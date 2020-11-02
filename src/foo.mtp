@@ -41,3 +41,4 @@ spec! MyLogic{X :: TRIV} =
 
 end
 
+goal MyLogic |- eq forall E exists E1 . read (E . L) = E .
