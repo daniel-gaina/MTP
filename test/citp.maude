@@ -1,0 +1,119 @@
+load file.maude
+
+--- -------------------------------------------------------------------------
+---> CORE <---
+--- -------------------------------------------------------------------------
+fmod LIBRARY is
+ including META-LEVEL .
+--- -------------------------------------------------------------------------
+sort Formula .
+subsort Condition < Formula .
+ op _/\_ : Formula Formula -> Formula [ditto] .
+ op ~_ : Formula -> Formula [ctor prec 72].
+ op _\/_ : Formula   Formula   -> Formula[ctor assoc id: nil prec 73].
+ op exists_._  : NeVariableSet Formula -> Formula [ctor prec 75].
+ op forall_._ : NeVariableSet Formula -> Formula [ctor prec 75].
+
+ sorts Sentence NeSentenceList SentenceList .
+ subsort Sentence < NeSentenceList < SentenceList .
+ op sen_=_[_].    : Term Term AttrSet -> Sentence[ctor] .
+ op sen_=_if_[_]. : Term Term Condition AttrSet -> Sentence[ctor] .
+---
+ op sen_:_[_].    : Term Sort AttrSet -> Sentence[ctor].
+ op sen_:_if_[_]. : Term Sort Condition AttrSet -> Sentence[ctor] .
+--- 
+ op sen_=>_[_].    : Term Term AttrSet -> Sentence [ctor].
+ op sen_=>_if_[_]. : Term Term Condition AttrSet -> Sentence [ctor].
+---
+ op emptySentenceList : -> SentenceList [ctor] .
+ op __ : SentenceList SentenceList   -> SentenceList   [ctor assoc id: emptySentenceList].
+ op __ : SentenceList NeSentenceList -> NeSentenceList [ctor assoc id: emptySentenceList].
+ op __ : NeSentenceList SentenceList -> NeSentenceList [ctor assoc id: emptySentenceList].
+--- -------------------------------------------------------------------------
+ sorts Goal NeGoalList GoalList .
+ subsort Goal < NeGoalList < GoalList .
+ op _|-_ : Module SentenceList -> Goal [ctor prec 40].
+ op emptyGoalList : -> GoalList [ctor] .
+ op __ : GoalList GoalList   -> GoalList   [ctor assoc id: emptyGoalList].
+ op __ : GoalList NeGoalList -> NeGoalList [ctor assoc id: emptyGoalList].
+ op __ : NeGoalList GoalList -> NeGoalList [ctor assoc id: emptyGoalList].
+endfm
+
+eof
+--- -------------------------------------------------------------------------
+---> PARSER <---
+--- -------------------------------------------------------------------------
+fmod GRAMMAR is
+ inc META-LEVEL .
+--- -------------------------------------------------------------------------
+ sorts Token Bubble NeTokenList .
+ op token : Qid -> Token
+     [special
+       (id-hook Bubble (1 1)
+        op-hook qidSymbol (<Qids> : ~> Qid))] .
+ op bubble : QidList -> Bubble
+      [special
+        (id-hook Bubble (1 -1 `( `))
+         op-hook qidListSymbol (__ : QidList QidList ~> QidList)
+         op-hook qidSymbol (<Qids> : ~> Qid)
+         id-hook Exclude (forall exists ~ \/ /\))] .
+ op neTokenList : QidList -> NeTokenList
+     [special
+       (id-hook Bubble (1 -1 `( `))
+        op-hook qidListSymbol (__ : QidList QidList ~> QidList)
+        op-hook qidSymbol (<Qids> : ~> Qid)
+        id-hook Exclude (forall exists ~ \/ /\ ->))] .
+--- -------------------------------------------------------------------------
+--- precedence for formulas 71 ~ 80 ---
+  sorts Formula .
+  op _=_ :  Bubble Bubble -> Formula[ctor prec 71].
+  op _:_ :  Bubble Token  -> Formula[ctor prec 71].
+  op _:=_ : Bubble Bubble -> Formula[ctor prec 71].
+  op _=>_ : Bubble Bubble -> Formula[ctor prec 71].
+  op ~_ : Formula -> Formula [ctor prec 72].
+  op _/\_ : Formula   Formula   -> Formula[ctor assoc id: nil prec 73].
+  op _\/_ : Formula   Formula   -> Formula[ctor assoc id: nil prec 73].
+  op exists_._  : NeTokenList Formula -> Formula [ctor prec 75].
+  op forall_._ : NeTokenList Formula -> Formula [ctor prec 75].
+--- -------------------------------------------------------------------------
+ sorts FormulaList NeFormulaList .
+ subsort Formula < NeFormulaList < FormulaList .
+--- -------------------------------------------------------------------------
+ op nil : -> FormulaList .
+ op _`,_ : FormulaList FormulaList   -> FormulaList   [ctor assoc id: nil prec 77].
+ op _`,_ : NeFormulaList FormulaList -> NeFormulaList [ctor assoc id: nil prec 77].
+ op _,`_ : FormulaList NeFormulaList -> NeFormulaList [ctor assoc id: nil prec 77].
+--- -------------------------------------------------------------------------
+ sorts Tactic NeTacticList TacticList .
+ subsort Tactic < NeTacticList < TacticList .
+ op nil : -> TacticList [ctor].
+ op __ : TacticList TacticList   -> TacticList  [ctor assoc id: nil prec 83].
+ op __ : NeTacticList TacticList -> NeTacticList[ctor assoc id: nil prec 83].
+ op __ : TacticList NeTacticList -> NeTacticList[ctor assoc id: nil prec 83].
+--- -------------------------------------------------------------------------
+--- precedence for commands 81 ~ 90 ---
+ op select_ : Bubble -> Tactic [ctor prec 81].
+ op goal_|-_ : Token FormulaList -> Tactic [ctor prec 81].
+ op first : -> Tactic [ctor].
+--- general proof tactics ---
+ ops simplify imp tc ca ca-1 : -> Tactic [ctor].
+ op ind-on_ : NeTokenList -> Tactic [ctor prec 81].
+ --- -------------------------------------------------------------------------
+ sort Command .
+ subsort TacticList < Command .
+ op idle : -> Command .
+ ops rollback show-proof show-goals show-goal quit : -> Command .
+ op red_ : Bubble -> Command [ctor prec 81].
+--- -------------------------------------------------------------------------
+endfm
+--- -------------------------------------------------------------------------
+
+red
+downTerm(
+getTerm(
+ metaParse(upModule('GRAMMAR,false),
+   'goal 'NAT '|- 
+   'forall 'X:Nat '; 'B:List '.  '~ '`( 's 's 'X:Nat '= 'B:List '`) '= '0 '/\ 'X:Nat '= 'B:List '`,
+   'exists 'X:Nat '; 'B:List '.  '~ '`( 's 's 'X:Nat '= 'B:List '`) '= '0 '/\ '~ 's '`( '0 '`)  '= 'B:List,
+   anyType)),
+(nil).TacticList).

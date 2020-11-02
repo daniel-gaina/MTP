@@ -1,0 +1,83 @@
+load file.maude
+--- -------------------------------------------------------------------------
+---> INTERFACE <---
+--- -------------------------------------------------------------------------
+fmod @GRAMMAR@ is
+ inc META-LEVEL .
+--- -------------------------------------------------------------------------
+ sorts Token Bubble NeTokenList .
+ op token : Qid -> Token
+     [special
+       (id-hook Bubble (1 1)
+        op-hook qidSymbol (<Qids> : ~> Qid))] .
+ op bubble : QidList -> Bubble
+      [special
+        (id-hook Bubble (1 -1 `( `))
+         op-hook qidListSymbol (__ : QidList QidList ~> QidList)
+         op-hook qidSymbol (<Qids> : ~> Qid)
+         id-hook Exclude ( sen if /\ .))] .
+ op neTokenList : QidList -> NeTokenList
+     [special
+       (id-hook Bubble (1 -1 `( `))
+        op-hook qidListSymbol (__ : QidList QidList ~> QidList)
+        op-hook qidSymbol (<Qids> : ~> Qid)
+        id-hook Exclude (->))] .
+--- -------------------------------------------------------------------------
+  sorts @EqCondition@ @Condition@ .
+  subsort @EqCondition@ < @Condition@ .
+  op nil : -> @EqCondition@ [ctor] .
+  op _=_ :  Bubble Bubble -> @EqCondition@[ctor prec 71].
+  op _:_ :  Bubble Token  -> @EqCondition@[ctor prec 71].
+  op _:=_ : Bubble Bubble -> @EqCondition@[ctor prec 71].
+  op _=>_ : Bubble Bubble -> @Condition@  [ctor prec 71].
+  op _/\_ : @EqCondition@ @EqCondition@ -> @EqCondition@[ctor assoc id: nil prec 73].
+  op _/\_ : @Condition@   @Condition@   -> @Condition@  [ctor assoc id: nil prec 73].
+--- -------------------------------------------------------------------------
+ sorts @Sentence@ @SentenceSet@ .
+ subsort @Sentence@ < @SentenceSet@ .
+--- -------------------------------------------------------------------------
+ op sen_=_.     : Bubble Bubble -> @Sentence@ .
+ op sen_=>_.    : Bubble Bubble -> @Sentence@ .
+ op sen_:_.     : Bubble Token  -> @Sentence@ .
+ op sen_=_if_.  : Bubble Bubble @Condition@ -> @Sentence@ .
+ op sen_=>_if_. : Bubble Bubble @Condition@ -> @Sentence@ .
+ op sen_:_if_.  : Bubble Token  @Condition@ -> @Sentence@ .
+--- -------------------------------------------------------------------------
+ op none : -> @SentenceSet@ .
+ op __ : @SentenceSet@ @SentenceSet@ -> @SentenceSet@
+    [ctor assoc comm id: none].
+--- -------------------------------------------------------------------------
+ sorts Tactic NeTacticList TacticList .
+ subsort Tactic < NeTacticList < TacticList .
+ op none : -> TacticList [ctor].
+ op __ : TacticList TacticList -> TacticList     [ctor assoc id: none].
+ op __ : NeTacticList TacticList -> NeTacticList [ctor assoc id: none].
+ op __ : TacticList NeTacticList -> NeTacticList [ctor assoc id: none].    
+--- -------------------------------------------------------------------------
+ op goal_|-_ : Token @SentenceSet@ -> Tactic [ctor].
+ op select_ : Bubble -> Tactic [ctor].
+ op first : -> Tactic [ctor].
+--- general proof tactics ---
+ ops simplify imp tc ca ca-1 : -> Tactic [ctor].
+ op ind-on_ : NeTokenList -> Tactic [ctor].
+ --- -------------------------------------------------------------------------
+ sort Command .
+ subsort TacticList < Command .
+ ops rollback show-proof show-goals show-goal quit : -> Command .
+ op red_ : Bubble -> Command .
+--- -------------------------------------------------------------------------
+endfm
+--- -------------------------------------------------------------------------
+
+
+
+red
+downTerm(
+getTerm(
+metaParse(
+  upModule('@GRAMMAR@,false),
+  'sen  '`( 's 's 's '0 '= '0 '`) '= '0  'if 'false.Bool '=  'true.Bool  '.
+  'sen 's 's '0 '= 'p '0 '.
+  ,anyType
+)),(none).@SentenceSet@).
+
