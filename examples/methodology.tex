@@ -1,0 +1,42 @@
+spec NAT 
+
+spec GRAPH1 
+ Sort Vertices1 .
+ op a1 b1 c1 d1 : Vertices1 .
+ <a,b> ....
+end
+
+spec GRAPH2 
+ pr GRAPH1 as nominals .
+ sort Vertices2 .
+ ops a2 b2 c2 : -> Vertices2 [flexible(Vertices1)] . 
+end  
+
+spec ALBERAS 
+ pr GRAPH2 as nominals .
+ pr NAT as rigid
+
+ op f g h : -> Nat [flexible(Vertices2)].
+ 
+ f(a2(c1))
+end 
+
+mutual exclusion protocol
+
+spec Nominal 
+sorts State Pid  ---- nominals
+init -> State
+wait try exit : State Pid -> State  
+end 
+
+queue(state) = agent(PID1), agent(PID2), agent(PID3), ...
+               (@ PID1 . agent) (@ PID2 . agent) (@ PID3 . agent), ....
+               
+
+op agent : -> Agent [ctor flexible(Pid)].
+
+agent(PID1) = agent(PID2).
+
+Pids <---> Agents
+ 
+ 
