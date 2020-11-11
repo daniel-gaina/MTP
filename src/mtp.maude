@@ -296,6 +296,38 @@ fmod COMMAND-PROCESSING is
              op Q : TyL -> Q' [AtS] .) /\
      TOP' := addOps(TOP, ODS) /\
      FLAT' := addOps(FLAT, ODS) .
+
+***(
+op f : A1 A2 -> A3 [flexible(NS1, NS3)] .
+
+op @__f(_,_)
+
+op _f_ : A1 A2 -> A3 [flexible(NS1, NS3)] .
+
+op @__._f_ : A1 A2 -> A3 [flexible(NS1, NS3)] .
+
+f(current:NS1, current:NS2,a,b)
+
+
+f(a,b)          -> @ Current:NS1 Current:NS3 . f(a,b)
+@ X . f(a,b)    -> @ X Current:NS3 . f(a,b)
+@ Y . f(a,b)    -> @ Current:NS1 Y . f(a,b)
+@ X Y . f(a,b)  -> @ X Y . f(a,b)
+
+
+
+
+op @_f(_,_) : @Nominal@ A1 A2 -> A3 .
+op f : A1 A2 -> A3 .
+
+flexible op _f_ : A1 A2 -> A3 .
+
+op @__f_ : @Nominal@ A1 A2 -> A3
+op _f_ : A1 A2 -> A3 .
+
+
+)
+
  ***(
            PARSING PREDICATES
  )
