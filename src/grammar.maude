@@ -123,6 +123,7 @@ fmod SPEC-SIGN is
  op  format`(_`) : @NeTokenList@ -> @Attr@ .
  ops ctor frozen ditto iter : -> @Attr@ [ctor] .
  op  metadata_ : @Token@ -> @Attr@ .
+ op  nominal`(_`) : @NeTokenList@ -> @Attr@ .
 
 endfm
 

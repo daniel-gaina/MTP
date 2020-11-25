@@ -16,16 +16,16 @@ fmod COMMAND-PROCESSING is
  vars RIG RIG' NOM NOM' FLE FLE' SS : SortSet .
  vars M M' M'' TOP TOP' FLAT FLAT' : Module .
  vars VS VS' UV UV' EV EV' : VariableSet .
+ vars TL TL' TL'' TL1 TL2 ACC : TermList .
  vars T T' T'' T1 T2 T3 T4 TQ : Term .
  vars QIL QIL' ERR ERR' : QidList .
  vars PL PL' : ParameterDeclList .
- vars TL TL' ACC : TermList .
  var  SSDS : SubsortDeclSet .
+ vars TyL TyL' : TypeList .
  var  RP? : [ResultPair] .
  var  COND : Condition .
  var  PR : ParsingRes .
  var  ODS : OpDeclSet .
- var  TyL : TypeList .
  vars Ty Ty' : Type .
  var  AtS : AttrSet .
  var  DB : Database .
@@ -53,7 +53,7 @@ fmod COMMAND-PROCESSING is
                                       < (RIG ; RIG'), (NOM ; NOM'), (FLE ; FLE') >, ERR ERR' ]
   if [M', TL, < RIG, NOM, FLE >, ERR] := parseDefNoBubble(M, T) /\
      [M'', TL', < RIG', NOM', FLE' >, ERR'] := parseNoBubbles(M', T') .
- eq parseNoBubbles(M, T) = parseDefNoBubble(M, T) .
+ eq parseNoBubbles(M, T) = parseDefNoBubble(M, T) [owise] .
 
  op parseDefNoBubble : Module Term -> ParsingRes .
  ***(
@@ -123,19 +123,55 @@ fmod COMMAND-PROCESSING is
  eq genSubsortNominal(none) = none .
  eq genSubsortNominal(Srt ; SS) = subsort Srt < '@Nominal@ . genSubsortNominal(SS) .
 
- op parseAttr : Module Term -> AttrSet .
- eq parseAttr(M, '__[TL]) = parseAttr*(M, TL) .
- eq parseAttr(M, 'ctor.@Attr@) = ctor .
- eq parseAttr(M, 'iter.@Attr@) = iter .
- eq parseAttr(M, 'assoc.@Attr@) = assoc .
- eq parseAttr(M, 'comm.@Attr@) = comm .
- eq parseAttr(M, 'idem.@Attr@) = idem .
- eq parseAttr(M, 'memo.@Attr@) = memo .
- eq parseAttr(M, 'id:_['bubble[T]]) = memo . *** TODO
+ op parseAttr : Module VariableSet Term -> AttrSet .
+ eq parseAttr(M, VS, '__[TL]) = parseAttr*(M, VS, TL) .
+ eq parseAttr(M, VS, 'ctor.@Attr@) = ctor .
+ eq parseAttr(M, VS, 'iter.@Attr@) = iter .
+ eq parseAttr(M, VS, 'assoc.@Attr@) = assoc .
+ eq parseAttr(M, VS, 'comm.@Attr@) = comm .
+ eq parseAttr(M, VS, 'idem.@Attr@) = idem .
+ eq parseAttr(M, VS, 'memo.@Attr@) = memo .
+ ceq parseAttr(M, VS, 'id:_['bubble[T]]) = id(T1)
+  if QIL := downQidList(T) /\
+     {T1, Ty} := metaParse(M, VS, QIL, anyType) .
+ ceq parseAttr(M, VS, 'nominal`(_`)['neTokenList[T]]) = metadata(S)
+  if TyL := downTypeList(T) /\
+     S := typeList2String(TyL) .
 
- op parseAttr* : Module TermList -> AttrSet .
- eq parseAttr*(M, empty) = none .
- eq parseAttr*(M, (T, TL)) = parseAttr(M, T) parseAttr*(M, TL) .
+ op parseAttr* : Module VariableSet TermList -> AttrSet .
+ eq parseAttr*(M, VS, empty) = none .
+ eq parseAttr*(M, VS, (T, TL)) = parseAttr(M,  VS,T) parseAttr*(M,  VS,TL) .
+
+ ***(
+    Extracts the typelist if the nominal attribute is used.
+    Otherwise, it returns the nil typelist.
+ )
+ op nominalSorts : Module Term -> TypeList .
+ eq nominalSorts(M, '__[TL]) = nominalSorts*(M, TL) .
+ ceq nominalSorts(M, 'nominal`(_`)['neTokenList[T]]) = TyL
+  if TyL := downTypeList(T) .
+ eq nominalSorts(M, T) = nil [owise] .
+
+ op nominalSorts* : Module TermList -> TypeList .
+ eq nominalSorts*(M, empty) = nil .
+ ceq nominalSorts*(M, (T, TL)) = if TyL =/= nil
+                                 then TyL
+                                 else nominalSorts*(M, TL)
+                                 fi
+  if TyL := nominalSorts(M, T) .
+
+ op downTypeList : Term -> TypeList .
+ eq downTypeList('__[TL]) = downTypeList*(TL) .
+ eq downTypeList(T) = downQid(T) [owise] .
+
+ op downTypeList* : TermList -> TypeList .
+ eq downTypeList*(empty) = nil .
+ eq downTypeList*((T, TL)) = downTypeList(T) downTypeList*(TL) .
+
+ op typeList2String : TypeList -> String .
+ eq typeList2String(nil) = "" .
+ eq typeList2String(Ty TyL) = string(Ty) + typeList2String(TyL) .
+
 
  ***(
  ops id:_ : @Bubble@ -> @Attr@ .
@@ -163,7 +199,7 @@ fmod COMMAND-PROCESSING is
 
  *** Top module, Flat module, Vars and equations
  op parseBubbles : Module Module TermList -> ParsingRes .
- eq parseBubbles(TOP, FLAT, TL) = parseBubbles(TOP, FLAT, none, TL, empty) .
+ eq parseBubbles(TOP, FLAT, TL) = parseBubbles(TOP, FLAT, none, reorderOps(TL), empty) .
 
  ***(
              PARSE VARIABLES
@@ -199,10 +235,11 @@ fmod COMMAND-PROCESSING is
                                                                                 parseBubbles(TOP', FLAT', VS, TL, ACC)
   if Q := downQid(T) /\
      Q' := downQid(T') /\
-     AtS := parseAttr(FLAT, T'') /\
+     AtS := parseAttr(FLAT, VS, T'') /\
      OP := op Q : nil -> Q' [AtS] . /\
      TOP' := addOps(TOP, OP) /\
-     FLAT' := addOps(FLAT, OP) .
+     FLAT' := addOps(FLAT, OP) /\
+     TyL' := nominalSorts(TOP, T'') [print TyL'] .
  ceq parseBubbles(TOP, FLAT, VS, ('op_:_->_.['token[T],'neTokenList[T'],'token[T'']], TL), ACC) =
                                                                                 parseBubbles(TOP', FLAT', VS, TL, ACC)
   if Q := downQid(T) /\
@@ -216,10 +253,11 @@ fmod COMMAND-PROCESSING is
   if Q := downQid(T1) /\
      TyL := parseArity(T2) /\
      Q' := downQid(T3) /\
-     AtS := parseAttr(FLAT, T4) /\
+     AtS := parseAttr(FLAT, VS, T4) /\
      OP := op Q : TyL -> Q' [AtS] . /\
      TOP' := addOps(TOP, OP) /\
-     FLAT' := addOps(FLAT, OP) .
+     FLAT' := addOps(FLAT, OP) /\
+     TyL' := nominalSorts(TOP, T4) .
  ***(
            PARSING PARTIAL OP DECLARATIONS
  )
@@ -233,10 +271,11 @@ fmod COMMAND-PROCESSING is
                                                                       parseBubbles(TOP', FLAT', VS, TL, ACC)
   if Q := downQid(T) /\
      Q' := downQid(T') /\
-     AtS := parseAttr(FLAT, T'') /\
+     AtS := parseAttr(FLAT, VS, T'') /\
      OP := op Q : nil -> Q' [AtS] . /\
      TOP' := addOps(TOP, OP) /\
-     FLAT' := addOps(FLAT, OP) .
+     FLAT' := addOps(FLAT, OP) /\
+     TyL' := nominalSorts(TOP, T'') .
  ceq parseBubbles(TOP, FLAT, VS, ('op_:_~>_.['token[T],'neTokenList[T'],'token[T'']], TL), ACC) =
                                                                       parseBubbles(TOP', FLAT', VS, TL, ACC)
   if Q := downQid(T) /\
@@ -250,10 +289,11 @@ fmod COMMAND-PROCESSING is
   if Q := downQid(T1) /\
      TyL := parseArity(T2) /\
      Q' := downQid(T3) /\
-     AtS := parseAttr(FLAT, T4) /\
+     AtS := parseAttr(FLAT, VS, T4) /\
      OP := op Q : toKind(FLAT, TyL) -> toKind(FLAT, Q') [AtS] . /\
      TOP' := addOps(TOP, OP) /\
-     FLAT' := addOps(FLAT, OP) .
+     FLAT' := addOps(FLAT, OP) /\
+     TyL' := nominalSorts(TOP, T4) .
  ***(
            PARSING FLEXIBLE OP DECLARATIONS
  )
@@ -270,11 +310,12 @@ fmod COMMAND-PROCESSING is
   if Q := downQid(T) /\
      FQ := createFlexOpName(Q, nil) /\
      Q' := downQid(T') /\
-     AtS := parseAttr(FLAT, T'') /\
+     AtS := parseAttr(FLAT, VS, T'') /\
      ODS := (op FQ : '@Nominal@ -> Q' [AtS] .
              op Q : nil -> Q' [AtS] .) /\
      TOP' := addOps(TOP, ODS) /\
-     FLAT' := addOps(FLAT, ODS) .
+     FLAT' := addOps(FLAT, ODS) /\
+     TyL' := nominalSorts(TOP, T'') .
  ceq parseBubbles(TOP, FLAT, VS, ('flexible`op_:_->_.['token[T],'neTokenList[T'],'token[T'']], TL), ACC) =
                                                                                parseBubbles(TOP', FLAT', VS, TL, ACC)
   if TyL := parseArity(T') /\
@@ -291,11 +332,23 @@ fmod COMMAND-PROCESSING is
      Q := downQid(T1) /\
      FQ := createFlexOpName(Q, TyL) /\
      Q' := downQid(T3) /\
-     AtS := parseAttr(FLAT, T4) /\
+     AtS := parseAttr(FLAT, VS, T4) /\
      ODS := (op FQ : '@Nominal@ TyL -> Q' [AtS] .
              op Q : TyL -> Q' [AtS] .) /\
      TOP' := addOps(TOP, ODS) /\
-     FLAT' := addOps(FLAT, ODS) .
+     FLAT' := addOps(FLAT, ODS) /\
+     TyL' := nominalSorts(TOP, T4) .
+
+
+ ***(
+ Reorders the list in order to parse constants first.
+ In this way we can later parse id attributes
+ )
+ op reorderOps : TermList -> TermList .
+ ceq reorderOps((TL, Q[TL1], TL', Q'[TL2], TL'')) = reorderOps((TL, Q'[TL2], TL', Q[TL1], TL''))
+  if ((Q == 'op_:_->_.) or (Q == 'op_:_->_`[_`].)) /\
+     ((Q' == 'op_:`->_. ) or (Q' == 'op_:`->_`[_`].)) .
+ eq reorderOps(TL) = TL [owise] .
 
 ***(
 op f : A1 A2 -> A3 [flexible(NS1, NS3)] .

@@ -17,7 +17,7 @@ spec! MyLogic{X :: TRIV} =
   op init : -> Mode [ctor] .
   op next : Mode -> Mode [ctor] .
 
-  op empty : -> List [ctor] .
+  op empty : -> List [ctor nominal(Elt)] .
   op _._ : Elt List -> List [ctor] .
 
   pred open .

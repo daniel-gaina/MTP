@@ -1,3 +1,6 @@
 fmod @NOMINAL@ is
- sort @Nominal@ .
+ sorts @Nominal@ @NominalList@ .
+ subsort @Nominal@ < @NominalList@ .
+
+ op __ : @NominalList@ @NominalList@ -> @NominalList@ [ctor assoc] .
 endfm
