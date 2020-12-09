@@ -152,7 +152,7 @@ fmod COMMAND-PROCESSING is
  )
  op nominalSorts : Module Term -> TypeList .
  eq nominalSorts(M, '__[TL]) = nominalSorts*(M, TL) .
- ceq nominalSorts(M, 'nominal`(_`)['neTokenList[T]]) = TyL
+ ceq nominalSorts(M, 'flexible`(_`)['neTokenList[T]]) = TyL
   if TyL := downTypeList(T) .
  eq nominalSorts(M, T) = nil [owise] .
 
