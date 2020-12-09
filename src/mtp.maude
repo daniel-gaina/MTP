@@ -134,7 +134,7 @@ fmod COMMAND-PROCESSING is
  ceq parseAttr(M, VS, 'id:_['bubble[T]]) = id(T1)
   if QIL := downQidList(T) /\
      {T1, Ty} := metaParse(M, VS, QIL, anyType) .
- ceq parseAttr(M, VS, 'nominal`(_`)['neTokenList[T]]) = metadata(S)
+ ceq parseAttr(M, VS, 'flexible`(_`)['neTokenList[T]]) = metadata(S) metadata("flexible")
   if TyL := downTypeList(T) /\
      S := typeList2String(TyL) .
 
@@ -174,7 +174,6 @@ fmod COMMAND-PROCESSING is
 
 
  ***(
- ops id:_ : @Bubble@ -> @Attr@ .
  op prec_ : @Token@ -> @Attr@ .
  op metadata_ : @Token@ -> @Attr@ .
  )
@@ -239,7 +238,7 @@ fmod COMMAND-PROCESSING is
      OP := op Q : nil -> Q' [AtS] . /\
      TOP' := addOps(TOP, OP) /\
      FLAT' := addOps(FLAT, OP) /\
-     TyL' := nominalSorts(TOP, T'') [print TyL'] .
+     nominalSorts(TOP, T'') == nil .
  ceq parseBubbles(TOP, FLAT, VS, ('op_:_->_.['token[T],'neTokenList[T'],'token[T'']], TL), ACC) =
                                                                                 parseBubbles(TOP', FLAT', VS, TL, ACC)
   if Q := downQid(T) /\
@@ -257,7 +256,7 @@ fmod COMMAND-PROCESSING is
      OP := op Q : TyL -> Q' [AtS] . /\
      TOP' := addOps(TOP, OP) /\
      FLAT' := addOps(FLAT, OP) /\
-     TyL' := nominalSorts(TOP, T4) .
+     nominalSorts(TOP, T4) == nil .
  ***(
            PARSING PARTIAL OP DECLARATIONS
  )
@@ -297,47 +296,34 @@ fmod COMMAND-PROCESSING is
  ***(
            PARSING FLEXIBLE OP DECLARATIONS
  )
- ceq parseBubbles(TOP, FLAT, VS, ('flexible`op_:`->_.['token[T],'token[T']], TL), ACC) = parseBubbles(TOP', FLAT', VS, TL, ACC)
-  if Q := downQid(T) /\
-     FQ := createFlexOpName(Q, nil) /\
-     Q' := downQid(T') /\
-     ODS := (op FQ : '@Nominal@ -> Q' [none] .
-             op Q : nil -> Q' [none] .) /\
-     TOP' := addOps(TOP, ODS) /\
-     FLAT' := addOps(FLAT, ODS) .
- ceq parseBubbles(TOP, FLAT, VS, ('flexible`op_:`->_`[_`].['token[T],'token[T'], T''], TL), ACC) =
+
+ ceq parseBubbles(TOP, FLAT, VS, ('op_:`->_`[_`].['token[T],'token[T'], T''], TL), ACC) =
                                                                                parseBubbles(TOP', FLAT', VS, TL, ACC)
   if Q := downQid(T) /\
      FQ := createFlexOpName(Q, nil) /\
      Q' := downQid(T') /\
      AtS := parseAttr(FLAT, VS, T'') /\
-     ODS := (op FQ : '@Nominal@ -> Q' [AtS] .
+     TyL' := nominalSorts(TOP, T'') /\
+     TyL' =/= nil /\
+     ODS := (op FQ : '@NominalList@ -> Q' [metadata("") AtS] .
+             op FQ : TyL' -> Q' [metadata("normalized") AtS] .
              op Q : nil -> Q' [AtS] .) /\
      TOP' := addOps(TOP, ODS) /\
-     FLAT' := addOps(FLAT, ODS) /\
-     TyL' := nominalSorts(TOP, T'') .
- ceq parseBubbles(TOP, FLAT, VS, ('flexible`op_:_->_.['token[T],'neTokenList[T'],'token[T'']], TL), ACC) =
-                                                                               parseBubbles(TOP', FLAT', VS, TL, ACC)
-  if TyL := parseArity(T') /\
-     Q := downQid(T) /\
-     FQ := createFlexOpName(Q, TyL) /\
-     Q' := downQid(T'') /\
-     ODS := (op FQ : '@Nominal@ TyL -> Q' [none] .
-             op Q : TyL -> Q' [none] .) /\
-     TOP' := addOps(TOP, ODS) /\
      FLAT' := addOps(FLAT, ODS) .
- ceq parseBubbles(TOP, FLAT, VS, ('flexible`op_:_->_`[_`].['token[T1],'neTokenList[T2],'token[T3], T4], TL), ACC) =
+ ceq parseBubbles(TOP, FLAT, VS, ('op_:_->_`[_`].['token[T1],'neTokenList[T2],'token[T3], T4], TL), ACC) =
                                                                                parseBubbles(TOP', FLAT', VS, TL, ACC)
   if TyL := parseArity(T2) /\
      Q := downQid(T1) /\
      FQ := createFlexOpName(Q, TyL) /\
      Q' := downQid(T3) /\
      AtS := parseAttr(FLAT, VS, T4) /\
-     ODS := (op FQ : '@Nominal@ TyL -> Q' [AtS] .
+     TyL' := nominalSorts(TOP, T4) /\
+     TyL' =/= nil /\
+     ODS := (op FQ : '@NominalList@ TyL -> Q' [metadata("") AtS] .
+             op FQ : TyL' TyL -> Q' [metadata("normalized") AtS] .
              op Q : TyL -> Q' [AtS] .) /\
      TOP' := addOps(TOP, ODS) /\
-     FLAT' := addOps(FLAT, ODS) /\
-     TyL' := nominalSorts(TOP, T4) .
+     FLAT' := addOps(FLAT, ODS) .
 
 
  ***(
@@ -350,36 +336,24 @@ fmod COMMAND-PROCESSING is
      ((Q' == 'op_:`->_. ) or (Q' == 'op_:`->_`[_`].)) .
  eq reorderOps(TL) = TL [owise] .
 
-***(
-op f : A1 A2 -> A3 [flexible(NS1, NS3)] .
+ op normalizeFlexible : Module Term -> Term .
+ *** We assume no subterms must be normalized
+ ceq normalizeFlexible(M, Q[TL]) = Q[TL] *** TODO
+  if isFlexible(M, Q) .
+ ceq normalizeFlexible(M, Q[TL]) = Q[TL']
+  if not isFlexible(M, Q) /\
+     TL' := normalizeFlexible*(M, TL) .
 
-op @__f(_,_)
+ op normalizeFlexible* : Module TermList -> TermList .
+ eq normalizeFlexible*(M, empty) = empty .
+ eq normalizeFlexible*(M, (T, TL)) = normalizeFlexible(M, T), normalizeFlexible*(M, TL) .
 
-op _f_ : A1 A2 -> A3 [flexible(NS1, NS3)] .
+ op isFlexible : Module Qid -> Bool .
+ eq isFlexible(M, Q) = isFlexible(getOps(M), Q) .
 
-op @__._f_ : A1 A2 -> A3 [flexible(NS1, NS3)] .
-
-f(current:NS1, current:NS2,a,b)
-
-
-f(a,b)          -> @ Current:NS1 Current:NS3 . f(a,b)
-@ X . f(a,b)    -> @ X Current:NS3 . f(a,b)
-@ Y . f(a,b)    -> @ Current:NS1 Y . f(a,b)
-@ X Y . f(a,b)  -> @ X Y . f(a,b)
-
-
-
-
-op @_f(_,_) : @Nominal@ A1 A2 -> A3 .
-op f : A1 A2 -> A3 .
-
-flexible op _f_ : A1 A2 -> A3 .
-
-op @__f_ : @Nominal@ A1 A2 -> A3
-op _f_ : A1 A2 -> A3 .
-
-
-)
+ op isFlexible : OpDeclSet Qid -> Bool .
+ eq isFlexible(op Q : TyL -> Ty [AtS metadata("flexible")] . ODS, Q) = true .
+ eq isFlexible(ODS, Q) = false [owise] .
 
  ***(
            PARSING PREDICATES
@@ -633,7 +607,7 @@ mod MTP is
  => < mtp : MTP | mi: MI, state: parseComm, AtS >
     parseTerm(MI, mtp, 'GRAMMAR, none, tokenize(Text), '@Input@) .
 
- crl [parseComm] :
+ crl [parsedComm] :
      parsedTerm(mtp, MI, {T, Ty})
      < mtp : MTP | mi: MI, state: parseComm, input: IN, AtS >
   => < mtp : MTP | mi: MI, state: executeComm, input: TL, AtS >
@@ -761,7 +735,7 @@ mod MTP is
      < mtp : MTP | state: getModule, umi: MI, current: Q, module: MM, AtS >
   => < mtp : MTP | state: print&executeComm, umi: MI, current: Q, module: M, AtS >
      write(stdout, mtp, MSG)
-  if MSG := "\nModule " + string(Q) + " introduced.\n\n" .
+  if MSG := "\nModule " + string(Q) + " introduced.\n\n" [print M] .
 
 
  *** TODO: parse error

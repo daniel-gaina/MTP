@@ -17,14 +17,14 @@ spec! MyLogic{X :: TRIV} =
   op init : -> Mode [ctor] .
   op next : Mode -> Mode [ctor] .
 
-  op empty : -> List [ctor nominal(Elt)] .
+  op empty : -> List [ctor] .
   op _._ : Elt List -> List [ctor] .
 
   pred open .
   pred equal : Elt Elt [comm] .
 
-  flexible op read_ : List -> Elt .
-  flexible op read2 : List -> Elt .
+  op read_ : List -> Elt [flexible(Mode)] .
+  op read2 : List -> Elt [flexible(Mode)] .
 
   op head : List -> Elt .
   eq head(E . L) = E .
