@@ -14,10 +14,11 @@ fmod COMMAND-PROCESSING is
  pr LEXICAL .
 
  vars RIG RIG' NOM NOM' FLE FLE' SS : SortSet .
+ vars T T' T'' T1 T2 T3 T4 TQ : Term .
+ var  T1' T2' : [Term] .
  vars M M' M'' TOP TOP' FLAT FLAT' : Module .
  vars VS VS' UV UV' EV EV' : VariableSet .
  vars TL TL' TL'' TL1 TL2 ACC : TermList .
- vars T T' T'' T1 T2 T3 T4 TQ : Term .
  vars QIL QIL' ERR ERR' : QidList .
  vars PL PL' : ParameterDeclList .
  var  SSDS : SubsortDeclSet .
@@ -33,6 +34,7 @@ fmod COMMAND-PROCESSING is
  var  Eq : Equation .
  vars Q Q' FQ : Qid .
  var  V : Variable .
+ var  C : Constant .
  var  OP : OpDecl .
  var  I : Import .
  var  Srt : Sort .
@@ -134,7 +136,9 @@ fmod COMMAND-PROCESSING is
  ceq parseAttr(M, VS, 'id:_['bubble[T]]) = id(T1)
   if QIL := downQidList(T) /\
      {T1, Ty} := metaParse(M, VS, QIL, anyType) .
- ceq parseAttr(M, VS, 'flexible`(_`)['neTokenList[T]]) = metadata(S) metadata("flexible")
+ *** This attribute is translated as none because the operator declaration
+ *** adds metadata operators
+ ceq parseAttr(M, VS, 'flexible`(_`)['neTokenList[T]]) = none
   if TyL := downTypeList(T) /\
      S := typeList2String(TyL) .
 
@@ -305,8 +309,8 @@ fmod COMMAND-PROCESSING is
      AtS := parseAttr(FLAT, VS, T'') /\
      TyL' := nominalSorts(TOP, T'') /\
      TyL' =/= nil /\
-     ODS := (op FQ : '@NominalList@ -> Q' [metadata("") AtS] .
-             op FQ : TyL' -> Q' [metadata("normalized") AtS] .
+     ODS := (op FQ : '@NominalList@ -> Q' [metadataFlexibleExtended AtS] .
+             op FQ : TyL' -> Q' [metadataFlexibleNormalized AtS] .
              op Q : nil -> Q' [AtS] .) /\
      TOP' := addOps(TOP, ODS) /\
      FLAT' := addOps(FLAT, ODS) .
@@ -319,12 +323,11 @@ fmod COMMAND-PROCESSING is
      AtS := parseAttr(FLAT, VS, T4) /\
      TyL' := nominalSorts(TOP, T4) /\
      TyL' =/= nil /\
-     ODS := (op FQ : '@NominalList@ TyL -> Q' [metadata("") AtS] .
-             op FQ : TyL' TyL -> Q' [metadata("normalized") AtS] .
+     ODS := (op FQ : '@NominalList@ TyL -> Q' [metadataFlexibleExtended AtS] .
+             op FQ : TyL' TyL -> Q' [metadataFlexibleNormalized AtS] .
              op Q : TyL -> Q' [AtS] .) /\
      TOP' := addOps(TOP, ODS) /\
      FLAT' := addOps(FLAT, ODS) .
-
 
  ***(
  Reorders the list in order to parse constants first.
@@ -338,11 +341,28 @@ fmod COMMAND-PROCESSING is
 
  op normalizeFlexible : Module Term -> Term .
  *** We assume no subterms must be normalized
- ceq normalizeFlexible(M, Q[TL]) = Q[TL] *** TODO
-  if isFlexible(M, Q) .
+ ceq normalizeFlexible(M, Q[TL]) = FQ[TL', TL]
+  if isFlexible(M, Q) /\
+     TyL := getTypeList(M, Q) /\
+     FQ := createFlexOpName(Q, TyL) /\
+     TyL' TyL := getNormalizedTypeList(M, FQ) /\
+     TL' := createVarList(TyL') .
+ ceq normalizeFlexible(M, Q[TL]) = Q[TL']
+  if isFlexibleExtended(M, Q) /\
+     '@NominalList@ TyL := getExtendedTypeList(M, Q) /\
+     TyL' TyL := getNormalizedTypeList(M, Q) /\
+     TL' := createMissingVarsAndReorder(M, TyL', TL) .
  ceq normalizeFlexible(M, Q[TL]) = Q[TL']
   if not isFlexible(M, Q) /\
      TL' := normalizeFlexible*(M, TL) .
+ eq normalizeFlexible(M, V) = V .
+ eq normalizeFlexible(M, C) = C . *** TODO
+
+ op createMissingVarsAndReorder : Module TypeList TermList -> TermList .
+ eq createMissingVarsAndReorder(M, nil, TL) = TL .
+ ceq createMissingVarsAndReorder(M, Ty TyL, (TL, T, TL')) = T, createMissingVarsAndReorder(M, TyL, (TL, TL'))
+  if {T', Ty} := metaReduce(M, T) .
+ eq createMissingVarsAndReorder(M, Ty TyL, TL) = createVar(Ty), createMissingVarsAndReorder(M, TyL, TL) [owise] .
 
  op normalizeFlexible* : Module TermList -> TermList .
  eq normalizeFlexible*(M, empty) = empty .
@@ -351,9 +371,56 @@ fmod COMMAND-PROCESSING is
  op isFlexible : Module Qid -> Bool .
  eq isFlexible(M, Q) = isFlexible(getOps(M), Q) .
 
+ op isFlexibleExtended : Module Qid -> Bool .
+ eq isFlexibleExtended(M, Q) = isFlexibleExtended(getOps(M), Q) .
+
  op isFlexible : OpDeclSet Qid -> Bool .
- eq isFlexible(op Q : TyL -> Ty [AtS metadata("flexible")] . ODS, Q) = true .
+ ceq isFlexible(op Q : TyL -> Ty [AtS metadata(S)] . ODS, Q) = true
+  if S == flexible .
  eq isFlexible(ODS, Q) = false [owise] .
+
+ op isFlexibleExtended : OpDeclSet Qid -> Bool .
+ ceq isFlexibleExtended(op Q : TyL -> Ty [AtS metadata(S)] . ODS, Q) = true
+  if S == flexibleExtended .
+ eq isFlexibleExtended(ODS, Q) = false [owise] .
+
+ ops flexible flexibleExtended flexibleNormalized : -> String .
+ eq flexible = "flexible" .
+ eq flexibleExtended = "flexibleExtended" .
+ eq flexibleNormalized = "flexibleNormalized" .
+
+ ops metadataFlexible metadataFlexibleExtended metadataFlexibleNormalized : -> Attr .
+ eq metadataFlexible = metadata(flexible) .
+ eq metadataFlexibleExtended = metadata(flexibleExtended) .
+ eq metadataFlexibleNormalized = metadata(flexibleNormalized) .
+
+ op getTypeList : Module Qid ~> TypeList .
+ eq getTypeList(M, Q) = getTypeList(getOps(M), Q) .
+
+ op getTypeList : OpDeclSet Qid ~> TypeList .
+ ceq getTypeList(op Q : TyL -> Ty [AtS metadata(S)] . ODS, Q) = TyL
+  if S == flexible .
+
+ op getNormalizedTypeList : Module Qid ~> TypeList .
+ eq getNormalizedTypeList(M, Q) = getNormalizedTypeList(getOps(M), Q) .
+
+ op getNormalizedTypeList : OpDeclSet Qid ~> TypeList .
+ ceq getNormalizedTypeList(op Q : TyL -> Ty [AtS metadata(S)] . ODS, Q) = TyL
+  if S == flexibleNormalized .
+
+ op getExtendedTypeList : Module Qid ~> TypeList .
+ eq getExtendedTypeList(M, Q) = getExtendedTypeList(getOps(M), Q) .
+
+ op getExtendedTypeList : OpDeclSet Qid ~> TypeList .
+ ceq getExtendedTypeList(op Q : TyL -> Ty [AtS metadata("flexible") metadata(S)] . ODS, Q) = TyL
+  if S == flexibleExtended .
+
+ op createVarList : TypeList -> TermList .
+ eq createVarList(nil) = empty .
+ eq createVarList(Ty TyL) = createVar(Ty), createVarList(TyL) .
+
+ op createVar : Type -> Variable .
+ eq createVar(Ty) = qid("@" + string(Ty) + ":" + string(Ty)) .
 
  ***(
            PARSING PREDICATES
@@ -386,7 +453,9 @@ fmod COMMAND-PROCESSING is
   if QIL := downQidList(T) /\
      QIL' := downQidList(T') /\
      {T1, Ty} := metaParse(M, VS, QIL, anyType) /\
-     {T2, Ty'} := metaParse(M, VS, QIL', anyType) .
+     {T2, Ty'} := metaParse(M, VS, QIL', anyType) /\
+     T1' := normalizeFlexible(M, T1) /\
+     T2' := normalizeFlexible(M, T2) [print T1'] .
  op parseEq : Module VariableSet Term -> Equation .
  ceq parseEq(M, VS, 'eq_._=_.[TQ, 'bubble[T], 'bubble[T']]) = eq T1 = T2 [AtS] .
   if QIL := downQidList(T) /\
