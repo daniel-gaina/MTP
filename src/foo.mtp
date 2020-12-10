@@ -8,7 +8,7 @@ spec! MyLogic{X :: TRIV} =
 
   rigid sort Elt .
   subsort Elt < List .
-  nominal sort Mode .
+  nominal sort Mode Mode2 .
 
   vars E E1 : Elt .
   var  M : Mode .
@@ -25,6 +25,8 @@ spec! MyLogic{X :: TRIV} =
 
   op read_ : List -> Elt [flexible(Mode)] .
   op read2 : List -> Elt [flexible(Mode)] .
+  op read3_ : List -> Elt [flexible(Mode Mode2)] .
+  op read4 : List -> Elt [flexible(Mode Mode2)] .
 
   op head : List -> Elt .
   eq head(E . L) = E .
@@ -34,6 +36,9 @@ spec! MyLogic{X :: TRIV} =
 
   eq @ init read (E . L) = E .
   eq @ init read2 (E . L) = E .
+  eq @ init read3 (E . L) = E .
+  eq @ init read4 (E . L) = E .
+  eq read4 (E . L) = E .
 
   eq @ next(M) read (E . L) = E .
   eq forall L L' exists E E1 . @ next(M) read (E . L') = E .

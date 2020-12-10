@@ -14,8 +14,7 @@ fmod COMMAND-PROCESSING is
  pr LEXICAL .
 
  vars RIG RIG' NOM NOM' FLE FLE' SS : SortSet .
- vars T T' T'' T1 T2 T3 T4 TQ : Term .
- var  T1' T2' : [Term] .
+ vars T T' T'' T1 T2 T3 T4 TQ T1' T2' : Term .
  vars M M' M'' TOP TOP' FLAT FLAT' : Module .
  vars VS VS' UV UV' EV EV' : VariableSet .
  vars TL TL' TL'' TL1 TL2 ACC : TermList .
@@ -24,6 +23,7 @@ fmod COMMAND-PROCESSING is
  var  SSDS : SubsortDeclSet .
  vars TyL TyL' : TypeList .
  var  RP? : [ResultPair] .
+ vars Q Q' FQ FNQ : Qid .
  var  COND : Condition .
  var  PR : ParsingRes .
  var  ODS : OpDeclSet .
@@ -32,7 +32,6 @@ fmod COMMAND-PROCESSING is
  var  DB : Database .
  vars S S' : String .
  var  Eq : Equation .
- vars Q Q' FQ : Qid .
  var  V : Variable .
  var  C : Constant .
  var  OP : OpDecl .
@@ -309,9 +308,10 @@ fmod COMMAND-PROCESSING is
      AtS := parseAttr(FLAT, VS, T'') /\
      TyL' := nominalSorts(TOP, T'') /\
      TyL' =/= nil /\
+     FNQ := createNormalOpName(Q, TyL') /\
      ODS := (op FQ : '@NominalList@ -> Q' [metadataFlexibleExtended AtS] .
-             op FQ : TyL' -> Q' [metadataFlexibleNormalized AtS] .
-             op Q : nil -> Q' [AtS] .) /\
+             op FNQ : TyL' -> Q' [metadata("#" + string(Q) + "# #" + string(FQ) + "#")  AtS] .
+             op Q : nil -> Q' [metadataFlexible AtS] .) /\
      TOP' := addOps(TOP, ODS) /\
      FLAT' := addOps(FLAT, ODS) .
  ceq parseBubbles(TOP, FLAT, VS, ('op_:_->_`[_`].['token[T1],'neTokenList[T2],'token[T3], T4], TL), ACC) =
@@ -322,10 +322,11 @@ fmod COMMAND-PROCESSING is
      Q' := downQid(T3) /\
      AtS := parseAttr(FLAT, VS, T4) /\
      TyL' := nominalSorts(TOP, T4) /\
+     FNQ := createNormalOpName(Q, TyL') /\
      TyL' =/= nil /\
      ODS := (op FQ : '@NominalList@ TyL -> Q' [metadataFlexibleExtended AtS] .
-             op FQ : TyL' TyL -> Q' [metadataFlexibleNormalized AtS] .
-             op Q : TyL -> Q' [AtS] .) /\
+             op FNQ : TyL' TyL -> Q' [metadata("#" + string(Q) + "# #" + string(FQ) + "#") AtS] .
+             op Q : TyL -> Q' [metadataFlexible AtS] .) /\
      TOP' := addOps(TOP, ODS) /\
      FLAT' := addOps(FLAT, ODS) .
 
@@ -341,19 +342,21 @@ fmod COMMAND-PROCESSING is
 
  op normalizeFlexible : Module Term -> Term .
  *** We assume no subterms must be normalized
- ceq normalizeFlexible(M, Q[TL]) = FQ[TL', TL]
+ ceq normalizeFlexible(M, Q[TL]) = FNQ[TL', TL]
   if isFlexible(M, Q) /\
      TyL := getTypeList(M, Q) /\
-     FQ := createFlexOpName(Q, TyL) /\
-     TyL' TyL := getNormalizedTypeList(M, FQ) /\
+     FNQ := getNormalizedOp(M, Q) /\
+     TyL' TyL := getNormalizedTypeList(M, FNQ) /\
      TL' := createVarList(TyL') .
- ceq normalizeFlexible(M, Q[TL]) = Q[TL']
+ ceq normalizeFlexible(M, Q[TL]) = FNQ[TL']
   if isFlexibleExtended(M, Q) /\
      '@NominalList@ TyL := getExtendedTypeList(M, Q) /\
-     TyL' TyL := getNormalizedTypeList(M, Q) /\
+     FNQ := getNormalizedOp(M, Q) /\
+     TyL' TyL := getNormalizedTypeList(M, FNQ) /\
      TL' := createMissingVarsAndReorder(M, TyL', TL) .
  ceq normalizeFlexible(M, Q[TL]) = Q[TL']
   if not isFlexible(M, Q) /\
+     not isFlexibleExtended(M, Q) /\
      TL' := normalizeFlexible*(M, TL) .
  eq normalizeFlexible(M, V) = V .
  eq normalizeFlexible(M, C) = C . *** TODO
@@ -371,28 +374,26 @@ fmod COMMAND-PROCESSING is
  op isFlexible : Module Qid -> Bool .
  eq isFlexible(M, Q) = isFlexible(getOps(M), Q) .
 
- op isFlexibleExtended : Module Qid -> Bool .
- eq isFlexibleExtended(M, Q) = isFlexibleExtended(getOps(M), Q) .
-
  op isFlexible : OpDeclSet Qid -> Bool .
  ceq isFlexible(op Q : TyL -> Ty [AtS metadata(S)] . ODS, Q) = true
   if S == flexible .
  eq isFlexible(ODS, Q) = false [owise] .
+
+ op isFlexibleExtended : Module Qid -> Bool .
+ eq isFlexibleExtended(M, Q) = isFlexibleExtended(getOps(M), Q) .
 
  op isFlexibleExtended : OpDeclSet Qid -> Bool .
  ceq isFlexibleExtended(op Q : TyL -> Ty [AtS metadata(S)] . ODS, Q) = true
   if S == flexibleExtended .
  eq isFlexibleExtended(ODS, Q) = false [owise] .
 
- ops flexible flexibleExtended flexibleNormalized : -> String .
+ ops flexible flexibleExtended : -> String .
  eq flexible = "flexible" .
  eq flexibleExtended = "flexibleExtended" .
- eq flexibleNormalized = "flexibleNormalized" .
 
- ops metadataFlexible metadataFlexibleExtended metadataFlexibleNormalized : -> Attr .
+ ops metadataFlexible metadataFlexibleExtended : -> Attr .
  eq metadataFlexible = metadata(flexible) .
  eq metadataFlexibleExtended = metadata(flexibleExtended) .
- eq metadataFlexibleNormalized = metadata(flexibleNormalized) .
 
  op getTypeList : Module Qid ~> TypeList .
  eq getTypeList(M, Q) = getTypeList(getOps(M), Q) .
@@ -401,18 +402,24 @@ fmod COMMAND-PROCESSING is
  ceq getTypeList(op Q : TyL -> Ty [AtS metadata(S)] . ODS, Q) = TyL
   if S == flexible .
 
+ op getNormalizedOp : Module Qid ~> Qid .
+ eq getNormalizedOp(M, Q) = getNormalizedOp(getOps(M), Q) .
+
+ op getNormalizedOp : OpDeclSet Qid ~> Qid .
+ ceq getNormalizedOp(op Q' : TyL -> Ty [AtS metadata(S)] . ODS, Q) = Q'
+  if find(S, "#" + string(Q) + "#", 0) =/= notFound .
+
  op getNormalizedTypeList : Module Qid ~> TypeList .
  eq getNormalizedTypeList(M, Q) = getNormalizedTypeList(getOps(M), Q) .
 
  op getNormalizedTypeList : OpDeclSet Qid ~> TypeList .
- ceq getNormalizedTypeList(op Q : TyL -> Ty [AtS metadata(S)] . ODS, Q) = TyL
-  if S == flexibleNormalized .
+ eq getNormalizedTypeList(op Q : TyL -> Ty [AtS metadata(S)] . ODS, Q) = TyL .
 
  op getExtendedTypeList : Module Qid ~> TypeList .
  eq getExtendedTypeList(M, Q) = getExtendedTypeList(getOps(M), Q) .
 
  op getExtendedTypeList : OpDeclSet Qid ~> TypeList .
- ceq getExtendedTypeList(op Q : TyL -> Ty [AtS metadata("flexible") metadata(S)] . ODS, Q) = TyL
+ ceq getExtendedTypeList(op Q : TyL -> Ty [AtS metadata(S)] . ODS, Q) = TyL
   if S == flexibleExtended .
 
  op createVarList : TypeList -> TermList .
@@ -449,28 +456,34 @@ fmod COMMAND-PROCESSING is
      M := addEqs(TOP, Eq) .
 
  op parseEq : Module VariableSet Term -> Equation .
- ceq parseEq(M, VS, 'eq_=_.['bubble[T], 'bubble[T']]) = eq T1 = T2 [none] .
+ ceq parseEq(M, VS, 'eq_=_.['bubble[T], 'bubble[T']]) = eq T1' = T2' [none] .
   if QIL := downQidList(T) /\
      QIL' := downQidList(T') /\
      {T1, Ty} := metaParse(M, VS, QIL, anyType) /\
      {T2, Ty'} := metaParse(M, VS, QIL', anyType) /\
      T1' := normalizeFlexible(M, T1) /\
-     T2' := normalizeFlexible(M, T2) [print T1'] .
+     T2' := normalizeFlexible(M, T2) .
  op parseEq : Module VariableSet Term -> Equation .
- ceq parseEq(M, VS, 'eq_._=_.[TQ, 'bubble[T], 'bubble[T']]) = eq T1 = T2 [AtS] .
+ ceq parseEq(M, VS, 'eq_._=_.[TQ, 'bubble[T], 'bubble[T']]) = eq T1' = T2' [AtS] .
   if QIL := downQidList(T) /\
      QIL' := downQidList(T') /\
      {T1, Ty} := metaParse(M, VS, QIL, anyType) /\
      {T2, Ty'} := metaParse(M, VS, QIL', anyType) /\
      < UV, EV > := extractQuantVars(TQ, VS) /\
-     AtS := generateQuantificationAtts(UV, EV) .
- ceq parseEq(M, VS, 'ceq_=_if_.['bubble[T], 'bubble[T'],T'']) = ceq T1 = T2 if COND [none] .
+     AtS := generateQuantificationAtts(UV, EV) /\
+     T1' := normalizeFlexible(M, T1) /\
+     T2' := normalizeFlexible(M, T2) .
+ *** TODO: Normalize conditions
+ ceq parseEq(M, VS, 'ceq_=_if_.['bubble[T], 'bubble[T'],T'']) =
+                           ceq normalizeFlexible(M, T1) = normalizeFlexible(M, T2) if COND [none] .
   if QIL := downQidList(T) /\
      QIL' := downQidList(T') /\
      {T1, Ty} := metaParse(M, VS, QIL, anyType) /\
      {T2, Ty'} := metaParse(M, VS, QIL', anyType) /\
      COND := parseCondition(M, T'', VS) .
- ceq parseEq(M, VS, 'ceq_._=_if_.[TQ, 'bubble[T], 'bubble[T'],T'']) = ceq T1 = T2 if COND [AtS] .
+ *** TODO: Normalize conditions
+ ceq parseEq(M, VS, 'ceq_._=_if_.[TQ, 'bubble[T], 'bubble[T'],T'']) =
+                           ceq normalizeFlexible(M, T1) = normalizeFlexible(M, T2) if COND [AtS] .
   if QIL := downQidList(T) /\
      QIL' := downQidList(T') /\
      {T1, Ty} := metaParse(M, VS, QIL, anyType) /\
@@ -534,6 +547,15 @@ fmod COMMAND-PROCESSING is
   if S := string(Q) /\
      find(S, "_", 0) == notFound /\
      Q' := qid("@_" + string(Q) + addUnderscores(N)) .
+
+ op createNormalOpName : Qid TypeList -> Qid .
+ ceq createNormalOpName(Q, TyL) = qid("#@" + string(Q))
+  if S := string(Q) /\
+     find(S, "_", 0) == notFound .
+ ceq createNormalOpName(Q, TyL) = Q'
+  if S := string(Q) /\
+     find(S, "_", 0) =/= notFound /\
+     Q' := qid("#@" + addUnderscores(| TyL |) + string(Q)) .
 
  op |_| : TypeList -> Nat .
  eq | nil | = 0 .
@@ -857,7 +879,7 @@ mod MTP is
 
  rl [exit] :
     < mtp : MTP | state: executeComm, input: ('exit.@Command@), AtS >
- => write(stdout, mtp, "Thanks for using MTP!\n") [print AtS] .
+ => write(stdout, mtp, "Thanks for using MTP!\n") .
 
  rl [quit] :
     < mtp : MTP | state: executeComm, input: ('q.@Command@), AtS >
