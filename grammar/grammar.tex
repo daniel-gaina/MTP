@@ -1,0 +1,77 @@
+%!TEX root = mtp.tex
+
+
+\begin{figure}[t]
+\scalebox{.89}{
+\begin{tabular}{lll}
+Spec   & ::= & spec ME \texttt{=} Decs \\
+ME     & ::= & TId \textbar~TId \texttt{\{} Params \texttt{\}}\\
+Params & ::= & PId \texttt{::} TId \textbar~$\varepsilon$
+%lit   & ::= & Atom \textbar~Integer \textbar~Float \textbar~Char \textbar~String %\textbar~ BitString
+%\textbar~\texttt{[~]}\\
+%fun   & ::= &  \texttt{fun(}var$_1$ \texttt{,} \ldots \texttt{,} var$_n$) \texttt{->} exprs \\
+%clause & ::= & pats \texttt{when} exprs$_1$ \texttt{->} exprs$_2$\\
+%pat   & ::= & var \textbar~lit \textbar~\texttt{[} pats$_1$ \texttt{\textbar} pats$_2$ \texttt{]} \textbar~\texttt{\{} pats$_1$\texttt{,} \ldots \texttt{,} pats$_n$ \texttt{\}} \textbar~var \texttt{=} pats \\
+%pats  & ::= & pat \textbar~\texttt{<}\ pat$_1$\texttt{,} \ldots \texttt{,} pat$_n$\ \texttt{>} \\
+%exprs & ::= & expr~\textbar~\texttt{<}\ expr$_1$\texttt{,} \ldots \texttt{,} expr$_n$\ \texttt{>} \\
+%expr  & ::= & var \textbar~lit \textbar~$\xi$ \textbar~fname \textbar~fun \textbar~\texttt{[} exprs$_1$ \texttt{\textbar} exprs$_2$ \texttt{]} \textbar~\texttt{\{} exprs$_1$\texttt{,} \ldots \texttt{,} exprs$_n$ \texttt{\}} \\
+%      &     & \textbar~\texttt{let} vars \texttt{=} exprs$_1$ \texttt{in} exprs$_2$ \\
+%      &     & \textbar~\texttt{letrec} fname$_1$ \texttt{=} fun$_1$ \ldots fname$_n$ \texttt{=} fun$_n$ \texttt{in} exprs \\
+%      &     & \textbar~\texttt{apply} exprs$_{n+1}$ \texttt{(} exprs$_1$ \texttt{,} \ldots \texttt{,} exprs$_n$ \texttt{)}\\
+%      &     & \textbar~\texttt{call} exprs$_{n+1}$\texttt{:}exprs$_{n+2}$ \texttt{(} exprs$_1$ \texttt{,} \ldots \texttt{,} exprs$_n$ \texttt{)}\\
+%      &     & \textbar~\texttt{primop} Atom \texttt{(} exprs$_1$ \texttt{,} \ldots \texttt{,} exprs$_n$ \texttt{)}\\
+%      &     & \textbar~\texttt{try} exprs$_1$ \texttt{of} \texttt{<}var$_1$ \texttt{,} \ldots \texttt{,} var$_n$\texttt{>}~\texttt{->} exprs$_2$\\
+%      &     & ~~\texttt{catch} \texttt{<}var'$_{1}$ \texttt{,} \ldots \texttt{,} var'$_{m}$\texttt{>}~\texttt{->} exprs$_3$\\
+%      &     & \textbar~\texttt{case} exprs \texttt{of} clause$_1$ \ldots clause$_n$ \texttt{end}\\
+%      &     & \textbar~\texttt{do} exprs$_1$ exprs$_2$ \textbar~ \texttt{catch} exprs\\
+%$\xi$ & ::= & Exception(val$_1$, \ldots, val$_m$) \\
+%val   & ::= & lit \textbar~fname \textbar~fun \textbar~\texttt{[} vals$_1$ \texttt{\textbar} vals$_2$ \texttt{]} \textbar~\texttt{\{}vals$_1$\texttt{,} \ldots \texttt{,} vals$_n$\texttt{\}}\\
+%eval   & ::= & lit \textbar~fname \textbar~fun \textbar~\texttt{[} evals$_1$ \texttt{\textbar} evals$_2$ \texttt{]} \textbar~\texttt{\{}evals$_1$\texttt{,} \ldots \texttt{,} evals$_n$\texttt{\}} \textbar~$\xi$\\
+%vals  & ::= & val \textbar~\texttt{<}\ val$_1$\texttt{,} \ldots \texttt{,} val$_n$\ \texttt{>} \\
+%evals  & ::= & eval \textbar~\texttt{<}\ eval$_1$\texttt{,} \ldots \texttt{,} eval$_n$\ \texttt{>} \\
+%vars  & ::= & var \textbar~\texttt{<}\ var$_1$\texttt{,} \ldots \texttt{,} var$_n$\ \texttt{>} \\
+\end{tabular}
+}
+\caption{MTP's Syntax}
+\label{fig:syntax}
+\end{figure}
+
+We have the following categories:
+\begin{itemize}
+\item
+Spec, for a theory.
+
+\item
+ME, for module expressions.
+
+\item
+Decs, for the declarations in the theory.
+
+\item
+TId, for theory identifiers.
+
+\item
+PId, for parameter identifiers.
+
+\item
+Params, for defining theory parameters.
+\end{itemize}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -578,6 +578,9 @@ fmod COMMAND-PROCESSING is
  eq generateQuantificationAtts(UV, EV) = nonexec metadata(vars2str(EV)) .
 endfm
 
+***(
+Interface: Command processing
+)
 mod MTP is
  pr (MAYBE * (op maybe to noMod)){Module} .
  pr (MAYBE * (op maybe to noQid)){Qid} .
@@ -653,8 +656,8 @@ mod MTP is
  op foo : -> State [ctor] .
 
  *** Object and class definition
- op MTP : -> Cid .
- op mtp : -> Oid .
+ op MTP : -> Cid [ctor] .
+ op mtp : -> Oid [ctor] .
 
  *** Attributes
  op uload:_ : List{Preload} -> Attribute [ctor gather (&)] .

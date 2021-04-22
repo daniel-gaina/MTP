@@ -1,0 +1,221 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage{geometry}
+\geometry{a4paper}
+\geometry{margin=2.5cm,nohead}
+
+%% Use the option review to obtain double line spacing
+%% \documentclass[preprint,review,12pt]{elsarticle}
+
+%% Use the options 1p,twocolumn; 3p; 3p,twocolumn; 5p; or 5p,twocolumn
+%% for a journal layout:
+%% \documentclass[final,1p,times]{elsarticle}
+%% \documentclass[final,1p,times,twocolumn]{elsarticle}
+%% \documentclass[final,3p,times]{elsarticle}
+%% \documentclass[final,3p,times,twocolumn]{elsarticle}
+%% \documentclass[final,5p,times]{elsarticle}
+%% \documentclass[final,5p,times,twocolumn]{elsarticle}
+
+%% if you use PostScript figures in your article
+%% use the graphics package for simple commands
+%% \usepackage{graphics}
+%% or use the graphicx package for more complicated commands
+%% \usepackage{graphicx}
+%% or use the epsfig package if you prefer to use the old commands
+%% \usepackage{epsfig}
+
+%% The amssymb package provides various useful mathematical symbols
+\usepackage{amssymb}
+%% The amsthm package provides extended theorem environments
+\usepackage{amsthm}
+%\usepackage{url}
+%\usepackage{alltt}
+%\usepackage[english]{babel}
+%\usepackage{amssymb}
+ \usepackage[final]{hyperref}
+\usepackage{hyperref}
+\usepackage{color} %para el texto con colores
+\usepackage[inference]{semantic}
+\usepackage{fixme}
+\usepackage{graphics} %para el scalebox
+\usepackage[pagewise]{lineno} %Para los numeros de linea
+\usepackage{rotating}
+\usepackage{multirow}
+\usepackage[T1]{fontenc}  % quita el warning OMS/cmtt/m/n y OMS/cmsy/m/n
+
+
+%\usepackage[margins]{trackchanges}
+
+
+% Para verbatim en captions
+%\usepackage{cprotect}
+
+%\usepackage{proof}
+
+%% The lineno packages adds line numbers. Start line numbering with
+%% \begin{linenumbers}, end it with \end{linenumbers}. Or switch it on
+%% for the whole article with \linenumbers after \end{frontmatter}.
+%% \usepackage{lineno}
+
+%% natbib.sty is loaded by default. However, natbib options can be
+%% provided with \biboptions{...} command. Following options are
+%% valid:
+
+%%   round  -  round parentheses are used (default)
+%%   square -  square brackets are used   [option]
+%%   curly  -  curly braces are used      {option}
+%%   angle  -  angle brackets are used    <option>
+%%   semicolon  -  multiple citations separated by semi-colon
+%%   colon  - same as semicolon, an earlier confusion
+%%   comma  -  separated by comma
+%%   numbers-  selects numerical citations
+%%   super  -  numerical citations as superscripts
+%%   sort   -  sorts multiple citations according to order in ref. list
+%%   sort&compress   -  like sort, but also compresses numerical citations
+%%   compress - compresses without sorting
+%%
+%% \biboptions{comma,round}
+
+% \biboptions{}
+
+\newtheorem{assumption}{Assumption}[section]
+\newtheorem{property}{Property}[section]
+\newtheorem{example}{Example}[section]
+\newtheorem{definition}{Definition}[section]
+\newtheorem{lemma}{Lemma}[section]
+\newtheorem{theorem}{Theorem}[section]
+
+\newcommand{\codesize}{\small}
+\newcommand{\vs}{\vspace{-1.15ex}}
+
+\newcommand{\mi}[1]{\mathit{#1}}
+\newcommand{\APT}{\mi{APT}}
+\newcommand{\APTZ}{\mi{APTZ}}
+\newcommand{\vals}{\mi{vals}}
+\newcommand{\vars}{\mi{vars}}
+\newcommand{\val}{\mi{val}}
+\newcommand{\exprs}{\mi{exprs}}
+\newcommand{\pats}{\mi{pats}}
+\newcommand{\fails}{\mi{fails}}
+\newcommand{\succeeds}{\mi{succeeds}}
+\newcommand{\evals}{\mi{evals}}
+\newcommand{\eval}{\mi{eval}}
+
+\newcommand{\lrangle}[2]{\langle #1, #2\rangle}
+\newcommand{\ojo}[1]{\textbf{\textcolor{red}{#1}}}
+\newcommand{\sub}[1]{\lrangle{#1}{\theta}}
+\newcommand{\subprime}[1]{\lrangle{#1}{\theta'}}
+\newcommand{\subid}[1]{\lrangle{#1}{\mi{id}}}
+\newcommand{\subinit}[1]{\lrangle{#1}{\mi{id}}}
+\newcommand{\subi}[2]{\lrangle{#1}{\theta_{#2}}}
+\newcommand{\subdp}[1]{\lrangle{#1}{\theta''}}
+
+\newcommand{\lab}[1]{\mathsf{(#1)}}
+\newcommand{\labapt}[1]{\!{\scriptstyle\lab{#1}}}
+\newcommand{\labtxt}[1]{$\mathsf{(#1)}$}
+
+\newcommand{\CESC}{\mi{CESC}} % usage:  $\CESC$
+\newcommand{\CESCI}[1]{\mi{ICESC_{#1}}} % usage:  $\CESCI{Z}$
+\newcommand{\CESCZ}{\mi{ZESC}} % usage:  $\CESCZ$
+\newcommand{\zoom}{\mathcal{Z}} % usage:  $\CESCZ$
+
+\makeatletter
+\newenvironment{prog}{\vspace{1.0ex}\par
+\obeylines\@vobeyspaces\tt}{\vspace{1.0ex}\noindent } \makeatother
+\newcommand{\startprog}{\begin{prog}}
+\newcommand{\stopprog}{\end{prog}\noindent}
+
+\newcommand{\lin}[1]{line~\textsf{#1}}
+\newcommand{\linann}[1]{\makebox[1em][r]{\textsf{\scriptsize #1}}}
+
+% Para reducciones
+\newcommand{\reduc}{\mathcal{E}}
+
+% Blah blah
+\newcommand{\blah}{\ojo{Blah Blah}}
+
+\title{MTP Grammar
+%\thanks{Research supported by MICINN Spanish project
+%\emph{StrongSoft} (TIN2012-39391-C04-04)
+%and Comunidad de Madrid program \emph{PROMETIDOS} (S2009/TIC-1465).}
+}
+
+\author{TBA
+%Rafael Caballero, Enrique Martin-Martin, Adri\'an Riesco, and Salvador Tamarit\\[.7cm]
+%\normalsize Technical Report 01/14\\[1ex]
+%  \normalsize\textit{Departamento de Sistemas Inform\'aticos y Computaci\'on},\\
+%  \normalsize\textit{Universidad Complutense de Madrid}\\[.4cm]
+%  June, 2014\\
+%  (updated on \today)
+  }
+
+\date{}
+
+\begin{document}
+
+\maketitle
+
+
+
+\title{}
+
+%% use optional labels to link authors explicitly to addresses:
+%% \author[label1,label2]{<author name>}
+%% \address[label1]{<address>}
+%% \address[label2]{<address>}
+
+\begin{abstract}
+%% Text of abstract
+TBA
+\smallskip
+
+\noindent\textbf{Keywords:} TBA
+\end{abstract}
+
+
+%% main text
+
+\section{MTP Grammar\label{sec:grammar}}
+\input{grammar}
+
+
+%% \section{}
+%% \label{}
+
+%% References
+%%
+%% Following citation commands can be used in the body text:
+%% Usage of \cite is as follows:
+%%   \cite{key}         ==>>  [#]
+%%   \cite[chap. 2]{key} ==>> [#, chap. 2]
+%%
+
+%% References with bibTeX database:
+
+{
+\bibliographystyle{plain}
+\bibliography{../refs.bib}
+}
+
+%% Authors are advised to submit their bibtex database files. They are
+%% requested to list a bibtex style file in the manuscript if they do
+%% not want to use elsarticle-num.bst.
+
+%% References without bibTeX database:
+
+% \begin{thebibliography}{00}
+
+%% \bibitem must have the following form:
+%%   \bibitem{key}...
+%%
+
+% \bibitem{}
+
+% \end{thebibliography}
+
+%% The Appendices part is started with the command \appendix;
+%% appendix sections are then done as normal sections
+
+\end{document}
+
+%%
+%% End of file `elsarticle-template-num.tex'.
