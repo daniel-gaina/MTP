@@ -8,14 +8,19 @@ Spec     & ::= & \texttt{spec*} ME \texttt{=} Decs \texttt{end} \textbar\\
          &     & \texttt{spec!} ME \texttt{=} Decs \texttt{end} \\
 Params   & ::= & Id \texttt{::} Id, Params \textbar~$\varepsilon$\\
 Decs     & ::= & Dec\ Decs \textbar~$\varepsilon$\\
-Dec      & ::= & ImpDecl\ \textbar~SortDecl\ \textbar~OpDecl\\
-ImpDecl  & ::= & \texttt{pr} IE \texttt{.} \textbar~\texttt{ex} IE \texttt{.} \textbar~\texttt{inc} IE \texttt{.}\\
-SortDecl & ::= & \texttt{sort} SL \texttt{.}\ \textbar~\texttt{sorts} SL \texttt{.}\\
-OpDecl   & ::= & TBA\\
+Dec      & ::= & Imp\ \textbar~Sort\ \textbar~Subsort\ \textbar~Op\ \textbar~Sen\\
+Imp      & ::= & \texttt{pr} IE \texttt{.} \textbar~\texttt{ex} IE \texttt{.} \textbar~\texttt{inc} IE \texttt{.}\\
+Sort     & ::= & \texttt{sort} SL \texttt{.}\ \textbar~\texttt{sorts} SL \texttt{.}\\
+Subsort  & ::= & \texttt{subsort} SL $\mathtt{<}$\ Id \texttt{.}\\
+OpDecl   & ::= & \texttt{op} Id \texttt{:} SL \texttt{->} Id [\texttt{[}AL\texttt{]}] \texttt{.}\\
+Sen      & ::= & TBA\\
 ME       & ::= & Id \textbar~Id \texttt{\{} Params \texttt{\}}\\
 IE       & ::= & Id \textbar~Id \texttt{\{} IdL \texttt{\}}\\
 IdL      & ::= & Id\texttt{,} IdL \textbar~$\varepsilon$\\
 SL       & ::= & Id\ SL \textbar~$\varepsilon$\\
+AL       & ::= & Att\ AL \textbar~$\varepsilon$\\
+Att      & ::= & \texttt{ctor} \textbar~\texttt{assoc} \textbar~\texttt{comm} \textbar~\texttt{id:} Id
+                 \textbar~\texttt{flexible(}SL\texttt{)}
 \end{tabular}
 }
 \caption{MTP's Syntax}
@@ -45,19 +50,34 @@ Decs, for the declarations in the theory.
 Id, for identifiers (tokens).
 
 \item
-IdL, for lists of identifiers (tokens).
+IdL, for lists of identifiers (comma-separated tokens).
 
 \item
-SL, for lists of sorts (tokens).
+SL, for lists of sorts (whitespace-separated tokens).
+
+\item
+AL, for lists of attributes.
+
+\item
+Att, for attributes.
 
 \item
 Params, for defining theory parameters.
 
 \item
-ImpDecl, for importation declarations.
+Imp, for importation declarations.
 
 \item
-SortDecl, for sort declarations.
+Sort, for sort declarations.
+
+\item
+Subsort, for subsort declarations.
+
+\item
+Op, for operator declarations.
+
+\item
+Sen, for sentences.
 \end{itemize}
 
 
