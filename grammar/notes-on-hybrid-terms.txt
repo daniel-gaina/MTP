@@ -1,0 +1,92 @@
+A sample specification
+---------------------------------------------------------------------------
+
+data-spec DS { *** potentially with imports, as in Maude
+  sorts s, t . *** the order doesn't matter
+  *** ...
+
+  op c : -> s .
+}
+
+state-spec SS {  *** no imports here
+  sorts w1, w2 . *** the order does matter here
+  *** ...
+
+  op a1 : -> w1 .
+  op a2 : -> w2 .
+  op q : w1 -> w2 .
+}
+
+*** proposal: drop the distinction between data- and state-spec
+
+hybrid-spec HS {
+  states SS . *** automatically defines `w1 w2' as the profile
+              *** of all subsequent operation symbols
+  
+  op f : -> s .   *** implicitly flexible
+  *** rigidifies to
+  *** op @(_,_)f : w1 w2 -> s
+
+  op g : -> s .   *** implicitly flexible
+  op h : s -> s . *** implicitly flexible
+
+  op _+_ : s s -> s [assoc comm] .
+  *** rigidifies to
+  *** op @(_,_)_+_ : w1 w2 s s -> s [assoc? comm?]
+  *** without attributes
+
+  sen g = c .
+
+  sen store (x1 x2) @(x1, x2) f = c .
+}
+
+Signatures
+---------------------------------------------------------------------------
+
+S1. data signature
+ - set of sorts
+ - sets of operation symbols
+
+S2. state signature
+ - list of sorts
+ - sets of operation symbols
+ ? set of modalities
+
+S3. hybrid signature 
+ ? set of (flexible) sorts
+ - set of flexible operations
+
+Terms
+---------------------------------------------------------------------------
+
+a) Rigid terms
+
+ - every S1-term is a rigid term
+ - if t is a tuple of S2-terms and
+      t' is a tuple of rigid terms
+   then @t t' is a rigid term
+
+b) Hybrid terms [of 'profile' p]
+
+ - every rigid term is a hybrid term [of profile p]
+ - if f is an operation symbol of [profile p and] arity u
+   and t is a tuple of hybrid terms of arity u
+   then f(t) is a hybrid term [of profile p]
+
+ Ex 1: f is a hybrid term of [profile w1 w2 and] arity nil
+ Ex 2: h is a hybrid term of [profile w1 w2 and] arity s
+
+Sentences
+---------------------------------------------------------------------------
+
+a) Atoms t1 = t2
+   where t1 and t2 are hybrid terms of the same sort
+
+ Ex 1: f = c
+ Ex 2: store x1 x2 . @ (x1, x2) f = c
+ Ex 2: store x1 x2 . @ (q(x1), x2) f = c
+
+b) Boolean connectives (as in Maude)
+   ~ | /\ | \/ | if | iff
+c) Hybrid operators
+   @ | <> | [] | store | forall | exists
